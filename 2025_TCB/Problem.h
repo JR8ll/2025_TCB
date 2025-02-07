@@ -1,5 +1,6 @@
 #pragma once
 
+#include<string>
 #include<vector>
 
 #include "Job.h"
@@ -12,12 +13,28 @@ class Schedule;
 
 class Problem {
 private:
-	Schedule env;
+	std::string filename;
+
 	std::vector<Product> products;
 	std::vector<Job> jobs;
 
+	unsigned seed;
+
+	int n;		// number of jobs
+	int stgs;	// number of stages/workcenters
+	int F;		// number of products (families)
+
 public:
 	Problem();
+	Problem(std::string filename);
+
+	std::string getFilename();
+
+	int getN() const;
+	int getStgs() const;
+	int getF() const;
+
+	void loadFromDat(std::string filename);
 
 };
 
