@@ -16,7 +16,14 @@ private:
 	Workcenter* workcenter;
 
 public:
-	Machine(int id, Workcenter* wc); 
+	Machine(int id, Workcenter* wc);
+
+	Batch& operator[] (size_t idx);
+	Batch& operator[] (size_t idx) const;
+
+	size_t size() const;
+
+	std::unique_ptr<Machine> clone(Workcenter* newWc) const;
 
 	Workcenter* getWorkcenter();
 	const std::vector<pBat>& getBatches() const;

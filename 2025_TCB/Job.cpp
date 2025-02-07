@@ -8,6 +8,22 @@ Job::Job(int id, int s, Product* f, double r, double d, double w) : id(id), s(s)
 	ops = vector<pOp>();
 }
 
+unique_ptr<Job> Job::clone() const {
+	auto newJob = make_unique<Job>(id, s, product.get(), r, d, w);
+	for (const auto& op : ops) {
+		auto newOp = make_unique<Operation>(newJob.get(), op->getStg());
+		//newOp->assignToBatch(op->getBatch()); // copy not to be assigned to a batch
+		newOp->setWait(op->getWait());
+		newJob->addOp(std::move(newOp));
+	}
+	auto& newOps = newJob->getOps();
+	for (size_t i = 0; i < newOps.size(); ++i) {
+		if (i > 0) newOps[i]->setPred(newOps[i - 1].get());
+		if (i < newOps.size() - 1) newOps[i]->setSucc(newOps[i + 1].get());
+	}
+	return newJob;
+}
+
 int Job::getId() const { return id; }
 int Job::getS() const { return s; }
 int Job::getF() const { return product->getId(); }

@@ -4,6 +4,12 @@
 
 using namespace std;
 
+unique_ptr<Batch> Batch::clone() const {
+	auto newBatch = make_unique<Batch>();
+	// shallow copy
+	return newBatch;
+}
+
 const vector<Operation*>& Batch::getOps() const {
 	return ops;
 }

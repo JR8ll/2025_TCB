@@ -12,19 +12,22 @@ private:
 
 	Job* job;
 	Batch* batch;
-	Product* product;
 
 	Operation* pred;	// route predecessor
 	Operation* succ;	// route successor
 
 public:
-	Operation(Job* j, Product* f, int stg); 
+	Operation(Job* j, int stg); 
 
 	int getId() const;
 	int getStg() const;
-	
+		
 	double getP() const;
 	double getWait() const;
+
+	void setWait(double wt);
+	void setPred(Operation* pre);
+	void setSucc(Operation* suc);
 	
 
 	Job* getJob() const;

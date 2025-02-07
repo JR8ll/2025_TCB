@@ -24,6 +24,8 @@ private:
 public:
 	Job(int id, int s, Product* f, double r, double d, double w);
 
+	std::unique_ptr<Job> clone() const;	// deep copy
+
 	int getId() const;
 	int getS() const;
 	int getF() const;

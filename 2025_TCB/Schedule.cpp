@@ -4,11 +4,47 @@ using namespace std;
 
 Schedule::Schedule() {
 	workcenters = vector<pWc>();
+	jobs = vector<pJob>();
 }
+
+Workcenter& Schedule::operator[](size_t idx) { return *workcenters[idx]; }
+Workcenter& Schedule::operator[](size_t idx) const { return *workcenters[idx]; }
+
+Job& Schedule::getJob(size_t idx) { return *jobs[idx]; };
+Job& Schedule::getJob(size_t idx) const { return *jobs[idx]; }
+
+std::unique_ptr<Schedule> Schedule::clone() const {
+	auto newSchedule = make_unique<Schedule>();
+	for (const auto& wc : workcenters) {
+		newSchedule->addWorkcenter(wc->clone(newSchedule.get()));
+	}
+	for (const auto& job : jobs) {
+		newSchedule->addJob(move(job->clone()));
+	}
+	newSchedule->_reconstruct(this);
+	return newSchedule;
+}
+
+void Schedule::_reconstruct(const Schedule* orig) {
+	for (size_t wc = 0; wc < orig->size(); ++wc) {
+		for (size_t m = 0; m < orig[wc].size(); ++m) {
+			for (size_t b = 0; b < orig[wc][m].size(); ++b) {
+				
+				
+			}
+		}
+	}
+}
+
+size_t Schedule::size() const { return workcenters.size();  }
+size_t Schedule::getN() const { return jobs.size(); }
 
 const std::vector<pWc>& Schedule::getWorkcenters() const {
 	return workcenters;
 }
 void Schedule::addWorkcenter(pWc wc) {
 	workcenters.push_back(move(wc));
+}
+void Schedule::addJob(pJob job) {
+	jobs.push_back(move(job));
 }

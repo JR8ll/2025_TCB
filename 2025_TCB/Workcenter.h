@@ -18,6 +18,15 @@ private:
 public:
 	Workcenter(int id, Schedule* sched);
 
+	Machine& operator[](size_t idx);
+	Machine& operator[](size_t idx) const;
+
+	std::unique_ptr<Workcenter> clone(Schedule* newSchedule) const;
+
+	size_t size() const;
+	
+	int getId() const;
+
 	Schedule* getSchedule() const;
 	const std::vector<pMac>& getMachines() const;
 
