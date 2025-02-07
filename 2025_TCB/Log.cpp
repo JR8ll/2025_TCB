@@ -3,7 +3,6 @@
 void Logger::SetVerbosity(LogPriority newPriority) {
 	verbosity = newPriority;
 }
-
 void Logger::Log(LogPriority prio, std::string message) {
 	if (prio >= verbosity) {
 		std::ofstream FILE(filepath, std::ios_base::app);
