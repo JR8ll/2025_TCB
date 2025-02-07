@@ -23,7 +23,7 @@ public:
 	Job& getJob(size_t idx);
 	Job& getJob(size_t idx) const;
 
-	std::unique_ptr<Schedule> clone() const;	
+	std::unique_ptr<Schedule> clone() const;
 	// Deep copy of Schedule, Workcenters and Jobs. 
 	// Shallow copy of Machines (no batches are copied)
 	// "Deep" copy is achieved by reconstruction of batch/op assignments -> _reconstruct(...)

@@ -26,6 +26,11 @@ public:
 
 	std::unique_ptr<Job> clone() const;	// deep copy
 
+	Operation& operator[] (size_t idx);
+	Operation& operator[] (size_t idx) const;
+
+	size_t size() const;
+
 	int getId() const;
 	int getS() const;
 	int getF() const;

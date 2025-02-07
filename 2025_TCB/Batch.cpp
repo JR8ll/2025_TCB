@@ -10,6 +10,11 @@ unique_ptr<Batch> Batch::clone() const {
 	return newBatch;
 }
 
+Operation& Batch::operator[](size_t idx) { return *ops[idx]; }
+Operation& Batch::operator[](size_t idx) const { return *ops[idx]; }
+
+size_t Batch::size() const { return ops.size(); }
+
 const vector<Operation*>& Batch::getOps() const {
 	return ops;
 }

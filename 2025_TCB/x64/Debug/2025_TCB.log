@@ -7,7 +7,6 @@ C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Job.h(6,10): warning C4067: Uner
 C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Workcenter.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
   (Quelldatei „Machine.cpp“ wird kompiliert)
   
-  Main.cpp
   Operation.cpp
 C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Job.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
   (Quelldatei „Operation.cpp“ wird kompiliert)
@@ -19,7 +18,6 @@ C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Job.h(6,10): warning C4067: Uner
 C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Workcenter.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
   (Quelldatei „Problem.cpp“ wird kompiliert)
   
-  Product.cpp
   Schedule.cpp
 C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Job.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
   (Quelldatei „Schedule.cpp“ wird kompiliert)

@@ -24,6 +24,11 @@ unique_ptr<Job> Job::clone() const {
 	return newJob;
 }
 
+Operation& Job::operator[](size_t idx) { return *ops[idx]; }
+Operation& Job::operator[](size_t idx) const { return *ops[idx]; }
+
+size_t Job::size() const { return ops.size(); }
+
 int Job::getId() const { return id; }
 int Job::getS() const { return s; }
 int Job::getF() const { return product->getId(); }

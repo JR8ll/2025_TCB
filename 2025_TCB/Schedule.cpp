@@ -26,11 +26,15 @@ std::unique_ptr<Schedule> Schedule::clone() const {
 }
 
 void Schedule::_reconstruct(const Schedule* orig) {
-	for (size_t wc = 0; wc < orig->size(); ++wc) {
-		for (size_t m = 0; m < orig[wc].size(); ++m) {
-			for (size_t b = 0; b < orig[wc][m].size(); ++b) {
-				
-				
+	for (size_t wc = 0; wc < (*orig).size(); ++wc) {
+		for (size_t m = 0; m < (*orig)[wc].size(); ++m) {
+			for (size_t b = 0; b < (*orig)[wc][m].size(); ++b) {
+				(*this)[wc][m].addBatch(move((*orig)[wc][m][b].clone()));	// TODO: timing
+				for (size_t j = 0; j < (*orig)[wc][m][b].size(); ++j) {
+					Operation& op = (*orig)[wc][m][b][j];
+					size_t jobIdx = op.getStg() - 1;
+					(*this)[wc][m][b].addOp(&(*jobs[wc])[jobIdx]);
+				}
 			}
 		}
 	}
