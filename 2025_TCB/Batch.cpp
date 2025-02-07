@@ -1,4 +1,5 @@
 #include "Batch.h"
+#include "Machine.h"
 #include "Operation.h"
 
 using namespace std;

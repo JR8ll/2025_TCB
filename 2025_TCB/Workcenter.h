@@ -3,7 +3,8 @@
 #include<memory>
 #include<vector>
 
-class Machine;
+#include "Machine.h";
+
 class Schedule;
 
 using pMac = std::unique_ptr<Machine>;
@@ -18,7 +19,7 @@ public:
 	Workcenter(int id, Schedule* sched);
 
 	Schedule* getSchedule() const;
-	const std::vector<pMac> getMachines() const;
+	const std::vector<pMac>& getMachines() const;
 
 	void addMachine(pMac mac);
 

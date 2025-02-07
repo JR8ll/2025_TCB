@@ -2,9 +2,11 @@
 
 using namespace std;
 
-Schedule::Schedule(int id) : id(id) {}
+Schedule::Schedule() {
+	workcenters = vector<pWc>();
+}
 
-const std::vector<pWc> Schedule::getWorkcenters() const {
+const std::vector<pWc>& Schedule::getWorkcenters() const {
 	return workcenters;
 }
 void Schedule::addWorkcenter(pWc wc) {

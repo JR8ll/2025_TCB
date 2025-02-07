@@ -3,15 +3,36 @@
 #include<memory>
 #include<vector>
 
-class Operation;
+#include "Operation.h";
+
+class Product;
 
 using pOp = std::unique_ptr<Operation>;
 
 class Job {
 private:
+	int id;		
+	int s;		// size
+
+	double r;	// release time
+	double d;	// due date
+	double w;	// weight (priority)
+
+	std::shared_ptr<Product> product;
 	std::vector<pOp> ops;
 
 public:
+	Job(int id, int s, Product* f, double r, double d, double w);
+
+	int getId() const;
+	int getS() const;
+	int getF() const;
+	double getR() const;
+	double getD() const;
+	double getW() const;
+
+	double getP(int stgIdx) const;
+
 	void addOp(pOp op);
 	const std::vector<pOp>& getOps() const;
 };

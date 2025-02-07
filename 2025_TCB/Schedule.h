@@ -3,18 +3,17 @@
 #include<memory>
 #include<vector>
 
-class Workcenter;
+#include "Workcenter.h"
 
 using pWc = std::unique_ptr<Workcenter>;
 
 class Schedule {
 private:
-	int id;
 	std::vector<pWc> workcenters;
 
 public:
-	Schedule(int id);
+	Schedule();
 
-	const std::vector<pWc> getWorkcenters() const;
+	const std::vector<pWc>& getWorkcenters() const;
 	void addWorkcenter(pWc wc);
 };

@@ -3,7 +3,8 @@
 #include <memory>
 #include <vector>
 
-class Batch;
+#include "Batch.h"
+
 class Workcenter;
 
 using pBat = std::unique_ptr<Batch>;

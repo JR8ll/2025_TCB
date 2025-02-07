@@ -1,4 +1,6 @@
 #include "Machine.h"
+#include "Batch.h"
+#include "Workcenter.h"
 
 using namespace std;
 
