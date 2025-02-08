@@ -1,2 +1,35 @@
-﻿  Log.cpp
+﻿  Problem.cpp
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Job.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
+  (Quelldatei „Problem.cpp“ wird kompiliert)
+  
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Workcenter.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
+  (Quelldatei „Problem.cpp“ wird kompiliert)
+  
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Problem.cpp(202,32): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Problem.cpp(245,30): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Problem.cpp(245,26): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Problem.cpp(252,25): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Problem.cpp(107,36): warning C4101: "exc": Unreferenzierte lokale Variable
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Problem.cpp(195,35): warning C4101: "exc": Unreferenzierte lokale Variable
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,56): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
+  (Quelldatei „Problem.cpp“ wird kompiliert)
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\memory(3597,56):
+      der Vorlageninstanziierungskontext (der älteste zuerst) ist
+          C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Problem.cpp(254,18):
+          Siehe Verweis auf die gerade kompilierte Instanziierung "std::unique_ptr<Operation,std::default_delete<Operation>> std::make_unique<Operation,_Ty*,size_t,0>(_Ty *&&,size_t &&)" der Funktions-Vorlage.
+          with
+          [
+              _Ty=Job
+          ]
+  
+  Product.cpp
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Product.cpp(11,46): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich
+  Schedule.cpp
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Job.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
+  (Quelldatei „Schedule.cpp“ wird kompiliert)
+  
+C:\Users\rocholl\source\repos\2025_TCB\2025_TCB\Workcenter.h(6,10): warning C4067: Unerwartete Token nach Präprozessordirektive - Zeilenvorschub erwartet.
+  (Quelldatei „Schedule.cpp“ wird kompiliert)
+  
+  Code wird generiert...
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

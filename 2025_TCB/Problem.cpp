@@ -67,7 +67,7 @@ void Problem::loadFromDat(string filename) {
 	}				// "};"
 
 	input >> dummy; // "m_o["
-	for (int i = 0; i < stgs; ++i) {
+	for (size_t i = 0; i < stgs; ++i) {
 		input >> dummy;
 		m_o.push_back(stoi(dummy));
 	}
@@ -76,7 +76,7 @@ void Problem::loadFromDat(string filename) {
 	m_B = vector<int>(stages_bSize);
 
 	rm = vector<vector<double> >(stgs);
-	for (int i = 0; i < stgs; ++i) {
+	for (size_t i = 0; i < stgs; ++i) {
 		rm[i] = vector<double>(m_o[i]);
 	}
 
@@ -93,9 +93,9 @@ void Problem::loadFromDat(string filename) {
 	input >> dummy; // "]#;"
 
 	B_io = vector<vector<set<int> > >(F);
-	for (int i = 0; i < F; ++i) {
+	for (size_t i = 0; i < F; ++i) {
 		B_io[i] = vector<set<int> >(stgs);
-		for (int j = 0; j < stgs; ++j) {
+		for (size_t j = 0; j < stgs; ++j) {
 			B_io[i][j] = set<int>();
 			do {
 				input >> dummy;
@@ -113,11 +113,11 @@ void Problem::loadFromDat(string filename) {
 
 	input >> dummy; // "B_iob=[[["
 	B_iob = vector<vector<vector<int> > >(F);
-	for (int i = 0; i < F; ++i) {
+	for (size_t i = 0; i < F; ++i) {
 		B_iob[i] = vector<vector<int> >(stgs);
-		for (int j = 0; j < stgs; ++j) {
+		for (size_t j = 0; j < stgs; ++j) {
 			B_iob[i][j] = vector<int>(n);
-			for (int k = 0; k < n; ++k) {
+			for (size_t k = 0; k < n; ++k) {
 				input >> dummy;
 				B_iob[i][j][k] = stoi(dummy);
 			}
@@ -127,11 +127,11 @@ void Problem::loadFromDat(string filename) {
 
 	input >> dummy; // "S_iob=["
 	S_iob = vector<vector<vector<double> > >(F);
-	for (int i = 0; i < F; ++i) {
+	for (size_t i = 0; i < F; ++i) {
 		S_iob[i] = vector<vector<double> >(stgs);
-		for (int j = 0; j < stgs; ++j) {
+		for (size_t j = 0; j < stgs; ++j) {
 			S_iob[i][j] = vector<double>(n);
-			for (int k = 0; k < n; ++k) {
+			for (size_t k = 0; k < n; ++k) {
 				input >> dummy;
 				S_iob[i][j][k] = stod(dummy);
 			}
@@ -140,42 +140,42 @@ void Problem::loadFromDat(string filename) {
 	}
 
 	input >> dummy;	// "B=["
-	for (int i = 0; i < stages_b.size(); ++i) {
+	for (size_t i = 0; i < stages_b.size(); ++i) {
 		input >> dummy;
 		m_B[i] = stoi(dummy);
 	}
 	input >> dummy; // "];"
 
 	input >> dummy;	// "d=["
-	for (int i = 0; i < n; ++i) {
+	for (size_t i = 0; i < n; ++i) {
 		input >> dummy;
 		jobs_d.push_back(stod(dummy));
 	}
 	input >> dummy; // "];"
 
 	input >> dummy;	// "r=["
-	for (int i = 0; i < n; ++i) {
+	for (size_t i = 0; i < n; ++i) {
 		input >> dummy;
 		jobs_r.push_back(stod(dummy));
 	}
 	input >> dummy; // "];"
 
 	input >> dummy;	// "w=["
-	for (int i = 0; i < n; ++i) {
+	for (size_t i = 0; i < n; ++i) {
 		input >> dummy;
 		jobs_w.push_back(stod(dummy));
 	}
 	input >> dummy; // "];"
 
 	input >> dummy;	// "f=["
-	for (int i = 0; i < n; ++i) {
+	for (size_t i = 0; i < n; ++i) {
 		input >> dummy;
 		jobs_f.push_back(stoi(dummy));
 	}
 	input >> dummy; // "];"
 
 	input >> dummy;	// "s=["
-	for (int i = 0; i < n; ++i) {
+	for (size_t i = 0; i < n; ++i) {
 		input >> dummy;
 		jobs_s.push_back(stoi(dummy));
 	}
@@ -183,7 +183,7 @@ void Problem::loadFromDat(string filename) {
 
 	input >> dummy;	// "rts=[{
 	routes = vector<vector<int> >(F);
-	for (int i = 0; i < F; ++i) {
+	for (size_t i = 0; i < F; ++i) {
 		routes[i] = vector<int>();
 		do {
 			input >> dummy;
@@ -198,14 +198,19 @@ void Problem::loadFromDat(string filename) {
 		} while (dummy != "}{" && dummy != "}];");
 	}
 
+	for (size_t f = 0; f < F; ++f) {
+		products.push_back(Product((f+1), routes[f]));
+	}
+
+
 	pTimes = vector < vector<double> >(F);
-	for (int i = 0; i < F; ++i) {
+	for (size_t i = 0; i < F; ++i) {
 		pTimes[i] = vector<double>(routes[i].size());
 	}
 
 	input >> dummy; // "p=[["
-	for (int p = 0; p < F; ++p) {
-		for (int s = 0; s < routes[p].size(); ++s) {
+	for (size_t p = 0; p < F; ++p) {
+		for (size_t s = 0; s < routes[p].size(); ++s) {
 			input >> dummy;
 			pTimes[p][s] = stod(dummy);
 		}
@@ -213,19 +218,19 @@ void Problem::loadFromDat(string filename) {
 	}
 
 	tc = vector<vector<vector<double> > >(F);
-	for (int p = 0; p < F; ++p) {
+	for (size_t p = 0; p < F; ++p) {
 		tc[p] = vector<vector<double> >(routes[p].size());
-		for (int s = 0; s < routes[p].size(); ++s) {
+		for (size_t s = 0; s < routes[p].size(); ++s) {
 			tc[p][s] = vector<double>(routes[p].size());
 		}
 	}
 
 	input >> dummy;	// "tc=[[[..."
-	for (int p = 0; p < F; ++p) {
+	for (size_t p = 0; p < F; ++p) {
 		// 1st dim: Product
-		for (int s1 = 0; s1 < routes[p].size(); ++s1) {
+		for (size_t s1 = 0; s1 < routes[p].size(); ++s1) {
 			// 2nd dim: Stage
-			for (int s2 = 0; s2 < routes[p].size(); ++s2) {
+			for (size_t s2 = 0; s2 < routes[p].size(); ++s2) {
 				// 3rd dim: Stage
 				input >> dummy;
 				tc[p][s1][s2] = stod(dummy);
@@ -234,40 +239,29 @@ void Problem::loadFromDat(string filename) {
 		}
 	}
 
-	// instantiate entities Jobs + Ops including time constraints
-	jobs.resize(n);
-	for (int j = 0; j < n; ++j) {
-		jobs[j].setD(jobs_d[j]);
-		jobs[j].setR(jobs_r[j]);
-		jobs[j].setW(jobs_w[j]);
-		jobs[j].setF(jobs_f[j]);
-		jobs[j].setS(jobs_s[j]);
-		int nSteps = routes[jobs_f[j] - 1].size();
-		for (int o = 0; o < nSteps; ++o) {
-			shared_ptr<Operation> newOp = make_shared<Operation>(Operation(jobs[j].getId(), (o + 1), routes[jobs_f[j] - 1][o], jobs_f[j], pTimes[jobs_f[j] - 1][o], jobs[j]));
-			jobs[j].addOp(newOp);
-		}
-		for (int o = 0; o < nSteps - 1; ++o) {
-			jobs[j].at(o)->setSucc(*jobs[j].at(o + 1));
-		}
-
-		// add time constraints
-		for (int o = 0; o < nSteps; ++o) {
-			pOp opPtr = jobs[j].at(o);
-			int pIdx = jobs_f[j] - 1;
-			for (int s = 0; s < tc[pIdx].size(); ++s) {
-				double time = tc[pIdx][s][o];
-				if (time != 999999) {
-					opPtr->addTcMax(s, time);
-				}
-
-				double timeFwd = tc[pIdx][o][s];
-				if (timeFwd != 999999) {
-					opPtr->addTcMaxFwd(s, timeFwd);
-				}
+	for (size_t f = 0; f < F; ++f) {
+		for (size_t s1 = 0; s1 < tc[f].size(); ++s1) {
+			for (size_t s2 = 0; s2 < tc[f][s1].size(); ++s2) {
+				products[f].addTcMax(s1, s2, tc[f][s1][s2]);
 			}
 		}
+	}
 
+	// instantiate entities Jobs + Ops including time constraints
+	for (size_t j = 0; j < n; ++j) {
+		jobs.push_back(Job((j + 1), jobs_s[j], &products[jobs_f[j] - 1], jobs_r[j], jobs_d[j], jobs_w[j]));
+		for (size_t o = 0; o < products[jobs_f[j]-1].size(); ++o) {
+			jobs[j].addOp(make_unique<Operation>(&jobs[j], o + 1));
+		}
+
+		for (size_t o = 0; o < jobs[j].size(); ++o) {
+			if (o > 0) {
+				jobs[j][o].setPred(&jobs[j][o - 1]);
+			}
+			if (o < jobs[j].size() - 1) {
+				jobs[j][o].setSucc(&jobs[j][o + 1]);
+			}
+		}
 	}
 	
 

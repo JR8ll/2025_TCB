@@ -37,8 +37,12 @@ public:
 	double getR() const;
 	double getD() const;
 	double getW() const;
-
 	double getP(int stgIdx) const;
+
+	void setD(double dueDate);
+	void setR(double release);
+	void setW(double weight);
+	void setS(int size);
 
 	void addOp(pOp op);
 	const std::vector<pOp>& getOps() const;

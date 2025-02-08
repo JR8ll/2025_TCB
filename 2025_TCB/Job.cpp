@@ -36,8 +36,12 @@ int Job::getF() const { return product->getId(); }
 double Job::getR() const { return r; }
 double Job::getD() const { return d; }
 double Job::getW() const { return w; }
-
 double Job::getP(int stgIdx) const { return product->getP(stgIdx); }
+
+void Job::setD(double dueDate) { d = dueDate; }
+void Job::setR(double release) { r = release; }
+void Job::setW(double weight) { w = weight; }
+void Job::setS(int size) { s = size; }
 
 void Job::addOp(pOp op) {
 	ops.push_back(move(op));
