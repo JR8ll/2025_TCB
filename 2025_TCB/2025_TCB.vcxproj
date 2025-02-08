@@ -150,6 +150,9 @@
     <ClCompile Include="Schedule.cpp" />
     <ClCompile Include="Workcenter.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Packages\Debugger\Visualizers\stl.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

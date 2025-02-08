@@ -1,1 +1,6 @@
 ERROR:	Could not open debug_data.dat.
+Info:	Problem initialized from demoProblemInstance.dat.
+Info:	Problem initialized from demoProblemInstance.dat.
+Info:	Problem initialized from demoProblemInstance.dat.
+Info:	Problem initialized from demoProblemInstance.dat.
+Info:	Problem initialized from demoProblemInstance.dat.
