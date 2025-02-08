@@ -249,22 +249,22 @@ void Problem::loadFromDat(string filename) {
 
 	// instantiate entities Jobs + Ops including time constraints
 	for (size_t j = 0; j < n; ++j) {
-		jobs.push_back(Job((j + 1), jobs_s[j], &products[jobs_f[j] - 1], jobs_r[j], jobs_d[j], jobs_w[j]));
+		jobs.push_back(unique_ptr<Job>(new Job((j + 1), jobs_s[j], &(products)[jobs_f[j] - 1], jobs_r[j], jobs_d[j], jobs_w[j])));
 		for (size_t o = 0; o < products[jobs_f[j]-1].size(); ++o) {
-			jobs[j].addOp(make_unique<Operation>(&jobs[j], o + 1));
+			auto newOp = make_unique<Operation>(jobs[j].get(), static_cast<int>(o + 1));
+			jobs[j]->addOp(move(newOp));
 		}
 
-		for (size_t o = 0; o < jobs[j].size(); ++o) {
+		for (size_t o = 0; o < jobs[j]->size(); ++o) {
 			if (o > 0) {
-				jobs[j][o].setPred(&jobs[j][o - 1]);
+				(*jobs[j])[o].setPred(&(*jobs[j])[o - 1]);
 			}
-			if (o < jobs[j].size() - 1) {
-				jobs[j][o].setSucc(&jobs[j][o + 1]);
+			if (o < (*jobs[j]).size() - 1) {
+				(*jobs[j])[o].setSucc(&(*jobs[j])[o + 1]);
 			}
 		}
 	}
 	
-
 	TCB::logger.Log(Info, "Problem initialized from " + filename + ".");
 	input.close();
 }

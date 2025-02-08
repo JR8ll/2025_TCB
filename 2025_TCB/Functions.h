@@ -1,9 +1,18 @@
 #pragma once
 
+#include<random>
+
 #include "Log.h"
+
+
+class Problem;
 
 namespace TCB {
 	extern Logger logger;
+	extern Problem* prob;
+	extern unsigned seed;
+	extern double precision;
+	extern std::mt19937 rng;
 }
 
 class ExcSched {

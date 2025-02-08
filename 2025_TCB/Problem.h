@@ -12,12 +12,14 @@ class Job;
 class Product;
 class Schedule;
 
+using pJob = std::unique_ptr<Job>;
+
 class Problem {
 private:
 	std::string filename;
 
 	std::vector<Product> products;
-	std::vector<Job> jobs;
+	std::vector<pJob> jobs;
 
 	unsigned seed;
 
