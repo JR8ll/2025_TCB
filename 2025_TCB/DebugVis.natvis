@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="std::basic_string&lt;char,*&gt;">
+		<DisplayString>{_Mypair._Myval2._Bx._Buf,s}</DisplayString>
+		<StringView>_Mypair._Myval2._Bx._Buf,s</StringView>
+	</Type>
+</AutoVisualizer>
