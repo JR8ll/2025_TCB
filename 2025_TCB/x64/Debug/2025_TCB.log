@@ -1,3 +1,10 @@
-﻿  Machine.cpp
+﻿  Operation.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Operation.cpp(122): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(123): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(124): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(148): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(149): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(150): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

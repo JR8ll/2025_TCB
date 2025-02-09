@@ -19,6 +19,7 @@ private:
 
 public:
 	Batch();
+	Batch(int cap);
 
 	friend std::ostream& operator<<(std::ostream& os, const Batch& batch);
 
@@ -27,11 +28,14 @@ public:
 	Operation& operator[](size_t idx);
 	Operation& operator[](size_t idx) const;
 
+	size_t getIdx() const;	// index in its machine
 	size_t size() const;
+	size_t findOp(const Operation* op) const;	// returns index of operation 
 	bool isEmpty() const;
 
 	double getStart() const;
 	double getC() const;
+	double getP() const;
 
 	int getF() const;
 	int getCap() const;
@@ -39,6 +43,10 @@ public:
 
 	const std::vector<Operation*>& getOps() const;
 	Machine* getMachine() const;
+
+	void setStart(double newStart, bool checkValidity = true);
+	void setC(double newC, bool checkvalidity = true);
+	void setCap(int newCap);
 
 	void assignToMachine(Machine* processor);
 

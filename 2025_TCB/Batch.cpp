@@ -1,12 +1,14 @@
 #include <iostream>
 
 #include "Batch.h"
+#include "Functions.h"
 #include "Machine.h"
 #include "Operation.h"
 
 using namespace std;
 
 Batch::Batch() : machine(nullptr) {}
+Batch::Batch(int cap) : machine(nullptr), cap(cap) {}
 
 ostream& operator<<(ostream& os, const Batch& batch) {
 	os << "S" << (int)batch.getStart() << "_C" << (int)batch.getC() << "[";
@@ -29,10 +31,29 @@ unique_ptr<Batch> Batch::clone() const {
 Operation& Batch::operator[](size_t idx) { return *ops[idx]; }
 Operation& Batch::operator[](size_t idx) const { return *ops[idx]; }
 
+size_t Batch::getIdx() const {
+	return machine->findBatch(this);
+}
+
 size_t Batch::size() const { return ops.size(); }
+size_t Batch::findOp(const Operation* op) const {
+	for (size_t j = 0; j < size(); ++j) {
+		if (ops[j] == op) return j;
+	}
+	throw ExcSched("Batch::findOp() Operation not found");
+}
 bool Batch::isEmpty() const { return ops.empty(); }
 double Batch::getStart() const { return start; }
 double Batch::getC() const { return c; }
+
+double Batch::getP() const {
+	double p = 0.0;
+	for (size_t j = 0; j < size(); ++j) {
+		double tempP = ops[j]->getP();
+		if (tempP > p) p = tempP;
+	}
+	return p;
+}
 
 int Batch::getF() const { return f; }
 int Batch::getCap() const { return cap; }
@@ -49,6 +70,25 @@ const vector<Operation*>& Batch::getOps() const {
 }
 Machine* Batch::getMachine() const {
 	return machine;
+}
+
+void Batch::setStart(double newStart, bool checkvalidity) {
+	start = newStart;
+	setC(newStart + getP(), checkvalidity);
+}
+void Batch::setC(double newC, bool checkvalidity) {
+	if (checkvalidity) {
+		for (size_t op = 0; op < size(); ++op) {
+			if (ops[op]->getEarliestStart() + ops[op]->getP() - TCB::precision > newC) throw ExcSched("Batch::setC() infeasible");
+		}
+	}
+	c = newC;
+}
+
+void Batch::setCap(int newCap) {
+	int requiredCap = cap - getAvailableCap();
+	if (requiredCap > newCap) throw ExcSched("Batch::setCap() infeasible");
+	cap = newCap;
 }
 
 void Batch::assignToMachine(Machine* processor) { machine = processor; };
