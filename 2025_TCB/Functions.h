@@ -25,12 +25,14 @@ public:
 	const std::string& getMessage() const { return message; }
 };
 
-void static sortJobsByD(std::vector<pJob>& jobs);
-void static sortJobsByR(std::vector<pJob>& jobs);
-void static sortJobsByGATC(std::vector<pJob>& jobs, double t, double kappa);
+void sortJobsByD(std::vector<pJob>& jobs);
+void sortJobsByR(std::vector<pJob>& jobs);
+void sortJobsByGATC(std::vector<pJob>& jobs, double t, double kappa);
 
 bool compJobsByD(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByR(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
+
+void shiftJobFromVecToVec(std::vector<pJob>& source, std::vector<pJob>& target, size_t sourceIdx);
 
 double getAvgP(const std::vector<pJob>& jobs);
 

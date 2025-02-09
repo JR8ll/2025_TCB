@@ -27,7 +27,8 @@ public:
 	int getStg() const;
 	int getWorkcenterId() const;	
 
-	int getS() const;
+	int getS() const;			// size
+	int getF() const;			// product id (family)
 	double getStart() const;	// start of processing(infinite if op was not yet schedule)
 	double getC() const;		// completion (infinite if op was not yet scheduled)
 	double getD() const;		// external due date (of the job)

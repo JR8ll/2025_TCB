@@ -49,6 +49,31 @@ void Workcenter::schedOp(Operation* op, double pWait) {
 	size_t bestBatIdx = -1;
 	bool bNewBatch = true;
 	double idealStart = op->getEarliestStart();
+	double tempStart = numeric_limits<double>::max();
+
+	for (size_t m = 0; m < machines.size(); ++m) {
+		Machine* mac = machines[m].get();
+		// consider existing batches
+		for (size_t b = 0; b < mac->size(); ++b) {
+			Batch* bat = &(*mac)[b];
+			if (bat->getStart() > tempStart) break; // earlier option already found
+			if (bat->getStart() >= idealStart && bat->getF() == op->getF() && bat->getAvailableCap() >= op->getS()) {
+				if (bat->getStart() < tempStart) {
+					tempStart = bat->getStart();
+					bestMacIdx = m;
+					bestBatIdx = b;
+					bNewBatch = false;
+				}
+				break;  // later batches on this machines are not considered
+			}
+		}
+
+		// consider formation of a new batch
+		double earliestSlot = mac->getEarliestSlot(idealStart, op->getP());
+		// TODO
+
+	}
+	
 	// TODO
 }
 

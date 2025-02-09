@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -7,7 +8,7 @@
 
 using namespace std;
 
-Machine::Machine(int id, Workcenter* wc) : id(id), workcenter(wc) {}
+Machine::Machine(int id, Workcenter* wc) : id(id), r(0), workcenter(wc) {}
 
 ostream& operator<<(ostream& os, const Machine& machine) {
 	os << "M" << to_string(machine.getId()) << ": ";
@@ -37,6 +38,17 @@ Workcenter* Machine::getWorkcenter() {
 }
 const std::vector<pBat>& Machine::getBatches() const {
 	return batches;
+}
+
+double Machine::getEarliestSlot(double from, double duration) const {
+	double slot = max(r, from);
+	for (size_t b = 0; b < batches.size(); ++b) {
+		if ((slot + duration) <= batches[b]->getStart()) {
+			return slot;
+		}
+		slot = max(slot, batches[b]->getC());
+	}
+	return slot;
 }
 
 void Machine::addBatch(pBat batch, double start){

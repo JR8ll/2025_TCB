@@ -15,17 +15,23 @@ void sortJobsByGATC(vector<pJob>& jobs, double t, double kappa) {
 	sort(jobs.begin(), jobs.end(), CompJobsByGATC(avgP, t, kappa));
 }
 
-bool compJobsByD(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
+bool compJobsByD(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 	if (a->getD() == b->getD()) {
 		return a->getId() < b->getId();
 	}
 	return a->getD() < b->getD();
 }
-bool compJobsByR(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
+bool compJobsByR(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 	if (a->getR() == b->getR()) {
 		return a->getId() < b->getId();
 	}
 	return a->getR() < b->getR();
+}
+
+void shiftJobFromVecToVec(vector<pJob>& source, vector<pJob>& target, size_t sourceIdx) {
+	if (sourceIdx >= source.size()) throw out_of_range("shiftJobFromVecToVec() out of range");
+	target.push_back(move(source[sourceIdx]));
+	source.erase(source.begin() + sourceIdx);
 }
 
 double getAvgP(const vector<pJob>& jobs) {
