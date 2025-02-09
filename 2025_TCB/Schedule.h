@@ -17,8 +17,10 @@ private:
 public:
 	Schedule();
 
+	friend std::ostream& operator<<(std::ostream& os, const Schedule& schedule);
+
 	Workcenter& operator[](size_t idx);			// access workcenter
-	Workcenter& operator[](size_t idx) const;		// access workcenter
+	Workcenter& operator[](size_t idx) const;	// access workcenter
 
 	Job& getJob(size_t idx);
 	Job& getJob(size_t idx) const;
@@ -36,4 +38,7 @@ public:
 	const std::vector<pWc>& getWorkcenters() const;
 	void addWorkcenter(pWc wc);
 	void addJob(pJob job);
+
+	double getTWT() const;	// total weighted tardiness
+
 };

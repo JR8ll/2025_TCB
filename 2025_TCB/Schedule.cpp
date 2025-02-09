@@ -29,7 +29,7 @@ void Schedule::_reconstruct(const Schedule* orig) {
 	for (size_t wc = 0; wc < (*orig).size(); ++wc) {
 		for (size_t m = 0; m < (*orig)[wc].size(); ++m) {
 			for (size_t b = 0; b < (*orig)[wc][m].size(); ++b) {
-				(*this)[wc][m].addBatch(move((*orig)[wc][m][b].clone()));	// TODO: timing
+				(*this)[wc][m].addBatch(move((*orig)[wc][m][b].clone()), (*orig)[wc][m][b].getStart());
 				for (size_t j = 0; j < (*orig)[wc][m][b].size(); ++j) {
 					Operation& op = (*orig)[wc][m][b][j];
 					size_t jobIdx = op.getStg() - 1;
@@ -51,4 +51,12 @@ void Schedule::addWorkcenter(pWc wc) {
 }
 void Schedule::addJob(pJob job) {
 	jobs.push_back(move(job));
+}
+
+double Schedule::getTWT() const {
+	double twt = 0;
+	for (size_t wc = 0; wc < size(); ++wc) {
+		twt += workcenters[wc]->getTWT();
+	}
+	return twt;
 }

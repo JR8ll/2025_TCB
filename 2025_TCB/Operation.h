@@ -19,6 +19,8 @@ private:
 public:
 	Operation(Job* j, int stg); 
 
+	friend std::ostream& operator<<(std::ostream& os, const Operation& operation);
+
 	int getId() const;
 	int getStg() const;
 		
@@ -34,5 +36,7 @@ public:
 	Batch* getBatch() const;
 
 	void assignToBatch(Batch* batch);
+
+	double getTWT() const;
 
 };

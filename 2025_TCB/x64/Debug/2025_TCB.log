@@ -1,28 +1,3 @@
 ﻿  Workcenter.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Schedule.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Product.cpp
-Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-  Problem.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Problem.cpp(202): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(245): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(252): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(107): warning C4101: 'exc' : unreferenced local variable
-Problem.cpp(195): warning C4101: 'exc' : unreferenced local variable
-  Operation.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Main.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Machine.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Log.cpp
-  Job.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Batch.cpp
-  Generating Code...
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe
