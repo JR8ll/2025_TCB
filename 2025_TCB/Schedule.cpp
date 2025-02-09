@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Schedule.h"
+#include "Functions.h"
 
 using namespace std;
 
@@ -70,11 +71,11 @@ void Schedule::schedOp(Operation* op, double pWait) {
 }
 
 void Schedule::lSchedJobs(std::vector<pJob>& unscheduled, double pWait) {
-	for (size_t j = 0; j < unscheduled.size(); ++j) {
-		for (size_t op = 0; op < unscheduled[j]->size(); ++op) {
-			schedOp(&(*unscheduled[j])[op], pWait);
+	while(!unscheduled.empty()) {
+		for (size_t op = 0; op < (*unscheduled.begin())->size(); ++op) {
+			schedOp(&(**unscheduled.begin())[op], pWait);
 		}
-		// TODO: move unscheduled to scheduled
+		shiftJobFromVecToVec(unscheduled, scheduledJobs, 0);
 	}
 }
 

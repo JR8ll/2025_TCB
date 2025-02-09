@@ -19,6 +19,7 @@ int Operation::getStg() const { return stg; }
 int Operation::getWorkcenterId() const { return job->getWorkcenterId(stg); };
 
 int Operation::getS() const { return job->getS(); }
+int Operation::getF() const { return job->getF(); }
 double Operation::getStart() const { 
 	if (batch != nullptr) {
 		if (batch->getMachine() != nullptr) {

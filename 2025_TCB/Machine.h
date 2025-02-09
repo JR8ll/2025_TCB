@@ -12,6 +12,8 @@ using pBat = std::unique_ptr<Batch>;
 class Machine {
 private:
 	int id;
+
+	double r;	// machine availability
 	std::vector<pBat> batches;
 	Workcenter* workcenter;
 
@@ -31,6 +33,8 @@ public:
 
 	Workcenter* getWorkcenter();
 	const std::vector<pBat>& getBatches() const;
+
+	double getEarliestSlot(double from, double duration) const;
 
 	void addBatch(pBat batch, double start);
 	pBat removeBatch(size_t idx);

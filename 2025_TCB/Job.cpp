@@ -71,7 +71,7 @@ void Job::setW(double weight) { w = weight; }
 void Job::setS(int size) { s = size; }
 
 Operation* Job::getOpPtr(size_t stgIdx) const {
-	if (stgIdx > ops.size()) throw out_of_range("Job::getOpPtr() out of range");
+	if (stgIdx >= ops.size()) throw out_of_range("Job::getOpPtr() out of range");
 	return ops[stgIdx].get();
 }
 
