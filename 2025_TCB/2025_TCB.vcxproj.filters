@@ -77,6 +77,9 @@
     <ClCompile Include="Log.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="Functions.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\Packages\Debugger\Visualizers\stl.natvis" />

@@ -38,6 +38,9 @@ public:
 	double getD() const;
 	double getW() const;
 	double getP(int stgIdx) const;
+	double getTotalP() const;
+
+	double getGATC(double avgP, double t, double kappa) const;
 
 	void setD(double dueDate);
 	void setR(double release);

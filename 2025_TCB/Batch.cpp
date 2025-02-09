@@ -34,6 +34,16 @@ bool Batch::isEmpty() const { return ops.empty(); }
 double Batch::getStart() const { return start; }
 double Batch::getC() const { return c; }
 
+int Batch::getF() const { return f; }
+int Batch::getCap() const { return cap; }
+int Batch::getAvailableCap() const { 
+	int availableCap = cap;
+	for (size_t op = 0; op < size(); ++op) {
+		availableCap -= ops[op]->getS();
+	}
+	return availableCap;
+}
+
 const vector<Operation*>& Batch::getOps() const {
 	return ops;
 }

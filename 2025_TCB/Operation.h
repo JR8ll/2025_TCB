@@ -23,14 +23,23 @@ public:
 
 	int getId() const;
 	int getStg() const;
-		
+
+	int getS() const;
+	double getD() const;	// external due date (of the job)
 	double getP() const;
+	double getW() const;
+		
+	
 	double getWait() const;
+
+	double getGATC(double avgP, double t, double kappa) const;
+
+	Operation* getPred() const;
+	Operation* getSucc() const;
 
 	void setWait(double wt);
 	void setPred(Operation* pre);
 	void setSucc(Operation* suc);
-	
 
 	Job* getJob() const;
 	Batch* getBatch() const;

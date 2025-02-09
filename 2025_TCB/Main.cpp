@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	pSched sched = TCB::prob->getSchedule();
-
+	cout << *sched;
 
 	return EXIT_SUCCESS;
 }

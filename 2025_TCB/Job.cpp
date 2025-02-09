@@ -37,6 +37,21 @@ double Job::getR() const { return r; }
 double Job::getD() const { return d; }
 double Job::getW() const { return w; }
 double Job::getP(int stgIdx) const { return product->getP(stgIdx); }
+double Job::getTotalP() const {
+	double totalP = 0.0;
+	for (size_t o = 0; o < size(); ++o) {
+		totalP += getP(o);
+	}
+	return totalP;
+}
+
+double Job::getGATC(double avgP, double t, double kappa) const {
+	double gAtc = 0.0;
+	for (size_t op = 0; op < size(); ++op) {
+		gAtc += ops[op]->getGATC(avgP, t, kappa);
+	}
+	return gAtc;
+}
 
 void Job::setD(double dueDate) { d = dueDate; }
 void Job::setR(double release) { r = release; }

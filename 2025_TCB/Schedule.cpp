@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Schedule.h"
 
 using namespace std;
@@ -5,6 +7,14 @@ using namespace std;
 Schedule::Schedule() {
 	workcenters = vector<pWc>();
 	jobs = vector<pJob>();
+}
+
+ostream& operator<<(ostream& os, const Schedule& sched) {
+	os << "---------SCHEDULE ----------" << endl;
+	for (size_t wc = 0; wc < sched.size(); ++wc) {
+		os << sched[wc] << endl;
+	}
+	return os;
 }
 
 Workcenter& Schedule::operator[](size_t idx) { return *workcenters[idx]; }

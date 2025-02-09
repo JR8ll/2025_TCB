@@ -17,8 +17,25 @@ ostream& operator<<(ostream& os, const Operation& op) {
 int Operation::getId() const { return id; }
 int Operation::getStg() const { return stg; }
 
+int Operation::getS() const { return job->getS(); }
+double Operation::getD() const { return job->getD(); }
 double Operation::getP() const { return job->getP(stg); }
+double Operation::getW() const { return job->getW(); }
+
 double Operation::getWait() const { return wait; }
+
+double Operation::getGATC(double avgP, double t, double kappa) const {
+	double slack = getD() - t - getP();
+	Operation* next = succ;
+	while (next != nullptr) {
+		slack -= next->getWait() + next->getP();
+		next = next->getSucc();
+	}
+	return (getW() / getP()) * exp(-1 * (max(slack, 0.0) / kappa * avgP));
+}
+
+Operation* Operation::getPred() const { return pred; }
+Operation* Operation::getSucc() const { return succ; }
 
 void Operation::setWait(double wt) { wait = wt; }
 void Operation::setPred(Operation* pre) { pred = pre; }
