@@ -16,12 +16,61 @@ ostream& operator<<(ostream& os, const Operation& op) {
 
 int Operation::getId() const { return id; }
 int Operation::getStg() const { return stg; }
+int Operation::getWorkcenterId() const { return job->getWorkcenterId(stg); };
 
 int Operation::getS() const { return job->getS(); }
+double Operation::getStart() const { 
+	if (batch != nullptr) {
+		if (batch->getMachine() != nullptr) {
+			return batch->getStart();
+		}
+	}
+	return numeric_limits<double>::max();	// operation has not yet been scheduled
+}
+double Operation::getC() const { 
+	if (batch != nullptr) {
+		if (batch->getMachine() != nullptr) {
+			return batch->getC();
+		}
+	}
+	return numeric_limits<double>::max();	// operation has not yet been scheduled
+}
 double Operation::getD() const { return job->getD(); }
 double Operation::getP() const { return job->getP(stg); }
+double Operation::getR() const { return job->getR(); }
 double Operation::getW() const { return job->getW(); }
 
+bool Operation::isScheduled() const {
+	if (batch != nullptr) {
+		return batch->getMachine() != nullptr;
+	}
+	return false;
+}
+double Operation::getAvailability() const {
+	if (pred == nullptr) {
+		return getR();								// first op is available with job release => end recursion
+	}
+
+	if (pred->getBatch() != nullptr) {
+		return pred->getC();						// op is available when its predecessor is completed => end recursion
+	}
+	return pred->getAvailability() + pred->getP();	// op is available when its predecessor could be completed => end recursion 
+}
+double Operation::getEarliestStart() const {
+	double earliest = getAvailability();
+	
+	const vector<pair<int, double>>& tcFwd = getTcMaxFwd();
+	for (size_t tc = 0; tc < tcFwd.size(); ++tc) {
+		Operation* tcSucc = job->getOpPtr(tcFwd[tc].first);
+		if (tcSucc->isScheduled()) {
+			double constrainedStart = tcSucc->getStart() - tcFwd[tc].second;
+			if (constrainedStart > earliest) {
+				earliest = constrainedStart;
+			}
+		}
+	}
+	return earliest;
+}
 double Operation::getWait() const { return wait; }
 
 double Operation::getGATC(double avgP, double t, double kappa) const {
@@ -36,6 +85,13 @@ double Operation::getGATC(double avgP, double t, double kappa) const {
 
 Operation* Operation::getPred() const { return pred; }
 Operation* Operation::getSucc() const { return succ; }
+
+const std::vector<std::pair<int, double>>& Operation::getTcMaxBwd() const {
+	return job->getTcMaxBwd(stg);
+}
+const std::vector<std::pair<int, double>>& Operation::getTcMaxFwd() const {
+	return job->getTcMaxFwd(stg);
+}
 
 void Operation::setWait(double wt) { wait = wt; }
 void Operation::setPred(Operation* pre) { pred = pre; }

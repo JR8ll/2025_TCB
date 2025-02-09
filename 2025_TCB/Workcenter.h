@@ -34,6 +34,8 @@ public:
 
 	void addMachine(pMac mac);
 
+	void schedOp(Operation* op, double pWait);
+
 	double getTWT() const;	// total weighted tardiness
 
 };
