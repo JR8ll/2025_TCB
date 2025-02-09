@@ -1,23 +1,12 @@
-﻿  Functions.cpp
+﻿  Operation.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Generating Code...
-  Compiling...
+  Skipping... (no relevant changes detected)
+  Workcenter.cpp
+  Schedule.cpp
   Problem.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Problem.cpp(203): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(246): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(253): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(108): warning C4101: 'exc' : unreferenced local variable
-Problem.cpp(196): warning C4101: 'exc' : unreferenced local variable
-C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-          Problem.cpp(287) : see reference to function template instantiation 'std::unique_ptr<Workcenter,std::default_delete<_Ty>> std::make_unique<Workcenter,size_t,Schedule*>(size_t &&,Schedule *&&)' being compiled
-          with
-          [
-              _Ty=Workcenter
-          ]
   Main.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Generating Code...
+  Job.cpp
+  Functions.cpp
+  Batch.cpp
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

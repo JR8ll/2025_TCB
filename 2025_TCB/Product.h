@@ -17,7 +17,11 @@ public:
 	int getId() const;
 	int size() const;	// number of steps
 
-	double getP(int stgIdx) const;
+	const std::vector<std::pair<int, double>>& getTcMaxBwd(size_t stgIdx) const;
+	const std::vector<std::pair<int, double>>& getTcMaxFwd(size_t stgIdx) const;
+
+	int getWorkcenterId(size_t stgIdx) const;
+	double getP(size_t stgIdx) const;
 
 	void addTcMax(int first, int second, double duration);	// adds both backward and forward perspectives
 

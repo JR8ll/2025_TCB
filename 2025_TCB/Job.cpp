@@ -32,11 +32,14 @@ size_t Job::size() const { return ops.size(); }
 int Job::getId() const { return id; }
 int Job::getS() const { return s; }
 int Job::getF() const { return product->getId(); }
+int Job::getWorkcenterId(size_t stgIdx) const {
+	return product->getWorkcenterId(stgIdx);
+}
 
 double Job::getR() const { return r; }
 double Job::getD() const { return d; }
 double Job::getW() const { return w; }
-double Job::getP(int stgIdx) const { return product->getP(stgIdx); }
+double Job::getP(size_t stgIdx) const { return product->getP(stgIdx); }
 double Job::getTotalP() const {
 	double totalP = 0.0;
 	for (size_t o = 0; o < size(); ++o) {
@@ -44,6 +47,8 @@ double Job::getTotalP() const {
 	}
 	return totalP;
 }
+
+
 
 double Job::getGATC(double avgP, double t, double kappa) const {
 	double gAtc = 0.0;
@@ -53,10 +58,22 @@ double Job::getGATC(double avgP, double t, double kappa) const {
 	return gAtc;
 }
 
+const vector<std::pair<int, double>>& Job::getTcMaxFwd(size_t stgIdx) const {
+	return product->getTcMaxFwd(stgIdx);
+}
+const vector<std::pair<int, double>>& Job::getTcMaxBwd(size_t stgIdx) const {
+	return product->getTcMaxBwd(stgIdx);
+}
+
 void Job::setD(double dueDate) { d = dueDate; }
 void Job::setR(double release) { r = release; }
 void Job::setW(double weight) { w = weight; }
 void Job::setS(int size) { s = size; }
+
+Operation* Job::getOpPtr(size_t stgIdx) const {
+	if (stgIdx > ops.size()) throw out_of_range("Job::getOpPtr() out of range");
+	return ops[stgIdx].get();
+}
 
 void Job::addOp(pOp op) {
 	ops.push_back(move(op));

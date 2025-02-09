@@ -34,18 +34,25 @@ public:
 	int getId() const;
 	int getS() const;
 	int getF() const;
+	int getWorkcenterId(size_t stgIdx) const;
+
 	double getR() const;
 	double getD() const;
-	double getW() const;
-	double getP(int stgIdx) const;
+	double getW() const;	
+	double getP(size_t stgIdx) const;
 	double getTotalP() const;
 
 	double getGATC(double avgP, double t, double kappa) const;
+
+	const std::vector<std::pair<int, double>>& getTcMaxFwd(size_t stgIdx) const;
+	const std::vector<std::pair<int, double>>& getTcMaxBwd(size_t stgIdx) const;
 
 	void setD(double dueDate);
 	void setR(double release);
 	void setW(double weight);
 	void setS(int size);
+
+	Operation* getOpPtr(size_t stgIdx) const;
 
 	void addOp(pOp op);
 	const std::vector<pOp>& getOps() const;

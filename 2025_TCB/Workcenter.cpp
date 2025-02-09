@@ -2,6 +2,7 @@
 #include <string>
 
 #include "Workcenter.h"
+#include "Operation.h"
 
 using namespace std;
 
@@ -40,6 +41,15 @@ const std::vector<pMac>& Workcenter::getMachines() const {
 void Workcenter::addMachine(pMac mac) {
 	mac->assignToWorkcenter(this);
 	machines.push_back(move(mac));
+}
+
+
+void Workcenter::schedOp(Operation* op, double pWait) {
+	size_t bestMacIdx = -1;
+	size_t bestBatIdx = -1;
+	bool bNewBatch = true;
+	double idealStart = op->getEarliestStart();
+	// TODO
 }
 
 double Workcenter::getTWT() const {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 class Batch;
 class Job;
 class Product;
@@ -23,19 +25,28 @@ public:
 
 	int getId() const;
 	int getStg() const;
+	int getWorkcenterId() const;	
 
 	int getS() const;
-	double getD() const;	// external due date (of the job)
+	double getStart() const;	// start of processing(infinite if op was not yet schedule)
+	double getC() const;		// completion (infinite if op was not yet scheduled)
+	double getD() const;		// external due date (of the job)
 	double getP() const;
+	double getR() const;		// external release date (of the job)
 	double getW() const;
 		
-	
+	bool isScheduled() const;
+	double getAvailability() const;		// internal release (after predecessors completion)
+	double getEarliestStart() const;	// constrained by job release, c of earlier steps, tc of later steps
 	double getWait() const;
 
 	double getGATC(double avgP, double t, double kappa) const;
 
 	Operation* getPred() const;
 	Operation* getSucc() const;
+
+	const std::vector<std::pair<int, double>>& getTcMaxFwd() const;
+	const std::vector<std::pair<int, double>>& getTcMaxBwd() const;
 
 	void setWait(double wt);
 	void setPred(Operation* pre);

@@ -47,6 +47,9 @@ int Batch::getAvailableCap() const {
 const vector<Operation*>& Batch::getOps() const {
 	return ops;
 }
+Machine* Batch::getMachine() const {
+	return machine;
+}
 
 void Batch::assignToMachine(Machine* processor) { machine = processor; };
 

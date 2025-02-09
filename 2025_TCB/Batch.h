@@ -38,6 +38,7 @@ public:
 	int getAvailableCap() const;
 
 	const std::vector<Operation*>& getOps() const;
+	Machine* getMachine() const;
 
 	void assignToMachine(Machine* processor);
 

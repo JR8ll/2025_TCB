@@ -8,11 +8,17 @@
 
 using pWc = std::unique_ptr<Workcenter>;
 using pJob = std::unique_ptr<Job>;
+using sharedJob = std::shared_ptr<Job>;
+using sharedOp = std::shared_ptr<Operation>;
 
 class Schedule {
 private:
 	std::vector<pWc> workcenters;
 	std::vector<pJob> jobs;
+	std::vector<pJob> scheduledJobs;
+
+	std::vector<sharedOp> unscheduled;
+	std::vector<sharedOp> scheduled;
 
 public:
 	Schedule();
@@ -38,6 +44,10 @@ public:
 	const std::vector<pWc>& getWorkcenters() const;
 	void addWorkcenter(pWc wc);
 	void addJob(pJob job);
+
+	void schedOp(Operation* op, double pWait);
+
+	void lSchedJobs(std::vector<pJob>& unscheduled, double pWait);	// List scheduling in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 
 	double getTWT() const;	// total weighted tardiness
 

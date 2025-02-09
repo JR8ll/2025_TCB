@@ -7,6 +7,7 @@ using namespace std;
 Schedule::Schedule() {
 	workcenters = vector<pWc>();
 	jobs = vector<pJob>();
+	scheduledJobs = vector<pJob>();
 }
 
 ostream& operator<<(ostream& os, const Schedule& sched) {
@@ -61,6 +62,20 @@ void Schedule::addWorkcenter(pWc wc) {
 }
 void Schedule::addJob(pJob job) {
 	jobs.push_back(move(job));
+}
+
+void Schedule::schedOp(Operation* op, double pWait) {
+	int wcIdx = op->getWorkcenterId() - 1;
+	workcenters[wcIdx]->schedOp(op, pWait);
+}
+
+void Schedule::lSchedJobs(std::vector<pJob>& unscheduled, double pWait) {
+	for (size_t j = 0; j < unscheduled.size(); ++j) {
+		for (size_t op = 0; op < unscheduled[j]->size(); ++op) {
+			schedOp(&(*unscheduled[j])[op], pWait);
+		}
+		// TODO: move unscheduled to scheduled
+	}
 }
 
 double Schedule::getTWT() const {
