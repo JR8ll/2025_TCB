@@ -3,6 +3,7 @@
 #include<fstream>
 
 #include "Functions.h"
+#include "Schedule.h"
 
 using namespace std;
 
@@ -277,5 +278,25 @@ pair<int, int> Problem::_tokenizeTupel(string tupel) {
 	ret.first = stoi(tupel.substr(first, comma - first));
 	ret.second = stoi(tupel.substr(comma + 1, last));
 	return ret;
+}
+
+unique_ptr<Schedule> Problem::getSchedule() const {
+	unique_ptr<Schedule> newSchedule = make_unique<Schedule>();
+	// setup machine environment
+	for (size_t wc = 0; wc < F; ++wc) {
+		unique_ptr<Workcenter> newWorkcenter = make_unique<Workcenter>(wc + 1, newSchedule.get());
+		for (size_t m = 0; m < m_o[wc]; ++m) {
+			unique_ptr<Machine> newMachine = make_unique<Machine>(m+1, newWorkcenter.get());
+			newWorkcenter->addMachine(move(newMachine));
+		}
+		newSchedule->addWorkcenter(move(newWorkcenter));
+	}
+
+	// add jobs
+	for (size_t j = 0; j < n; ++j) {
+		newSchedule->addJob(jobs[j]->clone());
+	}
+
+	return newSchedule;
 }
 

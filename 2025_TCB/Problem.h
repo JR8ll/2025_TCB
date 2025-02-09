@@ -65,5 +65,8 @@ public:
 	void loadFromDat(std::string filename);
 
 	std::pair<int, int> _tokenizeTupel(std::string tupel);
+
+	std::unique_ptr<Schedule> getSchedule() const;	// machine environment + jobs to be scheduled
+
 };
 

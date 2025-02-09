@@ -4,6 +4,7 @@
 #include "Problem.h"
 
 using namespace std;
+using pSched = unique_ptr<Schedule>;
 
 Problem* TCB::prob;
 LogPriority Logger::verbosity = Info;
@@ -41,6 +42,8 @@ int main(int argc, char* argv[]) {
 	if (argc > 4) {
 		iTilimSeconds = atoi(argv[4]);
 	}
+
+	pSched sched = TCB::prob->getSchedule();
 
 
 	return EXIT_SUCCESS;

@@ -18,6 +18,8 @@ private:
 public:
 	Workcenter(int id, Schedule* sched);
 
+	friend std::ostream& operator<<(std::ostream& os, const Workcenter& workcenter);
+
 	Machine& operator[](size_t idx);
 	Machine& operator[](size_t idx) const;
 
@@ -31,5 +33,7 @@ public:
 	const std::vector<pMac>& getMachines() const;
 
 	void addMachine(pMac mac);
+
+	double getTWT() const;	// total weighted tardiness
 
 };
