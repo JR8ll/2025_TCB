@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Batch.cpp" />
+    <ClCompile Include="Functions.cpp" />
     <ClCompile Include="Job.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Machine.cpp" />

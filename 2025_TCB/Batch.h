@@ -13,6 +13,9 @@ private:
 
 	double start;	// start time
 	double c;		// completion time
+	
+	int f;			// product (family)
+	int cap;		
 
 public:
 	Batch();
@@ -29,6 +32,10 @@ public:
 
 	double getStart() const;
 	double getC() const;
+
+	int getF() const;
+	int getCap() const;
+	int getAvailableCap() const;
 
 	const std::vector<Operation*>& getOps() const;
 
