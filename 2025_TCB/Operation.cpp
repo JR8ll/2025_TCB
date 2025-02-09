@@ -3,7 +3,10 @@
 
 #include "Operation.h"
 #include "Batch.h"
+#include "Functions.h"
 #include "Job.h"
+#include "Machine.h"
+#include "Workcenter.h"
 
 using namespace std;
 
@@ -15,6 +18,9 @@ ostream& operator<<(ostream& os, const Operation& op) {
 }
 
 int Operation::getId() const { return id; }
+size_t Operation::getIdxInBatch() const {
+	return batch->findOp(this);
+}
 int Operation::getStg() const { return stg; }
 int Operation::getWorkcenterId() const { return job->getWorkcenterId(stg); };
 
@@ -103,6 +109,57 @@ Batch* Operation::getBatch() const { return batch; }
 
 void Operation::assignToBatch(Batch* batch) {
 	batch = batch;
+}
+bool Operation::repairOverlaps() {
+	bool bRepaired = false;
+	if (batch != nullptr) {
+		if (succ != nullptr) {
+			if (succ->isScheduled()) {
+				Batch* succBatch = succ->getBatch();
+				if (succBatch != nullptr) {
+					if (batch->getC() > succBatch->getStart() + TCB::precision) {
+						Workcenter* wcSucc = succBatch->getMachine()->getWorkcenter();
+						int mIdx = succBatch->getMachine()->getIdx();
+						int bIdx = succBatch->getIdx();
+						int jIdx = succ->getIdxInBatch();
+						wcSucc->rightShift(mIdx, bIdx, jIdx, batch->getC());
+					}
+				}
+			}
+		}
+	}
+	return bRepaired;	
+}
+bool Operation::repairTimeConstraints() {
+	bool bRepaired = false;
+	const vector<pair<int, double>>& tcMax = getTcMaxBwd();
+	if (batch != nullptr) {
+		for (size_t i = 0; i < tcMax.size(); ++i) {
+			size_t predIdx = tcMax[i].first - 1;
+			Operation* predOp = &(*job)[predIdx];
+			if (predOp != nullptr) {
+				if (predOp->isScheduled()) {
+					Batch* predBatch = predOp->getBatch();
+					if (predBatch->getStart() < batch->getStart() - tcMax[i].second - TCB::precision) {
+						// time constraint is violated
+						double newStartForPred = batch->getStart() - tcMax[i].second;
+						Workcenter* wc = predBatch->getMachine()->getWorkcenter();
+						if (wc != nullptr) {
+							int mIdx = predBatch->getMachine()->getIdx();
+							int bIdx = predBatch->getIdx();
+							int jIdx = predOp->getIdxInBatch();
+							wc->rightShift(mIdx, bIdx, jIdx, newStartForPred);
+							bRepaired = true;
+						}
+						else {
+							throw(ExcSched("Operation::repairTimeConstraint() missing workcenter reference"));
+						}
+					}
+				}	
+			}
+		}
+	}
+	return bRepaired;
 }
 
 double Operation::getTWT() const {

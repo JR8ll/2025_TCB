@@ -26,6 +26,7 @@ public:
 	std::unique_ptr<Workcenter> clone(Schedule* newSchedule) const;
 
 	size_t size() const;
+	size_t findMachine(const Machine* mac) const;	// returns index of mac
 	
 	int getId() const;
 
@@ -34,7 +35,11 @@ public:
 
 	void addMachine(pMac mac);
 
-	void schedOp(Operation* op, double pWait);
+	void schedOp(Operation* op, double pWait = 0.0);
+	void ensureValidity(Operation* op);
+	void rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait = 0.0);	// indices identify op to be right-shifted, from is the new earliest starting time
+
+	void moveBatch(pBat batch, size_t tgtMac, double newStart);
 
 	double getTWT() const;	// total weighted tardiness
 

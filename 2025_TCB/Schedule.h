@@ -45,7 +45,7 @@ public:
 	void addWorkcenter(pWc wc);
 	void addJob(pJob job);
 
-	void schedOp(Operation* op, double pWait);
+	void schedOp(Operation* op, double pWait = 0.0);
 
 	void lSchedJobs(std::vector<pJob>& unscheduled, double pWait);	// List scheduling in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 

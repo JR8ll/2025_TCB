@@ -286,7 +286,7 @@ unique_ptr<Schedule> Problem::getSchedule() const {
 	for (size_t wc = 0; wc < F; ++wc) {
 		unique_ptr<Workcenter> newWorkcenter = make_unique<Workcenter>(wc + 1, newSchedule.get());
 		for (size_t m = 0; m < m_o[wc]; ++m) {
-			unique_ptr<Machine> newMachine = make_unique<Machine>(m+1, newWorkcenter.get());
+			unique_ptr<Machine> newMachine = make_unique<Machine>(m+1, m_B[m], newWorkcenter.get());
 			newWorkcenter->addMachine(move(newMachine));
 		}
 		newSchedule->addWorkcenter(move(newWorkcenter));

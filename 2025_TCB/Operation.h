@@ -24,6 +24,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Operation& operation);
 
 	int getId() const;
+	size_t getIdxInBatch() const;
 	int getStg() const;
 	int getWorkcenterId() const;	
 
@@ -57,6 +58,8 @@ public:
 	Batch* getBatch() const;
 
 	void assignToBatch(Batch* batch);
+	bool repairOverlaps();													// true, if an overlap was found and repaired
+	bool repairTimeConstraints();											// true, if a tc violation was found and repaired
 
 	double getTWT() const;
 
