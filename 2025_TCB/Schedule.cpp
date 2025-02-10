@@ -70,6 +70,23 @@ void Schedule::schedOp(Operation* op, double pWait) {
  	workcenters[wcIdx]->schedOp(op, pWait);
 }
 
+void Schedule::reset() {
+	for (size_t wc = 0; wc < size(); ++wc) {
+		for (size_t m = 0; m < workcenters[wc]->size(); ++m) {
+			(*workcenters[wc])[m].removeAllBatches();
+		}
+	}
+	while (!scheduledJobs.empty()) {
+		shiftJobFromVecToVec(scheduledJobs, unscheduledJobs, 0);
+	}
+
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < (*unscheduledJobs[j]).size(); ++o) {
+			(*unscheduledJobs[j])[o].setWait(0);
+		}
+	}
+}
+
 void Schedule::lSchedJobs(double pWait) {
 	while(!unscheduledJobs.empty()) {
 		for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {

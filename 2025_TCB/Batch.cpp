@@ -105,6 +105,13 @@ void Batch::removeOp(Operation* op) {
 	}
 }
 
+void Batch::removeAllOps() {
+	for (size_t o = 0; o < size(); ++o) {
+		ops[o]->assignToBatch(nullptr);
+	}
+	ops.clear();
+}
+
 double Batch::getTWT() const {
 	double twt = 0;
 	for (size_t op = 0; op < size(); ++op) {

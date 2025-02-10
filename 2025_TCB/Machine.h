@@ -46,6 +46,7 @@ public:
 	void eraseNullptr(size_t batIdx);
 
 	pBat removeBatch(size_t idx);
+	void removeAllBatches();
 	void moveBatch(pBat batch, double newStart);
 
 	void assignToWorkcenter(Workcenter* wc);
