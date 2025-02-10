@@ -22,6 +22,7 @@ int Problem::getStgs() const { return stgs; }
 int Problem::getF() const { return F; }
 
 void Problem::loadFromDat(string filename) {
+	this->filename = filename;
 	ifstream input(filename);
 	if (!input) {
 		TCB::logger.Log(Error, "Could not open " + filename + ".");

@@ -15,68 +15,66 @@ double TCB::precision = 0.001;
 mt19937 TCB::rng = mt19937(123456789);
 
 static const int ALG_ITERATEDMILP = 1;		// iterated MILP solving
-static const int ALG_LISTSCHEDWTG = 2;		// simple List scheduling approach
+static const int ALG_LISTSCHEDATC = 2;		// simple List scheduling approach
 static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
 static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
 
-int main(int argc, char* argv[]) {
-	TCB::logger = Logger();
+// argv[1] filename of problem instance to be solved
+// argv[2] seed for pseudo random-number generator
+// argv[3] int describing the solving method to be used
+// argv[4] time limit in seconds
+// argv[5] console output on(=1)/off(=0)
 
+int main(int argc, char* argv[]) {
+	// PROCESS COMMAND LINE ARGUMENTS
+	TCB::logger = Logger();
 	Problem p = Problem();
 	TCB::prob = &p;
-
 	int iSolver = -1;
 	int iTilimSeconds = 3600;
+	bool bConsole = false;
+	string solverName = "n/a";
+	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole);
 
-	// PROCESS COMMAND LINE ARGUMENTS
-	if (argc > 1) {
-		TCB::prob->loadFromDat(argv[1]);
-	}
-	else {
-		TCB::prob->loadFromDat("debug_data.dat");
-	}
+	// PREPARE 
+	pSched sched = TCB::prob->getSchedule();
 
-	if (argc > 2) {
-		TCB::seed = atoi(argv[2]);
-		TCB::rng = mt19937(TCB::seed);	// global random engine (mersenne twister)
-	}
-
-	if (argc > 3) {
-		iSolver = atoi(argv[3]);
-	}
-	if (argc > 4) {
-		iTilimSeconds = atoi(argv[4]);
-	}
-
+	// SOLVE
 	switch (iSolver) {
 	case ALG_ITERATEDMILP:
+		solverName = "DecompMILP";
 		break;
-	case ALG_LISTSCHEDWTG:
+	case ALG_LISTSCHEDATC: 
+		solverName = "ListSchedGATC";
+		{
+			vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
+			sched->lSchedJobsWithSorting(sortJobsByGATC, kappas);
+		}
 		break;
 	case ALG_BRKGALISTSCH:
+		solverName = "BRKGA";
 		break;
 	case ALG_BRKGALS2MILP:
+		solverName = "BRKGA_MILP";
 		break;
 	default:
 		TCB::logger.Log(Warning, "Program was executed with no valid algorithm key");
 	} 
 
+	// RESULT SUMMARY (FILE OUTPUT)
+	double twt = sched->getTWT();
+
+	// CONSOLE OUTPUT
+	if (bConsole) {
+		cout << "Solved using " << solverName << " in " << " seconds with TWT = " << twt << "." << endl;
+		cout << *sched;
+	}
+
 
 	// ************ DEBUGGING *****************
-	pSched sched = TCB::prob->getSchedule();
 	sched->lSchedJobsWithSorting(sortJobsByGATC, 1.5);
 	cout << *sched;
 	cout << "TWT = " << sched->getTWT();
-
-	sched->reset();
-	vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
-	sched->lSchedJobsWithSorting(sortJobsByGATC, kappas);
-	cout << *sched;
-	cout << "TWT = " << sched->getTWT();
-	
-	sched->reset();
-	
-	sched->clearJobs();
 
 	return EXIT_SUCCESS;
 }
