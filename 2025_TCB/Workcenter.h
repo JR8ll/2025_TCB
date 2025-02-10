@@ -39,8 +39,9 @@ public:
 	void ensureValidity(Operation* op);
 	void rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait = 0.0);	// indices identify op to be right-shifted, from is the new earliest starting time
 
-	void moveBatch(pBat batch, size_t tgtMac, double newStart);
+	void moveBatch(Batch* batch, size_t tgtMac, double newStart);
 
-	double getTWT() const;	// total weighted tardiness
+	double getTWT() const;		// total weighted tardiness
+	double getMinMSP() const;	// smallest makespan (completion of last batch)
 
 };

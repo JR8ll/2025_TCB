@@ -15,7 +15,7 @@ template<typename T>
 using prioRule = void(*)(std::vector<T>& vec);
 
 template<typename T>
-using prioRuleKappaT = void(*)(std::vector<T>& vec, double kappa, double t);
+using prioRuleKappaT = void(*)(std::vector<T>& vec, double t, double kappa);
 
 class Schedule {
 private:
@@ -53,13 +53,16 @@ public:
 
 	void schedOp(Operation* op, double pWait = 0.0);
 
-	void reset();										// clear all batches/machines and shift all jobs back to unscheduled
-	void clearJobs();									// clears unscheduled + scheduled jobs, operations and their references to products
+	void reset();																										// clear all batches/machines and shift all jobs back to unscheduled
+	void clearJobs();																									// clears unscheduled + scheduled jobs, operations and their references to products
 
-	void lSchedJobs(double pWait = 0.0);				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
-	//void lSchedJobsWithSorting(prioRule<pJob>);			// non-parameter sorting (EDD, SPT, ...)
-	//void lSchedJobsWithSorting(prioRuleKappaT<Job>);	// ATC-like sorting with parameter kappa and t
+	void lSchedFirstJob(double pWait = 0.0);
+	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
+	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
+	void lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
+	void lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0);	// like above with a grid search of kappa values
 
-	double getTWT() const;	// total weighted tardiness
+	double getTWT() const;											// total weighted tardiness
+	double getMinMSP(size_t stgIdx) const;							// smallest makespan of the machines at stage (workcenter)
 
 };

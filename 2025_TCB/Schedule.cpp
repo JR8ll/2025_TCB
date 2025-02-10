@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 
 #include "Schedule.h"
@@ -104,13 +105,46 @@ void Schedule::clearJobs() {
 	scheduledJobs.clear();
 }
 
+void Schedule::lSchedFirstJob(double pWait) {
+	for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {
+		schedOp(&(**unscheduledJobs.begin())[op], pWait);
+	}
+	shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
+}
 void Schedule::lSchedJobs(double pWait) {
 	while(!unscheduledJobs.empty()) {
-		for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {
-			schedOp(&(**unscheduledJobs.begin())[op], pWait);
-		}
-		shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
+		lSchedFirstJob(pWait);
 	}
+}
+
+void Schedule::lSchedJobsWithSorting(prioRule<pJob> rule, double pWait) {
+	rule(unscheduledJobs);
+	lSchedJobs(pWait);
+}
+
+void Schedule::lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, double kappa, double pWait) {
+	double t = 0.0;	// dynamic computation of priority index (increase t)
+	while (!unscheduledJobs.empty()) {
+		t = getMinMSP(0);
+		rule(unscheduledJobs, t, kappa);
+		lSchedFirstJob(pWait);
+	}
+}
+
+void Schedule::lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, const std::vector<double>& kappaGrid, double pWait) {
+	double bestTWT = numeric_limits<double>::max();
+	double bestKappa = 0.0;
+	for (size_t kappa = 0; kappa < kappaGrid.size(); ++kappa) {
+		lSchedJobsWithSorting(rule, kappaGrid[kappa], pWait);
+		double tempTWT = getTWT();
+		if (tempTWT < bestTWT) {
+			bestTWT = tempTWT;
+			bestKappa = kappaGrid[kappa];
+		}
+		reset();
+	}
+	lSchedJobsWithSorting(rule, bestKappa, pWait);
+	TCB::logger.Log(Info, "Found a schedule with best kappa value = " + to_string(bestKappa));
 }
 
 double Schedule::getTWT() const {
@@ -119,4 +153,9 @@ double Schedule::getTWT() const {
 		twt += workcenters[wc]->getTWT();
 	}
 	return twt;
+}
+
+double Schedule::getMinMSP(size_t stgIdx) const {
+	if (stgIdx >= size()) throw out_of_range("Schedule::getMSP() out of range");
+	return workcenters[stgIdx]->getMinMSP();
 }

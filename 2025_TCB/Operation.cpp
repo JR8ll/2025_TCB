@@ -114,8 +114,8 @@ void Operation::setSucc(Operation* suc) { succ = suc; }
 Job* Operation::getJob() const { return job; }
 Batch* Operation::getBatch() const { return batch; }
 
-void Operation::assignToBatch(Batch* batch) {
-	batch = batch;
+void Operation::assignToBatch(Batch* newBatch) {
+	batch = newBatch;
 }
 bool Operation::repairOverlaps() {
 	bool bRepaired = false;
@@ -142,7 +142,7 @@ bool Operation::repairTimeConstraints() {
 	const vector<pair<int, double>>& tcMax = getTcMaxBwd();
 	if (batch != nullptr) {
 		for (size_t i = 0; i < tcMax.size(); ++i) {
-			size_t predIdx = tcMax[i].first - 1;
+			size_t predIdx = tcMax[i].first;
 			Operation* predOp = &(*job)[predIdx];
 			if (predOp != nullptr) {
 				if (predOp->isScheduled()) {
@@ -171,7 +171,7 @@ bool Operation::repairTimeConstraints() {
 
 double Operation::getTWT() const {
 	double twt = 0;
-	if (succ != nullptr && batch != nullptr) {
+	if (succ == nullptr && batch != nullptr) {
 		twt = max(0.0, batch->getC() - job->getD()) * job->getW();
 	}
 	return twt;

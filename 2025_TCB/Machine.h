@@ -47,9 +47,10 @@ public:
 
 	pBat removeBatch(size_t idx);
 	void removeAllBatches();
-	void moveBatch(pBat batch, double newStart);	// move to specific time
+	void moveBatch(Batch* batch, double newStart);	// move to specific time
 
 	void assignToWorkcenter(Workcenter* wc);
 
 	double getTWT() const;	// total weighted tardiness
+	double getMSP() const;	// makespan
 };

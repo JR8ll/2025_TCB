@@ -14,9 +14,14 @@ unsigned TCB::seed = 123456789;
 double TCB::precision = 0.001;
 mt19937 TCB::rng = mt19937(123456789);
 
+static const int ALG_ITERATEDMILP = 1;		// iterated MILP solving
+static const int ALG_LISTSCHEDWTG = 2;		// simple List scheduling approach
+static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
+static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
+
 int main(int argc, char* argv[]) {
 	TCB::logger = Logger();
-	
+
 	Problem p = Problem();
 	TCB::prob = &p;
 
@@ -43,15 +48,34 @@ int main(int argc, char* argv[]) {
 		iTilimSeconds = atoi(argv[4]);
 	}
 
-	pSched sched = TCB::prob->getSchedule();
+	switch (iSolver) {
+	case ALG_ITERATEDMILP:
+		break;
+	case ALG_LISTSCHEDWTG:
+		break;
+	case ALG_BRKGALISTSCH:
+		break;
+	case ALG_BRKGALS2MILP:
+		break;
+	default:
+		TCB::logger.Log(Warning, "Program was executed with no valid algorithm key");
+	} 
 
 
 	// ************ DEBUGGING *****************
-	sched->lSchedJobs();
+	pSched sched = TCB::prob->getSchedule();
+	sched->lSchedJobsWithSorting(sortJobsByGATC, 1.5);
+	cout << *sched;
+	cout << "TWT = " << sched->getTWT();
 
-	cout << *sched;
 	sched->reset();
+	vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
+	sched->lSchedJobsWithSorting(sortJobsByGATC, kappas);
 	cout << *sched;
+	cout << "TWT = " << sched->getTWT();
+	
+	sched->reset();
+	
 	sched->clearJobs();
 
 	return EXIT_SUCCESS;
