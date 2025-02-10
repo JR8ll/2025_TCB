@@ -112,6 +112,14 @@ pBat Machine::removeBatch(size_t idx) {
 	return removedBatch;
 }
 
+void Machine::removeAllBatches() {
+	for (size_t b = 0; b < size(); ++b) {
+		batches[b]->removeAllOps();
+		batches[b]->assignToMachine(nullptr);
+	}
+	batches.clear();
+}
+
 void Machine::moveBatch(pBat batch, double newStart) {
 	size_t fromIdx = batch->getIdx();
 	size_t toIdx = 0;

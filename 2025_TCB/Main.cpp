@@ -50,6 +50,8 @@ int main(int argc, char* argv[]) {
 	sched->lSchedJobs();
 
 	cout << *sched;
+	sched->reset();
+	cout << *sched;
 
 	return EXIT_SUCCESS;
 }
