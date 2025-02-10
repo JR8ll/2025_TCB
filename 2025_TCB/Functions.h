@@ -2,8 +2,10 @@
 
 #include<random>
 
+#include "Solver_GA.h"		// struct GA_params
 #include "Job.h"
 #include "Log.h"
+
 
 using pJob = std::unique_ptr<Job>;
 
@@ -25,7 +27,7 @@ public:
 	const std::string& getMessage() const { return message; }
 };
 
-void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole);
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, GA_params& gaParams);
 
 void sortJobsByD(std::vector<pJob>& unscheduledJobs);									// by due date
 void sortJobsByR(std::vector<pJob>& unscheduledJobs);									// by release time
@@ -38,6 +40,8 @@ bool compJobsByR(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 void shiftJobFromVecToVec(std::vector<pJob>& source, std::vector<pJob>& target, size_t sourceIdx);
 
 double getAvgP(const std::vector<pJob>& unscheduledJobs);
+
+void loadGaParams(GA_params& gaParams, std::string filename);
 
 std::vector<double> getDoubleGrid(double low, double high, double step);
 

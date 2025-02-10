@@ -129,3 +129,45 @@ Info:	Problem initialized from demoProblemInstance.dat.
 Info:	Found a schedule with best kappa value = 1.600000
 Info:	Problem initialized from demoProblemInstance.dat.
 Info:	Found a schedule with best kappa value = 1.600000
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters file not found: GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Solver_GA::solveBRKGA_List_jobBased finished after 1 iterations.
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Solver_GA::solveBRKGA_List_jobBased finished after 132 iterations.

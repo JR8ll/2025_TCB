@@ -17,17 +17,18 @@ class Solver_GA {
 private:
 	bool completed;
 	std::vector<double> bestChromosome;
+	GA_params* params;
 
 public:
-	Solver_GA();
+	Solver_GA(GA_params& params);
 	~Solver_GA();
 
-	double solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds, GA_params& params);
+	double solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds);
 
 	bool hasCompleted();
 	std::vector<double> getBestChromosome();
 
-	GA_params getDefaultParams();
+	static GA_params getDefaultParams();
 
 };
 

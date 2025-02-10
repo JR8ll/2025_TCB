@@ -2,6 +2,7 @@
 
 #include "Functions.h"
 #include "Problem.h"
+#include "Solver_GA.h"
 
 using namespace std;
 using pSched = unique_ptr<Schedule>;
@@ -24,6 +25,7 @@ static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then it
 // argv[3] int describing the solving method to be used
 // argv[4] time limit in seconds
 // argv[5] console output on(=1)/off(=0)
+// argv[6] filename of ga parameters
 
 int main(int argc, char* argv[]) {
 	// PROCESS COMMAND LINE ARGUMENTS
@@ -34,7 +36,8 @@ int main(int argc, char* argv[]) {
 	int iTilimSeconds = 3600;
 	bool bConsole = false;
 	string solverName = "n/a";
-	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole);
+	GA_params gaParams = GA_params();
+	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, gaParams);
 
 	// PREPARE 
 	pSched sched = TCB::prob->getSchedule();
@@ -52,7 +55,11 @@ int main(int argc, char* argv[]) {
 		}
 		break;
 	case ALG_BRKGALISTSCH:
-		solverName = "BRKGA";
+		solverName = "BRKGA"; 
+		{
+			Solver_GA brkga = Solver_GA(gaParams);
+			brkga.solveBRKGA_List_jobBased(*sched.get(), iTilimSeconds);
+		}
 		break;
 	case ALG_BRKGALS2MILP:
 		solverName = "BRKGA_MILP";
@@ -69,11 +76,6 @@ int main(int argc, char* argv[]) {
 		cout << "Solved using " << solverName << " in " << " seconds with TWT = " << twt << "." << endl;
 		cout << *sched;
 	}
-
-	// ************ DEBUGGING *****************
-	sched->lSchedJobsWithSorting(sortJobsByGATC, 1.5);
-	cout << *sched;
-	cout << "TWT = " << sched->getTWT();
 
 	return EXIT_SUCCESS;
 }

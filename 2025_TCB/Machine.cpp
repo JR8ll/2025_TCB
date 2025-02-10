@@ -161,10 +161,12 @@ void Machine::moveBatch(Batch* batch, double newStart) {
 		pBat movingBatch = removeBatch(fromIdx);
 		if (fromIdx < toIdx && !bToTheEnd) {
 			batches.insert(batches.begin() + toIdx - 1, move(movingBatch));
+			batches[toIdx-1]->assignToMachine(this);
 			batches[toIdx-1]->setStart(newStart);
 		}
 		else {
 			batches.insert(batches.begin() + toIdx, move(movingBatch));
+			batches.back()->assignToMachine(this);
 			batches[toIdx]->setStart(newStart);
 		}
 	} else {
