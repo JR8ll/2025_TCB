@@ -47,7 +47,7 @@ public:
 
 	void schedOp(Operation* op, double pWait = 0.0);
 
-	void lSchedJobs(std::vector<pJob>& unscheduled, double pWait);	// List scheduling in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
+	void lSchedJobs(double pWait = 0.0);	// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 
 	double getTWT() const;	// total weighted tardiness
 

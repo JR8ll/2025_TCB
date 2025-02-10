@@ -44,6 +44,11 @@ int main(int argc, char* argv[]) {
 	}
 
 	pSched sched = TCB::prob->getSchedule();
+
+
+	// ************ DEBUGGING *****************
+	sched->lSchedJobs();
+
 	cout << *sched;
 
 	return EXIT_SUCCESS;

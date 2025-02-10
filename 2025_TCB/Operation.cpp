@@ -22,7 +22,7 @@ size_t Operation::getIdxInBatch() const {
 	return batch->findOp(this);
 }
 int Operation::getStg() const { return stg; }
-int Operation::getWorkcenterId() const { return job->getWorkcenterId(stg); };
+int Operation::getWorkcenterId() const { return job->getWorkcenterId(stg-1); };
 
 int Operation::getS() const { return job->getS(); }
 int Operation::getF() const { return job->getF(); }
@@ -43,7 +43,9 @@ double Operation::getC() const {
 	return numeric_limits<double>::max();	// operation has not yet been scheduled
 }
 double Operation::getD() const { return job->getD(); }
-double Operation::getP() const { return job->getP(stg); }
+double Operation::getP() const { 
+	return job->getP(stg-1); 
+}
 double Operation::getR() const { return job->getR(); }
 double Operation::getW() const { return job->getW(); }
 
@@ -94,10 +96,10 @@ Operation* Operation::getPred() const { return pred; }
 Operation* Operation::getSucc() const { return succ; }
 
 const std::vector<std::pair<int, double>>& Operation::getTcMaxBwd() const {
-	return job->getTcMaxBwd(stg);
+	return job->getTcMaxBwd(stg-1);
 }
 const std::vector<std::pair<int, double>>& Operation::getTcMaxFwd() const {
-	return job->getTcMaxFwd(stg);
+	return job->getTcMaxFwd(stg-1);
 }
 
 void Operation::setWait(double wt) { wait = wt; }

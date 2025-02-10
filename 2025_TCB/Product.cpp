@@ -23,7 +23,13 @@ int Product::getWorkcenterId(size_t stgIdx) const {
 	if (stgIdx >= route.size()) throw out_of_range("Product::getWorkcenterId out of range");
 	return route[stgIdx];
 }
-double Product::getP(size_t stgIdx) const { return p[stgIdx]; }
+double Product::getP(size_t stgIdx) const { 
+	return p[stgIdx]; 
+}
+
+void Product::setProcessingTimes(std::vector<double> pTimes) {
+	p = pTimes;
+}
 
 void Product::addTcMax(int first, int second, double duration) {
 	tcMaxBwd[second].push_back(make_pair(first, duration));

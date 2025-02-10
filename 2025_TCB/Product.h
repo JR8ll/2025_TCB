@@ -23,6 +23,7 @@ public:
 	int getWorkcenterId(size_t stgIdx) const;
 	double getP(size_t stgIdx) const;
 
+	void setProcessingTimes(std::vector<double> pTimes);	// add processing times for all stages
 	void addTcMax(int first, int second, double duration);	// adds both backward and forward perspectives
 
 };
