@@ -19,7 +19,7 @@ private:
 	std::string filename;
 
 	std::vector<Product> products;
-	std::vector<pJob> jobs;
+	std::vector<pJob> unscheduledJobs;
 
 	unsigned seed;
 
