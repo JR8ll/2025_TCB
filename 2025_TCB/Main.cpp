@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
 	cout << *sched;
 	sched->reset();
 	cout << *sched;
+	sched->clearJobs();
 
 	return EXIT_SUCCESS;
 }

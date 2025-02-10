@@ -54,6 +54,7 @@ public:
 	void schedOp(Operation* op, double pWait = 0.0);
 
 	void reset();										// clear all batches/machines and shift all jobs back to unscheduled
+	void clearJobs();									// clears unscheduled + scheduled jobs, operations and their references to products
 
 	void lSchedJobs(double pWait = 0.0);				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	//void lSchedJobsWithSorting(prioRule<pJob>);			// non-parameter sorting (EDD, SPT, ...)

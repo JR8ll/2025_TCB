@@ -86,6 +86,23 @@ void Schedule::reset() {
 		}
 	}
 }
+void Schedule::clearJobs() {
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < (*unscheduledJobs[j]).size(); ++o) {	
+			(*unscheduledJobs[j])[o].setPred(nullptr);
+			(*unscheduledJobs[j])[o].setSucc(nullptr);
+		}
+	}
+
+	for (size_t j = 0; j < scheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < (*scheduledJobs[j]).size(); ++o) {
+			(*scheduledJobs[j])[o].setPred(nullptr);
+			(*scheduledJobs[j])[o].setSucc(nullptr);
+		}
+	}
+	unscheduledJobs.clear();
+	scheduledJobs.clear();
+}
 
 void Schedule::lSchedJobs(double pWait) {
 	while(!unscheduledJobs.empty()) {

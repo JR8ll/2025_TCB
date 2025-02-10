@@ -42,12 +42,12 @@ public:
 
 	double getEarliestSlot(double from, double duration) const;
 
-	void addBatch(pBat batch, double start, bool checkvalidity = true);
+	bool addBatch(pBat batch, double start, bool checkvalidity = true);
 	void eraseNullptr(size_t batIdx);
 
 	pBat removeBatch(size_t idx);
 	void removeAllBatches();
-	void moveBatch(pBat batch, double newStart);
+	void moveBatch(pBat batch, double newStart);	// move to specific time
 
 	void assignToWorkcenter(Workcenter* wc);
 

@@ -11,6 +11,9 @@
 using namespace std;
 
 Operation::Operation(Job* j, int stg) : job(j), id(j->getId()), stg(stg), wait(0), batch(nullptr), pred(nullptr), succ(nullptr) {} 
+Operation::~Operation() {
+	resetLinks();
+}
 
 ostream& operator<<(ostream& os, const Operation& op) {
 	os << op.getId() << "." << op.getStg();
@@ -106,6 +109,8 @@ void Operation::setWait(double wt) { wait = wt; }
 void Operation::setPred(Operation* pre) { pred = pre; }
 void Operation::setSucc(Operation* suc) { succ = suc; }
 
+
+
 Job* Operation::getJob() const { return job; }
 Batch* Operation::getBatch() const { return batch; }
 
@@ -170,4 +175,11 @@ double Operation::getTWT() const {
 		twt = max(0.0, batch->getC() - job->getD()) * job->getW();
 	}
 	return twt;
+}
+
+void Operation::resetLinks() {
+	job = nullptr;
+	batch = nullptr;
+	pred = nullptr;
+	succ = nullptr;
 }
