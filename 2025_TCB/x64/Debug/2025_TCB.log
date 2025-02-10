@@ -1,4 +1,51 @@
-﻿  Main.cpp
+﻿  Workcenter.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Solver_GA.cpp
+C:\Users\rocholl\brkgaAPI\src\MTRand.h(257): warning C4800: 'size_t' : forcing value to bool 'true' or 'false' (performance warning)
+c:\users\rocholl\brkgaapi\src\Population.h(69): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
+c:\users\rocholl\brkgaapi\src\Population.h(73): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
+  Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Product.cpp
+Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+  Problem.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Problem.cpp(217): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(261): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(268): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(110): warning C4101: 'exc' : unreferenced local variable
+Problem.cpp(210): warning C4101: 'exc' : unreferenced local variable
+C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+          Problem.cpp(302) : see reference to function template instantiation 'std::unique_ptr<Workcenter,std::default_delete<_Ty>> std::make_unique<Workcenter,size_t,Schedule*>(size_t &&,Schedule *&&)' being compiled
+          with
+          [
+              _Ty=Workcenter
+          ]
+  Operation.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Operation.cpp(129): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(130): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(131): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(155): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(156): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(157): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+  Main.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Machine.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Log.cpp
+  Job.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Functions.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Batch.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Generating Code...
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

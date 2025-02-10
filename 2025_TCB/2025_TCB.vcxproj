@@ -102,8 +102,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +119,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,6 +138,7 @@
     <ClInclude Include="Problem.h" />
     <ClInclude Include="Product.h" />
     <ClInclude Include="Schedule.h" />
+    <ClInclude Include="Solver_GA.h" />
     <ClInclude Include="Workcenter.h" />
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +152,7 @@
     <ClCompile Include="Problem.cpp" />
     <ClCompile Include="Product.cpp" />
     <ClCompile Include="Schedule.cpp" />
+    <ClCompile Include="Solver_GA.cpp" />
     <ClCompile Include="Workcenter.cpp" />
   </ItemGroup>
   <ItemGroup>

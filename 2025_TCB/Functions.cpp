@@ -40,6 +40,26 @@ void sortJobsByGATC(vector<pJob>& unscheduledJobs, double t, double kappa) {
 	sort(unscheduledJobs.begin(), unscheduledJobs.end(), CompJobsByGATC(avgP, t, kappa));
 }
 
+void sortJobsByRK(std::vector<pJob>& unscheduledJobs, const std::vector<double>& chr) {
+	if (unscheduledJobs.size() != chr.size()) throw ExcSched("sortJobsByRK error different sizes of jobs and chromosome");
+
+	vector<pJob> sortedJobs = vector<pJob>(chr.size());
+	vector<pair<double, size_t>> ranking(chr.size());
+	for (size_t j = 0; j < chr.size(); ++j) {
+		ranking[j] = make_pair(chr[j], j);
+	}
+	sort(ranking.begin(), ranking.end());
+	size_t pos = 0;
+	for (auto rank = ranking.begin(); rank != ranking.end(); ++rank) {
+		sortedJobs[pos] = move(unscheduledJobs[rank->second]);	// JENS assure that unscheduled size remains unchanged
+		++pos;
+	}
+
+	for (size_t j = 0; j < chr.size(); ++j) {
+		unscheduledJobs[j] = move(sortedJobs[j]);
+	}
+}
+
 bool compJobsByD(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 	if (a->getD() == b->getD()) {
 		return a->getId() < b->getId();
