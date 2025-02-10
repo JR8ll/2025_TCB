@@ -116,7 +116,7 @@ void Workcenter::ensureValidity(Operation* op) {
 void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait) {
 	// TODO outsource search for best scheduling option from schedOp and rightShift to new method + ensure validity
 	Machine* mac = machines[mIdx].get();
-	pBat bat = mac->getBatch(bIdx);
+	Batch* bat = &(*mac)[bIdx];
 	Operation* op = &(*bat)[jIdx];
 
 	double earliestStart = op->getEarliestStart();
@@ -169,7 +169,7 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 	}
 	else {
 		if (bOnlyOperation) {
-			moveBatch(move(bat), bestMacIdx, tempStart);
+			moveBatch(bat, bestMacIdx, tempStart);
 		}
 		else {
 			pBat newBatch = make_unique<Batch>(machines[bestBatIdx]->getCap());
@@ -182,15 +182,15 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 	ensureValidity(op);
 }
 
-void Workcenter::moveBatch(pBat batch, size_t tgtMac, double newStart) {
+void Workcenter::moveBatch(Batch* batch, size_t tgtMac, double newStart) {
 	size_t batIdx = batch->getIdx();
 	size_t macIdx = batch->getMachine()->getIdx();
-	if (tgtMac == macIdx) {	
-	// same machine
+	if (tgtMac == macIdx) {
+		// same machine
 		return machines[tgtMac]->moveBatch(move(batch), newStart);
 	}
 	// different machine
-	machines[tgtMac]->addBatch(move(batch), newStart);
+	machines[tgtMac]->addBatch(move(machines[macIdx]->getBatch(batIdx)), newStart);
 	machines[macIdx]->eraseNullptr(batIdx);
 }
 
@@ -200,4 +200,15 @@ double Workcenter::getTWT() const {
 		twt += machines[m]->getTWT();
 	}
 	return twt;
+}
+
+double Workcenter::getMinMSP() const {
+	double minMSP = numeric_limits<double>::max();
+	for (size_t m = 0; m < size(); ++m) {
+		double tempMSP = machines[m]->getMSP();
+		if (tempMSP < minMSP) {
+			minMSP = tempMSP;
+		}
+	}
+	return minMSP;
 }

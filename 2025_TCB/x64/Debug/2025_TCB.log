@@ -1,13 +1,4 @@
-﻿  Job.cpp
+﻿  Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  Workcenter.cpp
-  Schedule.cpp
-  Problem.cpp
-  Operation.cpp
-  Main.cpp
-  Machine.cpp
-  Functions.cpp
-  Batch.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

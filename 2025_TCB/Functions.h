@@ -36,6 +36,8 @@ void shiftJobFromVecToVec(std::vector<pJob>& source, std::vector<pJob>& target, 
 
 double getAvgP(const std::vector<pJob>& unscheduledJobs);
 
+std::vector<double> getDoubleGrid(double low, double high, double step);
+
 class CompJobsByGATC {
 public:
 	double avgP;

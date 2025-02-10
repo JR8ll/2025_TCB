@@ -42,3 +42,12 @@ double getAvgP(const vector<pJob>& unscheduledJobs) {
 	return totalP / (double)unscheduledJobs.size();	// TODO check if to be divided by nJobs or nOps
 }
 
+vector<double> getDoubleGrid(double low, double high, double step) {
+	vector<double> grid = vector<double>();
+	while (low <= high + TCB::precision) {
+		grid.push_back(low);
+		low = low + step;
+	}
+	return grid;
+}
+

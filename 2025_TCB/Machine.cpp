@@ -121,7 +121,7 @@ void Machine::removeAllBatches() {
 	batches.clear();
 }
 
-void Machine::moveBatch(pBat batch, double newStart) {
+void Machine::moveBatch(Batch* batch, double newStart) {
 	size_t fromIdx = batch->getIdx();
 	size_t toIdx = 0;
 
@@ -130,9 +130,9 @@ void Machine::moveBatch(pBat batch, double newStart) {
 
 	for (auto it = batches.begin(); it != batches.end(); ++it) {
 		if ((newStart + batch->getP()) <= it->get()->getStart() || 
-			(it->get() == batch.get() && newStart < it->get()->getStart() && newStart + batch->getP() > it->get()->getStart())) {
+			(it->get() == batch && newStart < it->get()->getStart() && newStart + batch->getP() > it->get()->getStart())) {
 			if (it != batches.begin()) {
-				if ((it - 1)->get()->getC() <= newStart + TCB::precision || (it - 1)->get() == batch.get()) {
+				if ((it - 1)->get()->getC() <= newStart + TCB::precision || (it - 1)->get() == batch) {
 					toIdx = it - batches.begin();
 					bGapFound = true;
 					break;
@@ -159,7 +159,6 @@ void Machine::moveBatch(pBat batch, double newStart) {
 
 	if (fromIdx != toIdx) {
 		pBat movingBatch = removeBatch(fromIdx);
-		batches.erase(batches.begin() + fromIdx);
 		if (fromIdx < toIdx && !bToTheEnd) {
 			batches.insert(batches.begin() + toIdx - 1, move(movingBatch));
 			batches[toIdx-1]->setStart(newStart);
@@ -183,4 +182,9 @@ double Machine::getTWT() const {
 		twt += batches[b]->getTWT();
 	}
 	return twt;
+}
+
+double Machine::getMSP() const {
+	if (batches.empty()) return r;
+	return batches.back()->getC();
 }
