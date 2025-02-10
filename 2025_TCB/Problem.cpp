@@ -74,7 +74,8 @@ void Problem::loadFromDat(string filename) {
 	}
 	input >> dummy;	// "];"
 
-	m_B = vector<int>(stages_bSize);
+	vector<int> m_B_temp = vector<int>(stages_bSize);
+	m_B = vector<int>();
 
 	rm = vector<vector<double> >(stgs);
 	for (size_t i = 0; i < stgs; ++i) {
@@ -143,7 +144,19 @@ void Problem::loadFromDat(string filename) {
 	input >> dummy;	// "B=["
 	for (size_t i = 0; i < stages_b.size(); ++i) {
 		input >> dummy;
-		m_B[i] = stoi(dummy);
+		m_B_temp[i] = stoi(dummy);
+	}
+	for (size_t i = 0; i < stgs; ++i) {
+		bool bBatchingStage = false;
+		for (size_t o = 0; o < stages_b.size(); ++o) {
+			if (i + 1 == stages_b[o]) {
+				bBatchingStage = true;	
+				m_B.push_back(m_B_temp[o]);
+			}	
+		} 
+		if (!bBatchingStage) {
+			m_B.push_back(1);
+		}
 	}
 	input >> dummy; // "];"
 
@@ -241,6 +254,7 @@ void Problem::loadFromDat(string filename) {
 	}
 
 	for (size_t f = 0; f < F; ++f) {
+		products[f].setProcessingTimes(pTimes[f]);
 		for (size_t s1 = 0; s1 < tc[f].size(); ++s1) {
 			for (size_t s2 = 0; s2 < tc[f][s1].size(); ++s2) {
 				products[f].addTcMax(s1, s2, tc[f][s1][s2]);
@@ -283,7 +297,7 @@ pair<int, int> Problem::_tokenizeTupel(string tupel) {
 unique_ptr<Schedule> Problem::getSchedule() const {
 	unique_ptr<Schedule> newSchedule = make_unique<Schedule>();
 	// setup machine environment
-	for (size_t wc = 0; wc < F; ++wc) {
+	for (size_t wc = 0; wc < stgs; ++wc) {
 		unique_ptr<Workcenter> newWorkcenter = make_unique<Workcenter>(wc + 1, newSchedule.get());
 		for (size_t m = 0; m < m_o[wc]; ++m) {
 			unique_ptr<Machine> newMachine = make_unique<Machine>(m+1, m_B[m], newWorkcenter.get());

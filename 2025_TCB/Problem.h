@@ -29,11 +29,11 @@ private:
 	int stgs;	// number of stages/workcenters
 	int F;		// number of products (families)
 
-	std::vector<int> stages_1;	// stages (indices) with discrete processing
-	std::vector<int> stages_b;	// stages (indices) with batching
+	std::vector<int> stages_1;	// stages (ids) with discrete processing
+	std::vector<int> stages_b;	// stages (ids) with batching
 
 	std::vector<int> m_o;		// number of machines at stage (workcenter)
-	std::vector<int> m_B;		// batch capacity at batching stage
+	std::vector<int> m_B;		// batch capacity at stage (no discrimination of batching and discrete stages)
 
 	std::vector<std::vector<double>> rm;	// release of machine [stg][mac]
 

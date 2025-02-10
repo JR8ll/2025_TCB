@@ -83,6 +83,7 @@ void Machine::addBatch(pBat batch, double start, bool checkValidity){
 			newBatch->get()->assignToMachine(this);
 			newBatch->get()->setStart(start, checkValidity);	// automatically sets c	
 			bInserted = true;
+			break;
 		}
 		else if ((start + TCB::precision) < it->get()->getC()) {
 			throw ExcSched("Machine::addBatch() infeasible due to overlap");
@@ -94,10 +95,6 @@ void Machine::addBatch(pBat batch, double start, bool checkValidity){
 		batches.back()->assignToMachine(this);
 		batches.back()->setStart(start);
 	}
-
-	batches.push_back(move(batch));
-	batch->assignToMachine(this);
-	batch->setStart(start);
 }
 void Machine::eraseNullptr(size_t batIdx) {
 	if(batIdx >= batches.size()) throw out_of_range("Machine::eraseNullptr() out of range");

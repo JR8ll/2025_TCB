@@ -67,15 +67,15 @@ void Schedule::addJob(pJob job) {
 
 void Schedule::schedOp(Operation* op, double pWait) {
 	int wcIdx = op->getWorkcenterId() - 1;
-	workcenters[wcIdx]->schedOp(op, pWait);
+ 	workcenters[wcIdx]->schedOp(op, pWait);
 }
 
-void Schedule::lSchedJobs(std::vector<pJob>& unscheduled, double pWait) {
-	while(!unscheduled.empty()) {
-		for (size_t op = 0; op < (*unscheduled.begin())->size(); ++op) {
-			schedOp(&(**unscheduled.begin())[op], pWait);
+void Schedule::lSchedJobs(double pWait) {
+	while(!jobs.empty()) {
+		for (size_t op = 0; op < (*jobs.begin())->size(); ++op) {
+			schedOp(&(**jobs.begin())[op], pWait);
 		}
-		shiftJobFromVecToVec(unscheduled, scheduledJobs, 0);
+		shiftJobFromVecToVec(jobs, scheduledJobs, 0);
 	}
 }
 
