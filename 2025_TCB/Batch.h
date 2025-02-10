@@ -20,6 +20,7 @@ private:
 public:
 	Batch();
 	Batch(int cap);
+	~Batch();
 
 	friend std::ostream& operator<<(std::ostream& os, const Batch& batch);
 
@@ -50,7 +51,7 @@ public:
 
 	void assignToMachine(Machine* processor);
 
-	void addOp(Operation* op);
+	bool addOp(Operation* op);
 	void removeOp(Operation* op);
 	void removeAllOps();
 

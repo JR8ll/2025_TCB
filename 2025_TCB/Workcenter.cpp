@@ -94,11 +94,11 @@ void Workcenter::schedOp(Operation* op, double pWait) {
 	Machine* bestMac = machines[bestMacIdx].get();
 	if (!bNewBatch) {
 		Batch* bestBat = &(*bestMac)[bestBatIdx];
-		bestBat->addOp(op);
+		if(!bestBat->addOp(op)) throw ExcSched("Workcenter::schedOp -> op could not be added");
 	} else {
 		pBat newBatch = make_unique<Batch>(bestMac->getCap());
 		newBatch->addOp(op);
-		bestMac->addBatch(move(newBatch), tempStart);
+		if(!bestMac->addBatch(move(newBatch), tempStart)) throw ExcSched("Workcenter::schedOp -> batch could not be added");
 	}
 	ensureValidity(op);
 }

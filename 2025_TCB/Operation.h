@@ -20,6 +20,7 @@ private:
 
 public:
 	Operation(Job* j, int stg); 
+	~Operation();
 
 	friend std::ostream& operator<<(std::ostream& os, const Operation& operation);
 
@@ -63,4 +64,6 @@ public:
 
 	double getTWT() const;
 
+
+	void resetLinks();
 };

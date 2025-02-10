@@ -9,6 +9,7 @@ using namespace std;
 
 Batch::Batch() : machine(nullptr) {}
 Batch::Batch(int cap) : machine(nullptr), cap(cap) {}
+Batch::~Batch() { ops.clear(); }
 
 ostream& operator<<(ostream& os, const Batch& batch) {
 	os << "S" << (int)batch.getStart() << "_C" << (int)batch.getC() << "[";
@@ -93,9 +94,17 @@ void Batch::setCap(int newCap) {
 
 void Batch::assignToMachine(Machine* processor) { machine = processor; };
 
-void Batch::addOp(Operation* op) {
-	ops.push_back(op);
-	op->assignToBatch(this);
+bool Batch::addOp(Operation* op) {
+	if (f == 0 || f == op->getF()) {
+		if (getAvailableCap() >= op->getS()) {
+			f = op->getF();
+			ops.push_back(op);
+			op->assignToBatch(this);
+			return true;
+			// TODO: for safety maybe consider operations being added with availability > batch.start
+		}
+	}
+	return false;
 }
 void Batch::removeOp(Operation* op) {
 	auto it = std::find(ops.begin(), ops.end(), op);

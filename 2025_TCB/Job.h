@@ -18,11 +18,12 @@ private:
 	double d;	// due date
 	double w;	// weight (priority)
 
-	std::shared_ptr<Product> product;
+	Product* product;
 	std::vector<pOp> ops;
 
 public:
 	Job(int id, int s, Product* f, double r, double d, double w);
+	~Job();
 
 	std::unique_ptr<Job> clone() const;	// deep copy
 
@@ -52,8 +53,12 @@ public:
 	void setW(double weight);
 	void setS(int size);
 
+	void setProduct(Product* prod);
+
 	Operation* getOpPtr(size_t stgIdx) const;
 
 	void addOp(pOp op);
 	const std::vector<pOp>& getOps() const;
+
+	void resetLinks();
 };
