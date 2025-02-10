@@ -12,12 +12,13 @@
 
 using namespace std;
 
-Solver_GA::Solver_GA() : completed(false) {
+Solver_GA::Solver_GA(GA_params& parameters) : completed(false) {
 	bestChromosome = vector<double>();
+	params = &parameters;
 }
 Solver_GA::~Solver_GA() {}
 
-double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds, GA_params& params) {
+double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 	auto start = chrono::high_resolution_clock::now();
 	chrono::seconds usedTime;
 	chrono::time_point<chrono::high_resolution_clock> stop;
@@ -26,7 +27,7 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds, G
 	const long unsigned rngSeed = TCB::seed;
 	MTRand rng(rngSeed);
 
-	BRKGA<GaDecoderJobLs, MTRand> algorithm((int)sched.getN(), params.nPop, params.pElt, params.pRpM, params.rhoe, decoder, rng, params.K, params.maxThreads);
+	BRKGA<GaDecoderJobLs, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, params->maxThreads);
 
 	int iterationCounter = 0;
 	do {

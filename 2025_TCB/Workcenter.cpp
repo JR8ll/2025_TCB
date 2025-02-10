@@ -170,6 +170,7 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 	else {
 		if (bOnlyOperation) {
 			moveBatch(bat, bestMacIdx, tempStart);
+
 		}
 		else {
 			pBat newBatch = make_unique<Batch>(machines[bestBatIdx]->getCap());
