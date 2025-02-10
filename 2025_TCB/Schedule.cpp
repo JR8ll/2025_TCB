@@ -147,6 +147,11 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, const std::vecto
 	TCB::logger.Log(Info, "Found a schedule with best kappa value = " + to_string(bestKappa));
 }
 
+void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait) {
+	rule(unscheduledJobs, keys);
+	lSchedJobs(pWait);
+}
+
 double Schedule::getTWT() const {
 	double twt = 0;
 	for (size_t wc = 0; wc < size(); ++wc) {
