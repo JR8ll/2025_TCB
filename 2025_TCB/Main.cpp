@@ -70,7 +70,6 @@ int main(int argc, char* argv[]) {
 		cout << *sched;
 	}
 
-
 	// ************ DEBUGGING *****************
 	sched->lSchedJobsWithSorting(sortJobsByGATC, 1.5);
 	cout << *sched;

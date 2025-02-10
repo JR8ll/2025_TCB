@@ -27,9 +27,10 @@ public:
 
 void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole);
 
-void sortJobsByD(std::vector<pJob>& unscheduledJobs);
-void sortJobsByR(std::vector<pJob>& unscheduledJobs);
-void sortJobsByGATC(std::vector<pJob>& unscheduledJobs, double t, double kappa);
+void sortJobsByD(std::vector<pJob>& unscheduledJobs);									// by due date
+void sortJobsByR(std::vector<pJob>& unscheduledJobs);									// by release time
+void sortJobsByGATC(std::vector<pJob>& unscheduledJobs, double t, double kappa);		// by global ATC
+void sortJobsByRK(std::vector<pJob>& unscheduledJobs, const std::vector<double>& chr);	// by random keys 
 
 bool compJobsByD(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByR(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
