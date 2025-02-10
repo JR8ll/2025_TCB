@@ -1,8 +1,33 @@
 #include <algorithm>
 
 #include "Functions.h"
+#include "Problem.h"
 
 using namespace std;
+
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole) {
+	if (argc > 1) {
+		TCB::prob->loadFromDat(argv[1]);
+	}
+	else {
+		TCB::prob->loadFromDat("debug_data.dat");
+	}
+
+	if (argc > 2) {
+		TCB::seed = atoi(argv[2]);
+		TCB::rng = mt19937(TCB::seed);
+	}
+
+	if (argc > 3) {
+		iSolver = atoi(argv[3]);
+	}
+	if (argc > 4) {
+		iTilimSeconds = atoi(argv[4]);
+	}
+	if (argc > 5) {
+		if (atoi(argv[5]) == 1) bConsole = true;
+	}
+}
 
 void sortJobsByD(vector<pJob>& unscheduledJobs) {
 	sort(unscheduledJobs.begin(), unscheduledJobs.end(), compJobsByD);

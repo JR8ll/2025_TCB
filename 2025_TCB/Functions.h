@@ -25,6 +25,8 @@ public:
 	const std::string& getMessage() const { return message; }
 };
 
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole);
+
 void sortJobsByD(std::vector<pJob>& unscheduledJobs);
 void sortJobsByR(std::vector<pJob>& unscheduledJobs);
 void sortJobsByGATC(std::vector<pJob>& unscheduledJobs, double t, double kappa);
