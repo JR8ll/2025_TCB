@@ -7,7 +7,7 @@ using namespace std;
 
 Schedule::Schedule() {
 	workcenters = vector<pWc>();
-	jobs = vector<pJob>();
+	unscheduledJobs = vector<pJob>();
 	scheduledJobs = vector<pJob>();
 }
 
@@ -22,15 +22,15 @@ ostream& operator<<(ostream& os, const Schedule& sched) {
 Workcenter& Schedule::operator[](size_t idx) { return *workcenters[idx]; }
 Workcenter& Schedule::operator[](size_t idx) const { return *workcenters[idx]; }
 
-Job& Schedule::getJob(size_t idx) { return *jobs[idx]; };
-Job& Schedule::getJob(size_t idx) const { return *jobs[idx]; }
+Job& Schedule::getJob(size_t idx) { return *unscheduledJobs[idx]; };
+Job& Schedule::getJob(size_t idx) const { return *unscheduledJobs[idx]; }
 
 std::unique_ptr<Schedule> Schedule::clone() const {
 	auto newSchedule = make_unique<Schedule>();
 	for (const auto& wc : workcenters) {
 		newSchedule->addWorkcenter(wc->clone(newSchedule.get()));
 	}
-	for (const auto& job : jobs) {
+	for (const auto& job : unscheduledJobs) {
 		newSchedule->addJob(move(job->clone()));
 	}
 	newSchedule->_reconstruct(this);
@@ -45,7 +45,7 @@ void Schedule::_reconstruct(const Schedule* orig) {
 				for (size_t j = 0; j < (*orig)[wc][m][b].size(); ++j) {
 					Operation& op = (*orig)[wc][m][b][j];
 					size_t jobIdx = op.getStg() - 1;
-					(*this)[wc][m][b].addOp(&(*jobs[wc])[jobIdx]);
+					(*this)[wc][m][b].addOp(&(*unscheduledJobs[wc])[jobIdx]);
 				}
 			}
 		}
@@ -53,7 +53,7 @@ void Schedule::_reconstruct(const Schedule* orig) {
 }
 
 size_t Schedule::size() const { return workcenters.size();  }
-size_t Schedule::getN() const { return jobs.size(); }
+size_t Schedule::getN() const { return unscheduledJobs.size(); }
 
 const std::vector<pWc>& Schedule::getWorkcenters() const {
 	return workcenters;
@@ -62,7 +62,7 @@ void Schedule::addWorkcenter(pWc wc) {
 	workcenters.push_back(move(wc));
 }
 void Schedule::addJob(pJob job) {
-	jobs.push_back(move(job));
+	unscheduledJobs.push_back(move(job));
 }
 
 void Schedule::schedOp(Operation* op, double pWait) {
@@ -71,11 +71,11 @@ void Schedule::schedOp(Operation* op, double pWait) {
 }
 
 void Schedule::lSchedJobs(double pWait) {
-	while(!jobs.empty()) {
-		for (size_t op = 0; op < (*jobs.begin())->size(); ++op) {
-			schedOp(&(**jobs.begin())[op], pWait);
+	while(!unscheduledJobs.empty()) {
+		for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {
+			schedOp(&(**unscheduledJobs.begin())[op], pWait);
 		}
-		shiftJobFromVecToVec(jobs, scheduledJobs, 0);
+		shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
 	}
 }
 

@@ -11,10 +11,16 @@ using pJob = std::unique_ptr<Job>;
 using sharedJob = std::shared_ptr<Job>;
 using sharedOp = std::shared_ptr<Operation>;
 
+template<typename T>
+using prioRule = void(*)(std::vector<T>& vec);
+
+template<typename T>
+using prioRuleKappaT = void(*)(std::vector<T>& vec, double kappa, double t);
+
 class Schedule {
 private:
 	std::vector<pWc> workcenters;
-	std::vector<pJob> jobs;
+	std::vector<pJob> unscheduledJobs;
 	std::vector<pJob> scheduledJobs;
 
 	std::vector<sharedOp> unscheduled;
@@ -47,7 +53,11 @@ public:
 
 	void schedOp(Operation* op, double pWait = 0.0);
 
-	void lSchedJobs(double pWait = 0.0);	// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
+	//void reset();	// clear all batches/machines and shift all jobs back to unscheduled
+
+	void lSchedJobs(double pWait = 0.0);				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
+	//void lSchedJobsWithSorting(prioRule<pJob>);			// non-parameter sorting (EDD, SPT, ...)
+	//void lSchedJobsWithSorting(prioRuleKappaT<Job>);	// ATC-like sorting with parameter kappa and t
 
 	double getTWT() const;	// total weighted tardiness
 
