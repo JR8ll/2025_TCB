@@ -48,6 +48,9 @@
     <ClInclude Include="Solver_GA.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="GaDecoder.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Operation.cpp">
@@ -84,6 +87,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Solver_GA.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="GaDecoder.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

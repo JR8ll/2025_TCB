@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClInclude Include="Batch.h" />
     <ClInclude Include="Functions.h" />
+    <ClInclude Include="GaDecoder.h" />
     <ClInclude Include="Job.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="Machine.h" />
@@ -144,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="Batch.cpp" />
     <ClCompile Include="Functions.cpp" />
+    <ClCompile Include="GaDecoder.cpp" />
     <ClCompile Include="Job.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Machine.cpp" />

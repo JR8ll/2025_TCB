@@ -17,6 +17,9 @@ using prioRule = void(*)(std::vector<T>& vec);
 template<typename T>
 using prioRuleKappaT = void(*)(std::vector<T>& vec, double t, double kappa);
 
+template<typename T>
+using prioRuleKeySet = void(*)(std::vector<T>& vec, const std::vector<double>& keys);
+
 class Schedule {
 private:
 	std::vector<pWc> workcenters;
@@ -61,6 +64,7 @@ public:
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
 	void lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
 	void lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0);	// like above with a grid search of kappa values
+	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
 
 	double getTWT() const;											// total weighted tardiness
 	double getMinMSP(size_t stgIdx) const;							// smallest makespan of the machines at stage (workcenter)
