@@ -10,6 +10,7 @@ Schedule::Schedule() {
 	workcenters = vector<pWc>();
 	unscheduledJobs = vector<pJob>();
 	scheduledJobs = vector<pJob>();
+	problem = nullptr;
 }
 
 ostream& operator<<(ostream& os, const Schedule& sched) {
@@ -56,6 +57,21 @@ void Schedule::_reconstruct(const Schedule* orig) {
 size_t Schedule::size() const { return workcenters.size();  }
 size_t Schedule::getN() const { return unscheduledJobs.size(); }
 
+int Schedule::getCapAtStageIdx(size_t stgIdx) const {
+	if (stgIdx >= size()) throw out_of_range("Schedule::getCapAtStageIdx() out of range");
+	return (*workcenters[stgIdx])[0].getCap();
+}
+
+const vector<int> Schedule::getBatchingStages() const {
+	vector<int> batchingStages = vector<int>();
+	for (size_t o = 0; o < size(); ++o) {
+		if ((*workcenters[o])[0].getCap() > 1) {	// assumption: parallel identical machines
+			batchingStages.push_back(o + 1);
+		}
+	}
+	return batchingStages;
+}
+
 const std::vector<pWc>& Schedule::getWorkcenters() const {
 	return workcenters;
 }
@@ -69,6 +85,10 @@ void Schedule::addJob(pJob job) {
 void Schedule::schedOp(Operation* op, double pWait) {
 	int wcIdx = op->getWorkcenterId() - 1;
  	workcenters[wcIdx]->schedOp(op, pWait);
+}
+
+void Schedule::setProblemRef(Problem* prob) {
+	problem = prob;
 }
 
 void Schedule::reset() {

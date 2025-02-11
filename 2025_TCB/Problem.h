@@ -66,7 +66,7 @@ public:
 
 	std::pair<int, int> _tokenizeTupel(std::string tupel);
 
-	std::unique_ptr<Schedule> getSchedule() const;	// machine environment + jobs to be scheduled
+	std::unique_ptr<Schedule> getSchedule();	// machine environment + jobs to be scheduled
 
 };
 

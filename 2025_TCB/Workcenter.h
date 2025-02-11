@@ -3,11 +3,10 @@
 #include<memory>
 #include<vector>
 
+#include "Common_aliases.h"
 #include "Machine.h";
 
 class Schedule;
-
-using pMac = std::unique_ptr<Machine>;
 
 class Workcenter {
 private:

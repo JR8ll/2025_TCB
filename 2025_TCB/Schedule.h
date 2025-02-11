@@ -3,22 +3,11 @@
 #include<memory>
 #include<vector>
 
+#include "Common_aliases.h"
 #include "Job.h"
 #include "Workcenter.h"
 
-using pWc = std::unique_ptr<Workcenter>;
-using pJob = std::unique_ptr<Job>;
-using sharedJob = std::shared_ptr<Job>;
-using sharedOp = std::shared_ptr<Operation>;
-
-template<typename T>
-using prioRule = void(*)(std::vector<T>& vec);
-
-template<typename T>
-using prioRuleKappaT = void(*)(std::vector<T>& vec, double t, double kappa);
-
-template<typename T>
-using prioRuleKeySet = void(*)(std::vector<T>& vec, const std::vector<double>& keys);
+class Problem;
 
 class Schedule {
 private:
@@ -28,6 +17,7 @@ private:
 
 	std::vector<sharedOp> unscheduled;
 	std::vector<sharedOp> scheduled;
+	Problem* problem;
 
 public:
 	Schedule();
@@ -50,11 +40,17 @@ public:
 	size_t size() const;	// number of workcenters
 	size_t getN() const;	// number of jobs considered
 
+	int getCapAtStageIdx(size_t stgIdx) const;		// capacity (assumption: parallel identical machines)
+
+	const std::vector<int> getBatchingStages() const;
+
 	const std::vector<pWc>& getWorkcenters() const;
 	void addWorkcenter(pWc wc);
 	void addJob(pJob job);
 
 	void schedOp(Operation* op, double pWait = 0.0);
+
+	void setProblemRef(Problem* prob);
 
 	void reset();																										// clear all batches/machines and shift all jobs back to unscheduled
 	void clearJobs();																									// clears unscheduled + scheduled jobs, operations and their references to products

@@ -54,6 +54,9 @@
     <ClInclude Include="Solver_MILP.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="Common_aliases.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Operation.cpp">
