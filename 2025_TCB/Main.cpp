@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 		solverName = "DecompMILP";
 		{
 			Solver_MILP cplex = Solver_MILP();
-			cplex.solveDecompositionMILP(sched.get(), 10, iTilimSeconds);	
+			cplex.solveDecompJobBasedMILP(sched.get(), 4, iTilimSeconds, sortJobsByGATC, 0.5);	
 		}
 		break;
 	case ALG_LISTSCHEDATC: 

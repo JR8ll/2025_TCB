@@ -40,3 +40,23 @@ Info:	Problem initialized from demoProblemInstance.dat.
 Warning:	GA parameters filename not provided (default parameters initialized.)
 Info:	Problem initialized from demoProblemInstance.dat.
 Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 10 at stage 1
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 10 at stage 1

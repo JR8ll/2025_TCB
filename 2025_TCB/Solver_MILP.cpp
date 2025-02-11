@@ -18,8 +18,17 @@ using IloBoolArray2 = IloArray<IloBoolArray>;
 Solver_MILP::Solver_MILP() {}
 Solver_MILP::~Solver_MILP() {}
 
-double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cplexTilim) {
+double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim) {
 	if (schedule->getProblem() == nullptr) throw ExcSched("solveDecompositionMILP missing problem reference");
+
+	vector<pJob> consideredJobs = vector<pJob>();
+	for (size_t j = 0; j < nDash; ++j) {
+		try {
+			consideredJobs.push_back(move(schedule->get_pJob(0)));
+		} catch (const out_of_range& ex) {
+			break;	// all jobs considered
+		}
+	}
 
 	IloEnv env;
 
@@ -31,7 +40,7 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 
 	int nProducts = schedule->getProblem()->getF();
 	int nStages = schedule->size();
-	int nJobs = schedule->getN();
+	int nJobs = consideredJobs.size();
 
 	IloIntTupleSet stageMachine(env, 2);
 	for (int o = 0; o < nStages; ++o) {
@@ -104,10 +113,10 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 	IloIntArray f(env);		// f[Jobs] jobs´ products or families
 
 	for (int j = 0; j < nJobs; ++j) {
-		d.add(schedule->getJob(j).getD());
-		r.add(schedule->getJob(j).getR());
-		w.add(schedule->getJob(j).getW());
-		f.add(schedule->getJob(j).getF());
+		d.add(consideredJobs[j]->getD());
+		r.add(consideredJobs[j]->getR());
+		w.add(consideredJobs[j]->getW());
+		f.add(consideredJobs[j]->getF());
 	}
 
 	IloNumArray2 p(env);	// p[Products][Stages] processing times
@@ -606,7 +615,7 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 			// no batching at this stages
 			for (int j = 0; j < nJobs; ++j) {
 				pBat newSingleBatch = make_unique<Batch>(schedule->getCapAtStageIdx(stg));	// assumption: parallel identical machines
-				newSingleBatch->addOp(&schedule->getJob(j)[stg]);
+				newSingleBatch->addOp(consideredJobs[j]->getOpPtr(stg));
 				int macIdx;
 				for (int mac = 0; mac < (*schedule)[stg].size(); ++mac) {
 					IloNum val = cplex.getValue(u[j][mapStgMac[{stg, mac}]]);		// u[j][stgMac]	: machine assignment
@@ -673,7 +682,7 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 					for (int mac = 0; mac < (*schedule)[stg].size(); ++mac) {
 						IloNum xJBOL = cplex.getValue(x[j][b][mapStgMac[{stg, mac}]]);
 						if (xJBOL >= 1 - TCB::precision) {
-							if (!newBatches[mac][b]->addOp(&schedule->getJob(j)[stg])) {
+							if (!newBatches[mac][b]->addOp(consideredJobs[j]->getOpPtr(stg))) {
 								throw ExcSched("Could not add op to batch (invalid solution?), SolverMILP::initModel()");
 							}
 						}
@@ -705,13 +714,34 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 		}
 	}
 
-	while (schedule->getN() > 0) {
-		schedule->markAsScheduled(0);
+	while (consideredJobs.size() > 0) {
+		schedule->markAsScheduled(move(consideredJobs[0]));
+		consideredJobs.erase(consideredJobs.begin());
 	}
 
 	double bestObjectiveValue = cplex.getBestObjValue();
 	env.end();
 	return bestObjectiveValue;
+}
+
+double Solver_MILP::solveDecompJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim, prioRuleKappa<pJob> rule, double kappa)
+{	
+	double t = schedule->getMinMSP(0);
+	double twt = numeric_limits<double>::max();
+	
+	while (schedule->getN() > 0) {
+		// DYNAMIC SORTING
+		if (rule != nullptr) {
+			schedule->sortUnscheduled(rule, kappa);
+		}
+
+		// SOLVE
+		twt = solveJobBasedMILP(schedule, nDash, cplexTilim);
+
+		// UPDATE PARAMETERS
+		t = schedule->getMinMSP(0);
+	}
+	return twt;
 }
 
 

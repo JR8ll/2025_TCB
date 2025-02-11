@@ -27,6 +27,13 @@ Workcenter& Schedule::operator[](size_t idx) const { return *workcenters[idx]; }
 Job& Schedule::getJob(size_t idx) { return *unscheduledJobs[idx]; };
 Job& Schedule::getJob(size_t idx) const { return *unscheduledJobs[idx]; }
 
+pJob Schedule::get_pJob(size_t idx) {
+	if (idx >= unscheduledJobs.size()) throw out_of_range("Schedule::get_pJob() out of range");
+	pJob returnJob = move(unscheduledJobs[idx]);
+	unscheduledJobs.erase(unscheduledJobs.begin() + idx);
+	return returnJob;
+}
+
 std::unique_ptr<Schedule> Schedule::clone() const {
 	auto newSchedule = make_unique<Schedule>();
 	for (const auto& wc : workcenters) {
@@ -138,9 +145,21 @@ void Schedule::clearJobs() {
 	scheduledJobs.clear();
 }
 
+void Schedule::sortUnscheduled(prioRule<pJob> rule) {
+	rule(unscheduledJobs);
+}
+
+void Schedule::sortUnscheduled(prioRuleKappa<pJob> rule, double kappa) {
+	double t = getMinMSP(0);
+	rule(unscheduledJobs, t, kappa);
+}
+
 void Schedule::markAsScheduled(size_t jobIdx) {
 	if (jobIdx >= unscheduledJobs.size()) throw out_of_range("Schedule::markAsScheduled() out of range");
 	shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, jobIdx);
+}
+void Schedule::markAsScheduled(pJob scheduledJob) {
+	scheduledJobs.push_back(move(scheduledJob));
 }
 
 void Schedule::lSchedFirstJob(double pWait) {
@@ -160,7 +179,7 @@ void Schedule::lSchedJobsWithSorting(prioRule<pJob> rule, double pWait) {
 	lSchedJobs(pWait);
 }
 
-void Schedule::lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, double kappa, double pWait) {
+void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait) {
 	double t = 0.0;	// dynamic computation of priority index (increase t)
 	while (!unscheduledJobs.empty()) {
 		t = getMinMSP(0);
@@ -169,7 +188,7 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, double kappa, do
 	}
 }
 
-void Schedule::lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, const std::vector<double>& kappaGrid, double pWait) {
+void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait) {
 	double bestTWT = numeric_limits<double>::max();
 	double bestKappa = 0.0;
 	for (size_t kappa = 0; kappa < kappaGrid.size(); ++kappa) {

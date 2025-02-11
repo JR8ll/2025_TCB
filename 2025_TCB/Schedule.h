@@ -30,6 +30,8 @@ public:
 	Job& getJob(size_t idx);
 	Job& getJob(size_t idx) const;
 
+	pJob get_pJob(size_t idx);
+
 	std::unique_ptr<Schedule> clone() const;
 	// Deep copy of Schedule, Workcenters and Jobs. 
 	// Shallow copy of Machines (no batches are copied)
@@ -57,14 +59,18 @@ public:
 	void reset();																										// clear all batches/machines and shift all jobs back to unscheduled
 	void clearJobs();																									// clears unscheduled + scheduled jobs, operations and their references to products
 
+	void sortUnscheduled(prioRule<pJob> rule);
+	void sortUnscheduled(prioRuleKappa<pJob> rule, double kappa);
+	
 	void markAsScheduled(size_t jobIdx);
+	void markAsScheduled(pJob scheduledJob);																			// adds a job to the set of scheduled jobs
 
 	// LIST SCHEDULING
 	void lSchedFirstJob(double pWait = 0.0);
 	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
-	void lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
-	void lSchedJobsWithSorting(prioRuleKappaT<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0);	// like above with a grid search of kappa values
+	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
+	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0);	// like above with a grid search of kappa values
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
 
 	double getTWT() const;											// total weighted tardiness
