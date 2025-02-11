@@ -138,6 +138,11 @@ void Schedule::clearJobs() {
 	scheduledJobs.clear();
 }
 
+void Schedule::markAsScheduled(size_t jobIdx) {
+	if (jobIdx >= unscheduledJobs.size()) throw out_of_range("Schedule::markAsScheduled() out of range");
+	shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, jobIdx);
+}
+
 void Schedule::lSchedFirstJob(double pWait) {
 	for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {
 		schedOp(&(**unscheduledJobs.begin())[op], pWait);

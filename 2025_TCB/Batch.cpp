@@ -7,8 +7,8 @@
 
 using namespace std;
 
-Batch::Batch() : machine(nullptr) {}
-Batch::Batch(int cap) : machine(nullptr), cap(cap) {}
+Batch::Batch() : machine(nullptr), cap(0), start(0), f(0), c(0) {}
+Batch::Batch(int cap) : machine(nullptr), cap(cap), start(0), f(0), c(0) {}
 Batch::~Batch() { ops.clear(); }
 
 ostream& operator<<(ostream& os, const Batch& batch) {
