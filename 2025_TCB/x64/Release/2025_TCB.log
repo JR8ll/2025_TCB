@@ -1,23 +1,30 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Workcenter.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Batch.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Solver_MILP.cpp
-C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(3428): warning C4996: 'IloCplex::PresolveCallbackI::~PresolveCallbackI': was declared deprecated
-          C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
-          This diagnostic occurred in the compiler generated function 'void *IloCplex::PresolveCallbackI::__delDtor(unsigned int)'
-          C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
-  Solver_GA.cpp
-C:\Users\rocholl\brkgaAPI\src\MTRand.h(257): warning C4800: 'size_t' : forcing value to bool 'true' or 'false' (performance warning)
-c:\users\rocholl\brkgaapi\src\Population.h(69): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
-c:\users\rocholl\brkgaapi\src\Population.h(73): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
+  Functions.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Schedule.cpp
+  GaDecoder.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Product.cpp
-Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+  Job.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Log.cpp
+  Machine.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Main.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Operation.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Operation.cpp(129): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(130): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(131): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(155): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(156): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(157): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
   Problem.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -32,31 +39,25 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): war
           [
               _Ty=Workcenter
           ]
-  Operation.cpp
+  Product.cpp
+Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+  Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Operation.cpp(129): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(130): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(131): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(155): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(156): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(157): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-  Main.cpp
+  Solver_GA.cpp
+C:\Users\rocholl\brkgaAPI\src\MTRand.h(257): warning C4800: 'size_t' : forcing value to bool 'true' or 'false' (performance warning)
+c:\users\rocholl\brkgaapi\src\Population.h(69): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
+c:\users\rocholl\brkgaapi\src\Population.h(73): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Machine.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Solver_MILP.cpp
+C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(3428): warning C4996: 'IloCplex::PresolveCallbackI::~PresolveCallbackI': was declared deprecated
+          C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
+          This diagnostic occurred in the compiler generated function 'void *IloCplex::PresolveCallbackI::__delDtor(unsigned int)'
+          C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
+  Workcenter.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Log.cpp
-  Job.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  GaDecoder.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Functions.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Batch.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Generating Code...
-  2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe
+  Generating code
+  Finished generating code
+  2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Release\2025_TCB.exe
