@@ -102,13 +102,17 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;IL_STD;_LIB;_CRT_SECURE_NO_WARNINGS;BOOST_NO_CX11_TEMPLATE_ALIASES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;C:\ILOG_1271\concert\include;C:\ILOG_1271\cplex\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>true</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>C:\ILOG_1271\concert\lib\x64_windows_vs2013\stat_mda\concert.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\cplex1271.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\ilocplex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -117,9 +121,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;IL_STD;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\ILOG_1271\cplex\include;C:\ILOG_1271\concert\include;C:\Users\rocholl\brkgaAPI\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,6 +145,7 @@
     <ClInclude Include="Product.h" />
     <ClInclude Include="Schedule.h" />
     <ClInclude Include="Solver_GA.h" />
+    <ClInclude Include="Solver_MILP.h" />
     <ClInclude Include="Workcenter.h" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +161,7 @@
     <ClCompile Include="Product.cpp" />
     <ClCompile Include="Schedule.cpp" />
     <ClCompile Include="Solver_GA.cpp" />
+    <ClCompile Include="Solver_MILP.cpp" />
     <ClCompile Include="Workcenter.cpp" />
   </ItemGroup>
   <ItemGroup>
