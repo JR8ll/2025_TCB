@@ -62,6 +62,8 @@ public:
 	int getStgs() const;
 	int getF() const;
 
+	Product* getProduct(size_t productIdx);
+
 	void loadFromDat(std::string filename);
 
 	std::pair<int, int> _tokenizeTupel(std::string tupel);

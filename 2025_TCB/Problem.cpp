@@ -21,6 +21,12 @@ int Problem::getN() const { return n; }
 int Problem::getStgs() const { return stgs; }
 int Problem::getF() const { return F; }
 
+Product* Problem::getProduct(size_t productIdx) {
+	if (productIdx >= products.size()) throw out_of_range("Problem::getProduct() out of range");
+	return &(products[productIdx]);
+
+}
+
 void Problem::loadFromDat(string filename) {
 	this->filename = filename;
 	ifstream input(filename);

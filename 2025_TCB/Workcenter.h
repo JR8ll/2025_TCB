@@ -28,6 +28,7 @@ public:
 	size_t findMachine(const Machine* mac) const;	// returns index of mac
 	
 	int getId() const;
+	int getCap() const;		// assumption: parallel identical machines
 
 	Schedule* getSchedule() const;
 	const std::vector<pMac>& getMachines() const;

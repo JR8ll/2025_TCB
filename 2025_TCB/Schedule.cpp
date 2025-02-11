@@ -71,6 +71,15 @@ const vector<int> Schedule::getBatchingStages() const {
 	}
 	return batchingStages;
 }
+const std::vector<int> Schedule::getDiscreteStages() const {
+	vector<int> discreteStages = vector<int>();
+	for (size_t o = 0; o < size(); ++o) {
+		if ((*workcenters[o])[0].getCap() <= 1) {	// assumption: parallel identical machines
+			discreteStages.push_back(o + 1);
+		}
+	}
+	return discreteStages;
+}
 
 const std::vector<pWc>& Schedule::getWorkcenters() const {
 	return workcenters;
@@ -85,6 +94,10 @@ void Schedule::addJob(pJob job) {
 void Schedule::schedOp(Operation* op, double pWait) {
 	int wcIdx = op->getWorkcenterId() - 1;
  	workcenters[wcIdx]->schedOp(op, pWait);
+}
+
+Problem* Schedule::getProblem() const {
+	return problem;
 }
 
 void Schedule::setProblemRef(Problem* prob) {
