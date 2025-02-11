@@ -40,6 +40,11 @@ size_t Workcenter::findMachine(const Machine* mac) const {
 }
 
 int Workcenter::getId() const { return id; }
+
+int Workcenter::getCap() const {
+	if (machines.empty()) return 0;
+	return machines[0]->getCap();
+}
  
 Schedule* Workcenter::getSchedule() const {
 	return schedule;

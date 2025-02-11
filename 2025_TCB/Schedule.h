@@ -43,6 +43,7 @@ public:
 	int getCapAtStageIdx(size_t stgIdx) const;		// capacity (assumption: parallel identical machines)
 
 	const std::vector<int> getBatchingStages() const;
+	const std::vector<int> getDiscreteStages() const;
 
 	const std::vector<pWc>& getWorkcenters() const;
 	void addWorkcenter(pWc wc);
@@ -50,11 +51,13 @@ public:
 
 	void schedOp(Operation* op, double pWait = 0.0);
 
+	Problem* getProblem() const;
 	void setProblemRef(Problem* prob);
 
 	void reset();																										// clear all batches/machines and shift all jobs back to unscheduled
 	void clearJobs();																									// clears unscheduled + scheduled jobs, operations and their references to products
 
+	// LIST SCHEDULING
 	void lSchedFirstJob(double pWait = 0.0);
 	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
