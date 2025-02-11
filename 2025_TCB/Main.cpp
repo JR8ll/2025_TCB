@@ -3,6 +3,7 @@
 #include "Functions.h"
 #include "Problem.h"
 #include "Solver_GA.h"
+#include "Solver_MILP.h"
 
 using namespace std;
 using pSched = unique_ptr<Schedule>;
@@ -46,6 +47,10 @@ int main(int argc, char* argv[]) {
 	switch (iSolver) {
 	case ALG_ITERATEDMILP:
 		solverName = "DecompMILP";
+		{
+			Solver_MILP cplex = Solver_MILP();
+			cplex.solveDecompositionMILP(sched.get(), 10, iTilimSeconds);	
+		}
 		break;
 	case ALG_LISTSCHEDATC: 
 		solverName = "ListSchedGATC";

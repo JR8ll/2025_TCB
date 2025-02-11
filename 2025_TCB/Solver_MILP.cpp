@@ -29,10 +29,14 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 	IloInt G = 99999;	// TODO compute
 	IloInt m = schedule->size();
 
+	int nProducts = schedule->getProblem()->getF();
+	int nStages = schedule->size();
+	int nJobs = schedule->getN();
+
 	IloIntTupleSet stageMachine(env, 2);
-	for (int o = 0; o < o; ++o) {
-		for (int i = 0; i < (*schedule)[o].size(); ++i) {
-			stageMachine.add(IloIntArray(env, 2, o, i));
+	for (int o = 0; o < nStages; ++o) {
+		for (int l = 0; l < (*schedule)[l].size(); ++l) {
+			stageMachine.add(IloIntArray(env, 2, o, l));
 		}
 	}
 	map<pair<int, int>, int> mapStgMac = map<pair<int, int>, int>();	// for access to tuple "stageMachine"
@@ -50,9 +54,7 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 		}
 	}
 
-	int nProducts = schedule->getProblem()->getF();
-	int nStages = schedule->size();
-	int nJobs = schedule->getN();
+
 
 	IloIntArray3 B_iob(env);	// number of jobs assigned to preformed Batch[Products][Stages][Batches]
 	IloNumArray3 S_iob(env);	// start times of preformed Batch[Products][Stages][Batches]	
@@ -109,19 +111,19 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 	}
 
 	IloNumArray2 p(env);	// p[Products][Stages] processing times
-	for (int f = 0; f < nProducts; ++f) {
+	for (int i = 0; i < nProducts; ++i) {
 		p.add(IloNumArray(env, nStages));
 		for (int o = 0; o < nStages; ++o) {
-			p[f][o] = schedule->getProblem()->getProduct(f)->getP(o); 
+			p[i][o] = schedule->getProblem()->getProduct(i)->getP(o); 
 		}
 	}
 
 	IloNumArray3 tc(env);	// tc[Products][Stages][Stages] time constraints
-	for (int f = 0; f < nProducts; ++f) {
+	for (int i = 0; i < nProducts; ++i) {
 		tc.add(IloNumArray2(env));
 		for (int o1 = 0; o1 < nStages; ++o1) {
-			tc[f].add(IloNumArray(env, nStages));
-			const vector<pair<int, double>>& tcMaxFwd = schedule->getProblem()->getProduct(f)->getTcMaxFwd(o1);
+			tc[i].add(IloNumArray(env, nStages));
+			const vector<pair<int, double>>& tcMaxFwd = schedule->getProblem()->getProduct(i)->getTcMaxFwd(o1);
 			for (size_t o2 = 0; o2 < nStages; ++o2) {
 				double tcDuration = 999999;	// TODO define INF
 				for (auto it = tcMaxFwd.begin(); it != tcMaxFwd.end(); ++it) {
@@ -129,7 +131,7 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 						tcDuration = it->second;
 					}
 				}
-				tc[f][o1][o2] = (IloNum)tcDuration;
+				tc[i][o1][o2] = (IloNum)tcDuration;
 			}
 		}
 	}
@@ -151,14 +153,14 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 	}
 
 	IloBoolVarArray3 y(env);	// y[Products][Batches][<StageMachine>]
-	for (int f = 0; f < nProducts; ++f) {
+	for (int i = 0; i < nProducts; ++i) {
 		y.add(IloBoolVarArray2(env));
 		for (int b = 0; b < nJobs; ++b) {
-			y[f].add(IloBoolVarArray(env, stageMachine.getCardinality()));
+			y[i].add(IloBoolVarArray(env, stageMachine.getCardinality()));
 			for (int k = 0; k < stageMachine.getCardinality(); ++k) {
-				y[f][b][k] = IloBoolVar(env);
-				string varName = "y_" + to_string(f) + "," + to_string(b) + "," + to_string(k);
-				y[f][b][k].setName(varName.c_str());
+				y[i][b][k] = IloBoolVar(env);
+				string varName = "y_" + to_string(i) + "," + to_string(b) + "," + to_string(k);
+				y[i][b][k].setName(varName.c_str());
 			}
 		}
 	}
@@ -651,6 +653,12 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 			}
 			int capacity = schedule->getCapAtStageIdx(batchingStageIndex);
 			vector<vector<pBat>> newBatches = vector<vector<pBat>>((*schedule)[stg].size());
+			for (size_t l = 0; l < ((*schedule)[stg].size()); ++l) {
+				for (size_t b = 0; b < nJobs; ++b) {
+					newBatches[l].push_back(make_unique<Batch>(capacity));
+				}
+			}
+				
 			for (int o = 0; o < (*schedule)[stg].size(); ++o) {
 				newBatches[o].resize(nJobs);
 			}
@@ -681,7 +689,9 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 						if (xJBOL >= 1 - TCB::precision) {
 							IloNum sBOL = cplex.getValue(S[b][mapStgMac[{stg, mac}]]);
 							try {
-								(*schedule)[stg][mac].addBatch(move(newBatches[mac][b]), sBOL); //  preformed.at(stg).at(mac).addBatch(newBatches[mac][b], sBOL);
+								if (newBatches[mac][b] != nullptr) {
+									(*schedule)[stg][mac].addBatch(move(newBatches[mac][b]), (double)sBOL);
+								}	 
 							}
 							catch (ExcSched& e) {
 								TCB::logger.Log(Error, e.getMessage());
@@ -694,6 +704,11 @@ double Solver_MILP::solveDecompositionMILP(Schedule* schedule, int nDash, int cp
 			}
 		}
 	}
+
+	while (schedule->getN() > 0) {
+		schedule->markAsScheduled(0);
+	}
+
 	double bestObjectiveValue = cplex.getBestObjValue();
 	env.end();
 	return bestObjectiveValue;
