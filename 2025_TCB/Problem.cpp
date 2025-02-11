@@ -295,7 +295,7 @@ pair<int, int> Problem::_tokenizeTupel(string tupel) {
 	return ret;
 }
 
-unique_ptr<Schedule> Problem::getSchedule() const {
+unique_ptr<Schedule> Problem::getSchedule() {
 	unique_ptr<Schedule> newSchedule = make_unique<Schedule>();
 	// setup machine environment
 	for (size_t wc = 0; wc < stgs; ++wc) {
@@ -312,6 +312,7 @@ unique_ptr<Schedule> Problem::getSchedule() const {
 		newSchedule->addJob(unscheduledJobs[j]->clone());
 	}
 
+	newSchedule->setProblemRef(this);
 	return newSchedule;
 }
 

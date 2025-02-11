@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Batch.h" />
+    <ClInclude Include="Common_aliases.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="GaDecoder.h" />
     <ClInclude Include="Job.h" />

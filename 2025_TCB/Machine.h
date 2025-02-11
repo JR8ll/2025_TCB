@@ -4,10 +4,9 @@
 #include <vector>
 
 #include "Batch.h"
+#include "Common_aliases.h"
 
 class Workcenter;
-
-using pBat = std::unique_ptr<Batch>;
 
 class Machine {
 private:

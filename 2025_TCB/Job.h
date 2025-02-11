@@ -4,10 +4,9 @@
 #include<vector>
 
 #include "Operation.h";
+#include "Common_aliases.h"
 
 class Product;
-
-using pOp = std::unique_ptr<Operation>;
 
 class Job {
 private:
