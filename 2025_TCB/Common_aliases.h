@@ -12,7 +12,7 @@ template<typename T>
 using prioRule = void(*)(std::vector<T>& vec);
 
 template<typename T>
-using prioRuleKappaT = void(*)(std::vector<T>& vec, double t, double kappa);
+using prioRuleKappa = void(*)(std::vector<T>& vec, double t, double kappa);
 
 template<typename T>
 using prioRuleKeySet = void(*)(std::vector<T>& vec, const std::vector<double>& keys);
