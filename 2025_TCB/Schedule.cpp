@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <map>
 
 #include "Schedule.h"
 #include "Functions.h"
@@ -152,6 +153,38 @@ void Schedule::sortUnscheduled(prioRule<pJob> rule) {
 void Schedule::sortUnscheduled(prioRuleKappa<pJob> rule, double kappa) {
 	double t = getMinMSP(0);
 	rule(unscheduledJobs, t, kappa);
+}
+
+void Schedule::updateWaitingTimes() {
+	for (size_t wc = 0; wc < size(); ++wc) {
+		workcenters[wc]->updateWaitingTimes();
+	}
+}
+
+void Schedule::mimicWaitingTimes(const Schedule* wtSched) {
+	map<pair<int, int>, double> mapWait = map<pair<int, int>, double>();	// <job id, stage id>, waiting time 
+	for (size_t wc = 0; wc < wtSched->size(); ++wc) {
+		for (size_t m = 0; m < (*wtSched)[wc].size(); ++m) {
+			for (size_t b = 0; b < (*wtSched)[wc][m].size(); ++b) {
+				for (size_t op = 0; op < (*wtSched)[wc][m][b].size(); ++op) {
+					mapWait.insert(make_pair(make_pair((*wtSched)[wc][m][b][op].getId(), (*wtSched)[wc][m][b][op].getStg()), (*wtSched)[wc][m][b][op].getWait()));
+				}
+			}
+		}
+	}
+
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < unscheduledJobs[j]->size(); ++o) {
+			(*unscheduledJobs[j])[o].setWait(mapWait[make_pair((*unscheduledJobs[j])[o].getId(), (*unscheduledJobs[j])[o].getStg())]);
+		}
+	}
+
+	for (size_t j = 0; j < scheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < scheduledJobs[j]->size(); ++o) {
+			(*scheduledJobs[j])[o].setWait(mapWait[make_pair((*scheduledJobs[j])[o].getId(), (*scheduledJobs[j])[o].getStg())]);
+		}
+	}
+
 }
 
 void Schedule::markAsScheduled(size_t jobIdx) {

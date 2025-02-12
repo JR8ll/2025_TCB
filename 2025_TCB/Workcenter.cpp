@@ -200,6 +200,12 @@ void Workcenter::moveBatch(Batch* batch, size_t tgtMac, double newStart) {
 	machines[macIdx]->eraseNullptr(batIdx);
 }
 
+void Workcenter::updateWaitingTimes() {
+	for (size_t m = 0; m < size(); ++m) {
+		machines[m]->updateWaitingTimes();
+	}
+}
+
 double Workcenter::getTWT() const {
 	double twt = 0;
 	for (size_t m = 0; m < size(); ++m) {

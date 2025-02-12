@@ -52,6 +52,7 @@ public:
 	const std::vector<std::pair<int, double>>& getTcMaxBwd() const;
 
 	void setWait(double wt);
+	void computeWaitingTimeFromStart(double start);							// computes and sets waiting time
 	void setPred(Operation* pre);
 	void setSucc(Operation* suc);
 

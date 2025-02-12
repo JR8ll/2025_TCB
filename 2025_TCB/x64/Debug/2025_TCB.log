@@ -1,7 +1,4 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Workcenter.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Solver_MILP.cpp
 C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(3428): warning C4996: 'IloCplex::PresolveCallbackI::~PresolveCallbackI': was declared deprecated
           C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
@@ -101,61 +98,21 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): war
   ,            _Alloc=std::allocator<std::pair<const std::pair<int,int>,int>>
   ,            _Valty=std::pair<std::pair<__int64,__int64>,int>
           ]
-  Solver_GA.cpp
-C:\Users\rocholl\brkgaAPI\src\MTRand.h(257): warning C4800: 'size_t' : forcing value to bool 'true' or 'false' (performance warning)
-c:\users\rocholl\brkgaapi\src\Population.h(69): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
-c:\users\rocholl\brkgaapi\src\Population.h(73): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Schedule.cpp(76): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(85): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(166): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-  Product.cpp
-Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-  Problem.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Problem.cpp(223): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(267): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(274): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(116): warning C4101: 'exc' : unreferenced local variable
-Problem.cpp(216): warning C4101: 'exc' : unreferenced local variable
-C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-          Problem.cpp(308) : see reference to function template instantiation 'std::unique_ptr<Workcenter,std::default_delete<_Ty>> std::make_unique<Workcenter,size_t,Schedule*>(size_t &&,Schedule *&&)' being compiled
-          with
-          [
-              _Ty=Workcenter
-          ]
-  Operation.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Operation.cpp(129): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(130): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(131): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(155): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(156): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(157): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(77): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(86): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(199): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Main.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Machine.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Log.cpp
-  Job.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  GaDecoder.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Functions.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Batch.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Generating Code...
+  Skipping... (no relevant changes detected)
+  Solver_GA.cpp
+  Problem.cpp
+  GaDecoder.cpp
+  Functions.cpp
 concert.lib(ilosstructi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosstructi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
 concert.lib(ilohash.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilohash.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
 concert.lib(iloalg.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloalg.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info

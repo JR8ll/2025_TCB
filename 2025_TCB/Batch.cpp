@@ -124,6 +124,12 @@ void Batch::removeAllOps() {
 	ops.clear();
 }
 
+void Batch::updateWaitingTimes() {
+	for (size_t op = 0; op < size(); ++op) {
+		ops[op]->computeWaitingTimeFromStart(start);
+	}
+}
+
 double Batch::getTWT() const {
 	double twt = 0;
 	for (size_t op = 0; op < size(); ++op) {
