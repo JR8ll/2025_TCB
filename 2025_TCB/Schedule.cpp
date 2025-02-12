@@ -162,6 +162,10 @@ void Schedule::markAsScheduled(pJob scheduledJob) {
 	scheduledJobs.push_back(move(scheduledJob));
 }
 
+int Schedule::getNumberOfScheduledJobs() const {
+	return scheduledJobs.size();
+}
+
 void Schedule::lSchedFirstJob(double pWait) {
 	for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {
 		schedOp(&(**unscheduledJobs.begin())[op], pWait);

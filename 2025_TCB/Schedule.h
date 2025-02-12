@@ -64,6 +64,7 @@ public:
 	
 	void markAsScheduled(size_t jobIdx);
 	void markAsScheduled(pJob scheduledJob);																			// adds a job to the set of scheduled jobs
+	int getNumberOfScheduledJobs() const;
 
 	// LIST SCHEDULING
 	void lSchedFirstJob(double pWait = 0.0);

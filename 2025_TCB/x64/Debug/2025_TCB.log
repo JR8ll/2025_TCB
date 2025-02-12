@@ -1,4 +1,7 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
+  Workcenter.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Solver_MILP.cpp
 C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(3428): warning C4996: 'IloCplex::PresolveCallbackI::~PresolveCallbackI': was declared deprecated
           C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
@@ -8,8 +11,8 @@ c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpec
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 Solver_MILP.cpp(42): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
 Solver_MILP.cpp(43): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Solver_MILP.cpp(103): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Solver_MILP.cpp(309): warning C4244: 'argument' : conversion from 'IloInt' to 'IloNum', possible loss of data
+Solver_MILP.cpp(104): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(310): warning C4244: 'argument' : conversion from 'IloInt' to 'IloNum', possible loss of data
 Solver_MILP.cpp(28): warning C4101: 'ex' : unreferenced local variable
 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): warning C4244: 'initializing' : conversion from '__int64' to 'int', possible loss of data
           C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157) : see reference to function template instantiation 'std::pair<int,int>::pair<__int64,__int64,void>(std::pair<__int64,__int64> &&)' being compiled
@@ -80,7 +83,7 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): war
               _Kty=std::pair<int,int>
   ,            _Ty=int
           ]
-          Solver_MILP.cpp(54) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
+          Solver_MILP.cpp(55) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
           with
           [
               _Kty=std::pair<int,int>
@@ -89,7 +92,7 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): war
   ,            _Alloc=std::allocator<std::pair<const std::pair<int,int>,int>>
   ,            _Valty=std::pair<std::pair<__int64,__int64>,int>
           ]
-          Solver_MILP.cpp(54) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
+          Solver_MILP.cpp(55) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
           with
           [
               _Kty=std::pair<int,int>
@@ -98,25 +101,20 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): war
   ,            _Alloc=std::allocator<std::pair<const std::pair<int,int>,int>>
   ,            _Valty=std::pair<std::pair<__int64,__int64>,int>
           ]
-  Schedule.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Schedule.cpp(76): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(85): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-  Main.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Generating Code...
-  Compiling...
-  Workcenter.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Solver_GA.cpp
 C:\Users\rocholl\brkgaAPI\src\MTRand.h(257): warning C4800: 'size_t' : forcing value to bool 'true' or 'false' (performance warning)
 c:\users\rocholl\brkgaapi\src\Population.h(69): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
 c:\users\rocholl\brkgaapi\src\Population.h(73): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Schedule.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Schedule.cpp(76): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(85): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(166): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+  Product.cpp
+Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Problem.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -140,9 +138,13 @@ Operation.cpp(131): warning C4267: 'initializing' : conversion from 'size_t' to 
 Operation.cpp(155): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
 Operation.cpp(156): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
 Operation.cpp(157): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+  Main.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Machine.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Log.cpp
   Job.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   GaDecoder.cpp
