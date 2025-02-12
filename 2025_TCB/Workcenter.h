@@ -41,6 +41,8 @@ public:
 
 	void moveBatch(Batch* batch, size_t tgtMac, double newStart);
 
+	void updateWaitingTimes();
+
 	double getTWT() const;		// total weighted tardiness
 	double getMinMSP() const;	// smallest makespan (completion of last batch)
 

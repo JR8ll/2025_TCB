@@ -50,6 +50,8 @@ public:
 
 	void assignToWorkcenter(Workcenter* wc);
 
+	void updateWaitingTimes();
+
 	double getTWT() const;	// total weighted tardiness
 	double getMSP() const;	// makespan
 };

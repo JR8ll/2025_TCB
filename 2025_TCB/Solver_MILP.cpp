@@ -724,7 +724,6 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	env.end();
 	return bestObjectiveValue;
 }
-
 double Solver_MILP::solveDecompJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim, prioRuleKappa<pJob> rule, double kappa)
 {	
 	double t = schedule->getMinMSP(0);
@@ -744,6 +743,28 @@ double Solver_MILP::solveDecompJobBasedMILP(Schedule* schedule, int nDash, int c
 	}
 	return twt;
 }
+double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash, int cplexTilim, prioRule<pJob> initRule, prioRuleKappa<pJob> dynRule, double kappa) {
+	// OBTAIN INITIAL WAITING TIMES FROM A SCHEDULE WITH LIST SCHEDULING AND SORTING BY initRule (DEFAULT: EDD)
+	unique_ptr<Schedule> tempSched = schedule->clone();
+	tempSched->lSchedJobsWithSorting(initRule);
+	tempSched->updateWaitingTimes();
+	schedule->mimicWaitingTimes(tempSched.get());
+
+	// ACHTUNG FEHLER: NEGATIVE WAITING TIMES NACH EDD!
+
+	// UPDATE WAITING TIMES
+
+
+
+
+	// TODO
+	return 666;
+}
+double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash, int cplexTilim, prioRule<pJob> initRule, prioRuleKappa<pJob> dynRule, std::vector<double> kappas) {
+	// TODO
+	return 666;
+}
+
 
 
 

@@ -49,7 +49,8 @@ int main(int argc, char* argv[]) {
 		solverName = "DecompMILP";
 		{
 			Solver_MILP cplex = Solver_MILP();
-			cplex.solveDecompJobBasedMILP(sched.get(), 4, iTilimSeconds, sortJobsByGATC, 0.5);	
+			vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
+			cplex.solveDecompJobBasedDynamicSortingMILP(sched.get(), 10, iTilimSeconds, sortJobsByD, sortJobsByGATC, 1.0);	// TODO: set last parameter to kappas
 		}
 		break;
 	case ALG_LISTSCHEDATC: 

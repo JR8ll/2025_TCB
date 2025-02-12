@@ -55,5 +55,7 @@ public:
 	void removeOp(Operation* op);
 	void removeAllOps();
 
+	void updateWaitingTimes();
+
 	double getTWT() const;	// total weighted tardiness
 };

@@ -106,10 +106,11 @@ const std::vector<std::pair<int, double>>& Operation::getTcMaxFwd() const {
 }
 
 void Operation::setWait(double wt) { wait = wt; }
+void Operation::computeWaitingTimeFromStart(double start) {
+	wait = start - getEarliestStart();
+}
 void Operation::setPred(Operation* pre) { pred = pre; }
 void Operation::setSucc(Operation* suc) { succ = suc; }
-
-
 
 Job* Operation::getJob() const { return job; }
 Batch* Operation::getBatch() const { return batch; }

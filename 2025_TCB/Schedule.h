@@ -61,6 +61,8 @@ public:
 
 	void sortUnscheduled(prioRule<pJob> rule);
 	void sortUnscheduled(prioRuleKappa<pJob> rule, double kappa);
+	void updateWaitingTimes();
+	void mimicWaitingTimes(const Schedule* wtSchedule);		// set waiting times of operations in this schedule according to the waiting times in the wtSchedule
 	
 	void markAsScheduled(size_t jobIdx);
 	void markAsScheduled(pJob scheduledJob);																			// adds a job to the set of scheduled jobs

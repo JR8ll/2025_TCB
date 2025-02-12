@@ -178,6 +178,12 @@ void Machine::assignToWorkcenter(Workcenter* wc) {
 	workcenter = wc;
 }
 
+void Machine::updateWaitingTimes() {
+	for (size_t b = 0; b < size(); ++b) {
+		batches[b]->updateWaitingTimes();
+	}
+}
+
 double Machine::getTWT() const {
 	double twt = 0;
 	for (size_t b = 0; b < size(); ++b) {
