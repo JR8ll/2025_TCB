@@ -41,6 +41,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	int nProducts = schedule->getProblem()->getF();
 	int nStages = schedule->size();
 	int nJobs = consideredJobs.size();
+	int nBatches = nJobs + schedule->getNumberOfScheduledJobs();	// new and (max. number of) already formed batches
 
 	IloIntTupleSet stageMachine(env, 2);
 	for (int o = 0; o < nStages; ++o) {
@@ -67,19 +68,19 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 
 	IloIntArray3 B_iob(env);	// number of jobs assigned to preformed Batch[Products][Stages][Batches]
 	IloNumArray3 S_iob(env);	// start times of preformed Batch[Products][Stages][Batches]	
-	vector<vector<set<int> > > B_io_preformed = vector<vector<set<int> > >(nProducts);
-
+	vector<vector<set<int>>> B_io_preformed = vector<vector<set<int>>>(nProducts);
 	for (int i = 0; i < nProducts; ++i) {
-		B_io_preformed[i] = vector<set<int> >(nStages);
+		B_io_preformed[i] = vector<set<int>>(nStages);
 		B_iob.add(IloIntArray2(env));
 		S_iob.add(IloNumArray2(env));
 		for (int o = 0; o < nStages; ++o) {
 			B_io_preformed[i][o] = set<int>();
-			B_iob[i].add(IloIntArray(env, nJobs));
-			S_iob[i].add(IloNumArray(env, nJobs));
+			B_iob[i].add(IloIntArray(env, nBatches));
+			S_iob[i].add(IloNumArray(env, nBatches));
 		}
 	}
-	vector<map<pair<int, int>, pair<int, int> > > batchIdxMac = vector<map<pair<int, int>, pair<int, int> > >(nStages);
+
+	vector<map<pair<int, int>, pair<int, int>>> batchIdxMac = vector<map<pair<int, int>, pair<int, int>>>(nStages);
 	for (int o = 0; o < nStages; ++o) {
 		batchIdxMac[o] = map<pair<int, int>, pair<int, int> >();
 		int batchIdx = 0;
@@ -151,7 +152,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	IloBoolVarArray3 x(env);	// x[Jobs][Batches][<StageMachine>]
 	for (int j = 0; j < nJobs; ++j) {
 		x.add(IloBoolVarArray2(env));
-		for (int b = 0; b < nJobs; ++b) {
+		for (int b = 0; b < nBatches; ++b) {
 			x[j].add(IloBoolVarArray(env, stageMachine.getCardinality()));
 			for (int k = 0; k < stageMachine.getCardinality(); ++k) {
 				x[j][b][k] = IloBoolVar(env);
@@ -164,7 +165,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	IloBoolVarArray3 y(env);	// y[Products][Batches][<StageMachine>]
 	for (int i = 0; i < nProducts; ++i) {
 		y.add(IloBoolVarArray2(env));
-		for (int b = 0; b < nJobs; ++b) {
+		for (int b = 0; b < nBatches; ++b) {
 			y[i].add(IloBoolVarArray(env, stageMachine.getCardinality()));
 			for (int k = 0; k < stageMachine.getCardinality(); ++k) {
 				y[i][b][k] = IloBoolVar(env);
@@ -178,8 +179,8 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	for (int j = 0; j < nJobs; ++j) {
 		z.add(IloBoolVarArray2(env));
 		for (int o = 0; o < nStages; ++o) {
-			z[j].add(IloBoolVarArray(env, nJobs));		
-			for (int b = 0; b < nJobs; ++b) {
+			z[j].add(IloBoolVarArray(env, nBatches));		
+			for (int b = 0; b < nBatches; ++b) {
 				z[j][o][b] = IloBoolVar(env);
 				string varName = "z_" + to_string(j) + "," + to_string(o) + "," + to_string(b);
 				z[j][o][b].setName(varName.c_str());
@@ -221,7 +222,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	}
 
 	IloNumVarArray2 S(env);		// S[Batches][<StageMachine>]
-	for (int b = 0; b < nJobs; ++b) {
+	for (int b = 0; b < nBatches; ++b) {
 		S.add(IloNumVarArray(env, stageMachine.getCardinality()));
 		for (int k = 0; k < stageMachine.getCardinality(); ++k) {
 			S[b][k] = IloNumVar(env);
@@ -283,7 +284,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	// R04: capacity																	// forall..
 	for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {					// o in Stages_b
 		int oBatch = schedule->getBatchingStages()[o] - 1;
-		for (int b = 0; b < nJobs; ++b) {												// b in Batches
+		for (int b = 0; b < nBatches; ++b) {											// b in Batches
 			for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {						// l in 1..m[o]
 				IloExpr cR04_SumX(env);
 				for (int j = 0; j < nJobs; ++j) {										// sum(j in Jobs)
@@ -315,7 +316,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	// R06: unique family of a batch													// forall..
 	for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {					// o in Stages_b
 		int oBatch = schedule->getBatchingStages()[o] - 1;
-		for (int b = 0; b < nJobs; ++b) {												// b in Batches
+		for (int b = 0; b < nBatches; ++b) {												// b in Batches
 			for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {						// l in 1..m[o]
 				IloExpr cR06_SumY(env);
 				for (int i = 0; i < nProducts; ++i) {									// sum(i in Products)
@@ -331,7 +332,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 
 	// R07: matching families of jobs and batches										// forall..
 	for (int j = 0; j < nJobs; ++j) {													// j in Jobs
-		for (int b = 0; b < nJobs; ++b) {												// b in Batches
+		for (int b = 0; b < nBatches; ++b) {											// b in Batches
 			for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {			// o in Stages_b
 				int oBatch = schedule->getBatchingStages()[o] - 1;
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
@@ -374,7 +375,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 
 	// R10: release dates of machines													// forall..
 	for (int j = 0; j < nJobs; ++j) {													// j in Jobs
-		for (int o = 0; o < schedule->getDiscreteStages().size(); ++o) {						// o in Stages_1
+		for (int o = 0; o < schedule->getDiscreteStages().size(); ++o) {				// o in Stages_1
 			int oSingle = schedule->getDiscreteStages()[o] - 1;
 			for (int l = 0; l < (*schedule)[oSingle].size(); ++l) {					// l in 1..m_o[o]
 				IloExpr cR10(env);
@@ -389,7 +390,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	for (int j = 0; j < nJobs; ++j) {													// j in Jobs
 		for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {				// o in Stages_b
 			int oBatch = schedule->getDiscreteStages()[o] - 1;
-			for (int b = 0; b < nJobs; ++b) {											// b in Batches
+			for (int b = 0; b < nBatches; ++b) {											// b in Batches
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
 					IloExpr cR11(env);
 					cR11 = S[b][mapStgMac[{oBatch, l}]]; // >= rm[oBatch][l];
@@ -403,7 +404,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	// R12: processing times of batches													// forall..
 	for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {					// o in Stages_b
 		int oBatch = schedule->getBatchingStages()[o] - 1;
-		for (int b = 0; b < (nJobs - 1); ++b) {											// b in 1..(n-1)
+		for (int b = 0; b < (nBatches - 1); ++b) {										// b in 1..(n-1)
 			for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {						// l in 1..m_o[o]
 				IloExpr cR12_SumY(env);
 				for (int i = 0; i < nProducts; ++i) {									// sum(i in Products)
@@ -486,7 +487,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	for (int j = 0; j < nJobs; ++j) {												// j in Jobs
 		for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {						// o in Stages_b
 			int oBatch = schedule->getBatchingStages()[o] - 1;
-			for (int b = 0; b < nJobs; ++b) {									// b in Batches
+			for (int b = 0; b < nBatches; ++b) {									// b in Batches
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
 					IloExpr cR17(env);
 					cR17 = s[j][oBatch] + (G * (1 - x[j][b][mapStgMac[{oBatch, l}]])); // >= S[b][oBatch, l];
@@ -501,7 +502,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	for (int j = 0; j < nJobs; ++j) {												// j in Jobs
 		for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {						// o in Stages_b
 			int oBatch = schedule->getBatchingStages()[o] - 1;
-			for (int b = 0; b < nJobs; ++b) {									// b in Batches
+			for (int b = 0; b < nBatches; ++b) {									// b in Batches
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
 					IloExpr cR18(env);
 					cR18 = s[j][oBatch] + (G * (x[j][b][mapStgMac[{oBatch, l}]] - 1)); // <= S[b][oBatch, l];

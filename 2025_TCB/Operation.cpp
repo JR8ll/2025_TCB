@@ -62,8 +62,8 @@ double Operation::getAvailability() const {
 	if (pred == nullptr) {
 		return getR();								// first op is available with job release => end recursion
 	}
-
-	if (pred->getBatch() != nullptr) {
+	
+	if (pred->isScheduled()) {
 		return pred->getC();						// op is available when its predecessor is completed => end recursion
 	}
 	return pred->getAvailability() + pred->getP();	// op is available when its predecessor could be completed => end recursion 
