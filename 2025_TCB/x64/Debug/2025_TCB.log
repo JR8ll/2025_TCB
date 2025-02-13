@@ -1,5 +1,101 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Workcenter.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Solver_MILP.cpp
+C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(3428): warning C4996: 'IloCplex::PresolveCallbackI::~PresolveCallbackI': was declared deprecated
+          C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
+          This diagnostic occurred in the compiler generated function 'void *IloCplex::PresolveCallbackI::__delDtor(unsigned int)'
+          C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Solver_MILP.cpp(42): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(43): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(104): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(310): warning C4244: 'argument' : conversion from 'IloInt' to 'IloNum', possible loss of data
+Solver_MILP.cpp(28): warning C4101: 'ex' : unreferenced local variable
+C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): warning C4244: 'initializing' : conversion from '__int64' to 'int', possible loss of data
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157) : see reference to function template instantiation 'std::pair<int,int>::pair<__int64,__int64,void>(std::pair<__int64,__int64> &&)' being compiled
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157) : see reference to function template instantiation 'std::pair<int,int>::pair<__int64,__int64,void>(std::pair<__int64,__int64> &&)' being compiled
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xmemory0(600) : see reference to function template instantiation 'std::pair<const _Kty,_Ty>::pair<std::pair<__int64,__int64>,int,void>(std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Kty=std::pair<int,int>
+  ,            _Ty=int
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xmemory0(600) : see reference to function template instantiation 'std::pair<const _Kty,_Ty>::pair<std::pair<__int64,__int64>,int,void>(std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Kty=std::pair<int,int>
+  ,            _Ty=int
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xmemory0(723) : see reference to function template instantiation 'void std::allocator<_Other>::construct<_Objty,_Ty>(_Objty *,_Ty &&)' being compiled
+          with
+          [
+              _Other=std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>
+  ,            _Objty=std::pair<const std::pair<int,int>,int>
+  ,            _Ty=std::pair<std::pair<__int64,__int64>,int>
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xmemory0(723) : see reference to function template instantiation 'void std::allocator<_Other>::construct<_Objty,_Ty>(_Objty *,_Ty &&)' being compiled
+          with
+          [
+              _Other=std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>
+  ,            _Objty=std::pair<const std::pair<int,int>,int>
+  ,            _Ty=std::pair<std::pair<__int64,__int64>,int>
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xmemory0(872) : see reference to function template instantiation 'void std::allocator_traits<_Alloc>::construct<_Ty,std::pair<std::pair<__int64,__int64>,int>>(std::allocator<_Other> &,_Objty *,std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Alloc=std::allocator<std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>>
+  ,            _Ty=std::pair<const std::pair<int,int>,int>
+  ,            _Other=std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>
+  ,            _Objty=std::pair<const std::pair<int,int>,int>
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xmemory0(872) : see reference to function template instantiation 'void std::allocator_traits<_Alloc>::construct<_Ty,std::pair<std::pair<__int64,__int64>,int>>(std::allocator<_Other> &,_Objty *,std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Alloc=std::allocator<std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>>
+  ,            _Ty=std::pair<const std::pair<int,int>,int>
+  ,            _Other=std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>
+  ,            _Objty=std::pair<const std::pair<int,int>,int>
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xtree(933) : see reference to function template instantiation 'void std::_Wrap_alloc<std::allocator<_Other>>::construct<_Ty,std::pair<std::pair<__int64,__int64>,int>>(_Ty *,std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Other=std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>
+  ,            _Ty=std::pair<const std::pair<int,int>,int>
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xtree(933) : see reference to function template instantiation 'void std::_Wrap_alloc<std::allocator<_Other>>::construct<_Ty,std::pair<std::pair<__int64,__int64>,int>>(_Ty *,std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Other=std::_Tree_node<std::pair<const std::pair<int,int>,int>,void *>
+  ,            _Ty=std::pair<const std::pair<int,int>,int>
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xtree(1158) : see reference to function template instantiation 'std::_Tree_node<std::pair<const _Kty,_Ty>,void *> *std::_Tree_buy<std::pair<const _Kty,_Ty>,std::allocator<std::pair<const _Kty,_Ty>>>::_Buynode<std::pair<std::pair<__int64,__int64>,int>>(std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Kty=std::pair<int,int>
+  ,            _Ty=int
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\xtree(1158) : see reference to function template instantiation 'std::_Tree_node<std::pair<const _Kty,_Ty>,void *> *std::_Tree_buy<std::pair<const _Kty,_Ty>,std::allocator<std::pair<const _Kty,_Ty>>>::_Buynode<std::pair<std::pair<__int64,__int64>,int>>(std::pair<std::pair<__int64,__int64>,int> &&)' being compiled
+          with
+          [
+              _Kty=std::pair<int,int>
+  ,            _Ty=int
+          ]
+          Solver_MILP.cpp(55) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
+          with
+          [
+              _Kty=std::pair<int,int>
+  ,            _Ty=int
+  ,            _Pr=std::less<std::pair<int,int>>
+  ,            _Alloc=std::allocator<std::pair<const std::pair<int,int>,int>>
+  ,            _Valty=std::pair<std::pair<__int64,__int64>,int>
+          ]
+          Solver_MILP.cpp(55) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
+          with
+          [
+              _Kty=std::pair<int,int>
+  ,            _Ty=int
+  ,            _Pr=std::less<std::pair<int,int>>
+  ,            _Alloc=std::allocator<std::pair<const std::pair<int,int>,int>>
+  ,            _Valty=std::pair<std::pair<__int64,__int64>,int>
+          ]
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

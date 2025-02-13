@@ -43,6 +43,9 @@ std::unique_ptr<Schedule> Schedule::clone() const {
 	for (const auto& job : unscheduledJobs) {
 		newSchedule->addJob(move(job->clone()));
 	}
+	for (const auto& job : scheduledJobs) {
+		newSchedule->markAsScheduled(move(job->clone()));
+	}
 	newSchedule->_reconstruct(this);
 	return newSchedule;
 }
@@ -53,10 +56,21 @@ void Schedule::_reconstruct(const Schedule* orig) {
 			for (size_t b = 0; b < (*orig)[wc][m].size(); ++b) {
 				(*this)[wc][m].addBatch(move((*orig)[wc][m][b].clone()), (*orig)[wc][m][b].getStart());
 				for (size_t j = 0; j < (*orig)[wc][m][b].size(); ++j) {
-					Operation& op = (*orig)[wc][m][b][j];
-					size_t jobIdx = op.getStg() - 1;
-					(*this)[wc][m][b].addOp(&(*unscheduledJobs[wc])[jobIdx]);
+					Operation* remoteOp = &(*orig)[wc][m][b][j];
+					Operation* localOp = findInScheduledJobs(remoteOp);
+					if (localOp == nullptr) {
+						localOp = findInUnscheduledJobs(remoteOp);
+					}
+					if (localOp == nullptr) throw ExcSched("Schedule::_reconstruct() operation not found");
+					(*this)[wc][m][b].addOp(localOp);
 				}
+			}
+		}
+	}
+	for (size_t wc = 0; wc < size(); ++wc) {
+		for (size_t m = 0; m < workcenters[wc]->size(); ++m) {
+			for (size_t b = 0; b < (*workcenters[wc])[m].size(); ++b) {
+				(*this)[wc][m][b].setStart((*this)[wc][m][b].getStart());
 			}
 		}
 	}
@@ -197,6 +211,31 @@ void Schedule::markAsScheduled(pJob scheduledJob) {
 
 int Schedule::getNumberOfScheduledJobs() const {
 	return scheduledJobs.size();
+}
+
+Operation* Schedule::findInScheduledJobs(Operation* remoteOp) const {
+	for (size_t j = 0; j < scheduledJobs.size(); ++j) {
+		if (scheduledJobs[j]->getId() == remoteOp->getId()) {
+			for (size_t o = 0; o < scheduledJobs[j]->size(); ++o) {
+				if ((*scheduledJobs[j])[o].getStg() == remoteOp->getStg()) {
+					return &(*scheduledJobs[j])[o];	// local op
+				}
+			}
+		}
+	}
+	return nullptr;
+}
+Operation* Schedule::findInUnscheduledJobs(Operation* remoteOp) const {
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		if (unscheduledJobs[j]->getId() == remoteOp->getId()) {
+			for (size_t o = 0; o < unscheduledJobs[j]->size(); ++o) {
+				if ((*unscheduledJobs[j])[o].getStg() == remoteOp->getStg()) {
+					return &(*unscheduledJobs[j])[o];	// local op
+				}
+			}
+		}
+	}
+	return nullptr;
 }
 
 void Schedule::lSchedFirstJob(double pWait) {

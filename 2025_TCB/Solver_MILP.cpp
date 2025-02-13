@@ -389,7 +389,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	// R11: release dates of batching machines											// forall..
 	for (int j = 0; j < nJobs; ++j) {													// j in Jobs
 		for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {				// o in Stages_b
-			int oBatch = schedule->getDiscreteStages()[o] - 1;
+			int oBatch = schedule->getBatchingStages()[o] - 1;
 			for (int b = 0; b < nBatches; ++b) {											// b in Batches
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
 					IloExpr cR11(env);
@@ -637,9 +637,9 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 					try {
 						IloNum zVal = cplex.getValue(z[j][stg][it->first.second]);
 						if (zVal >= 1 - TCB::precision) {
-							if (!(*schedule)[stg][it->second.first][it->second.second].addOp(&schedule->getJob(j)[stg])) {
+							if (!(*schedule)[stg][it->second.first][it->second.second].addOp(&(*consideredJobs[j])[stg])) {
 								stringstream errorMsg;
-								errorMsg << "Problem in SolverMILP::solve(): infeasible op assignment " << schedule->getJob(j).getId() << " at stage " << (stg + 1);
+								errorMsg << "Problem in SolverMILP::solve(): infeasible op assignment " << consideredJobs[j]->getId() << " at stage " << (stg + 1);
 								TCB::logger.Log(Error, errorMsg.str());
 							}
 						}
@@ -664,19 +664,19 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			int capacity = schedule->getCapAtStageIdx(batchingStageIndex);
 			vector<vector<pBat>> newBatches = vector<vector<pBat>>((*schedule)[stg].size());
 			for (size_t l = 0; l < ((*schedule)[stg].size()); ++l) {
-				for (size_t b = 0; b < nJobs; ++b) {
+				for (size_t b = 0; b < nBatches; ++b) {
 					newBatches[l].push_back(make_unique<Batch>(capacity));
 				}
 			}
 				
-			for (int o = 0; o < (*schedule)[stg].size(); ++o) {
-				newBatches[o].resize(nJobs);
-			}
-			for (int mac = 0; mac < (*schedule)[stg].size(); ++mac) {
-				for (int b = 0; b < nJobs; ++b) {
+			/*for (int o = 0; o < (*schedule)[stg].size(); ++o) {
+				newBatches[o].resize(nBatches);
+			}*/
+			/*for (int mac = 0; mac < (*schedule)[stg].size(); ++mac) {
+				for (int b = 0; b < nBatches; ++b) {
 					newBatches[mac][b] = make_unique<Batch>(Batch(capacity));
 				}
-			}
+			}*/
 
 			for (int b = 0; b < nJobs; ++b) {
 				for (int j = 0; j < nJobs; ++j) {
@@ -720,9 +720,9 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 		consideredJobs.erase(consideredJobs.begin());
 	}
 
-	double bestObjectiveValue = cplex.getBestObjValue();
+	//double bestObjectiveValue = cplex.getBestObjValue();
 	env.end();
-	return bestObjectiveValue;
+	return schedule->getTWT();	// bestObjectiveValue; // integrated objective function
 }
 double Solver_MILP::solveDecompJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim, prioRuleKappa<pJob> rule, double kappa)
 {	
@@ -745,20 +745,22 @@ double Solver_MILP::solveDecompJobBasedMILP(Schedule* schedule, int nDash, int c
 }
 double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash, int cplexTilim, prioRule<pJob> initRule, prioRuleKappa<pJob> dynRule, double kappa) {
 	// OBTAIN INITIAL WAITING TIMES FROM A SCHEDULE WITH LIST SCHEDULING AND SORTING BY initRule (DEFAULT: EDD)
-	unique_ptr<Schedule> tempSched = schedule->clone();
-	tempSched->lSchedJobsWithSorting(initRule);
-	tempSched->updateWaitingTimes();
-	schedule->mimicWaitingTimes(tempSched.get());
+	unique_ptr<Schedule> initSched = schedule->clone();
+	initSched->lSchedJobsWithSorting(initRule);
+	initSched->updateWaitingTimes();
+	schedule->mimicWaitingTimes(initSched.get());
 
-	// ACHTUNG FEHLER: NEGATIVE WAITING TIMES NACH EDD!
+	while (schedule->getN() > 0) {
+		schedule->sortUnscheduled(dynRule, kappa);
+		solveJobBasedMILP(schedule, nDash, cplexTilim);
 
-	// UPDATE WAITING TIMES
+		// DYNAMIC SORTING AND UPDATE WAITING TIMES
+		unique_ptr<Schedule> tempSched = schedule->clone();
+		tempSched->lSchedJobsWithSorting(dynRule, kappa);
+		schedule->mimicWaitingTimes(tempSched.get());
+	}
 
-
-
-
-	// TODO
-	return 666;
+	return schedule->getTWT();
 }
 double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash, int cplexTilim, prioRule<pJob> initRule, prioRuleKappa<pJob> dynRule, std::vector<double> kappas) {
 	// TODO

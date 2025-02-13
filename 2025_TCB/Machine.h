@@ -34,7 +34,7 @@ public:
 	size_t getIdx() const;	// index in its workcenter
 	int getCap() const;
 
-	std::unique_ptr<Machine> clone(Workcenter* newWc) const;
+	std::unique_ptr<Machine> clone(Workcenter* newWc) const;	// Machines are cloned without batches because op references would go dangling, instead use Schedule::_reconstruct to copy the actual scheduling
 
 	Workcenter* getWorkcenter();
 	const std::vector<pBat>& getBatches() const;

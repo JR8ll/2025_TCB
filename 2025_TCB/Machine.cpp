@@ -43,9 +43,9 @@ int Machine::getCap() const { return cap; }
 
 unique_ptr<Machine> Machine::clone(Workcenter* newWc) const {
 	auto newMachine = make_unique<Machine>(id, cap, newWc);
-	for (const auto& bat : batches) {
+	/*for (const auto& bat : batches) {
 		newMachine->addBatch(bat->clone(), bat->getStart());
-	}
+	}*/
 	return newMachine;
 }
 
