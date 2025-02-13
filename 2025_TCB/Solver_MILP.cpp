@@ -763,8 +763,23 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, in
 	return schedule->getTWT();
 }
 double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash, int cplexTilim, prioRule<pJob> initRule, prioRuleKappa<pJob> dynRule, std::vector<double> kappas) {
-	// TODO
-	return 666;
+	// OBTAIN INITIAL WAITING TIMES FROM A SCHEDULE WITH LIST SCHEDULING AND SORTING BY initRule (DEFAULT: EDD)
+	unique_ptr<Schedule> initSched = schedule->clone();
+	initSched->lSchedJobsWithSorting(initRule);
+	initSched->updateWaitingTimes();
+	schedule->mimicWaitingTimes(initSched.get());
+
+	while (schedule->getN() > 0) {
+		schedule->sortUnscheduled(dynRule, kappas[0]);	// TODO grid? oder best kappa von unten?
+		solveJobBasedMILP(schedule, nDash, cplexTilim);
+
+		// DYNAMIC SORTING AND UPDATE WAITING TIMES
+		unique_ptr<Schedule> tempSched = schedule->clone();
+		tempSched->lSchedJobsWithSorting(dynRule, kappas);	// GRID SEARCH
+		schedule->mimicWaitingTimes(tempSched.get());
+	}
+
+	return schedule->getTWT();
 }
 
 

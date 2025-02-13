@@ -7,6 +7,7 @@ class Machine;
 class Job;
 class Operation;
 class Workcenter;
+class Schedule;
 
 template<typename T>
 using prioRule = void(*)(std::vector<T>& vec);
@@ -16,6 +17,8 @@ using prioRuleKappa = void(*)(std::vector<T>& vec, double t, double kappa);
 
 template<typename T>
 using prioRuleKeySet = void(*)(std::vector<T>& vec, const std::vector<double>& keys);
+
+using objectiveFunction = double(*)(const Schedule*);
 
 using pOp = std::unique_ptr<Operation>;
 using pBat = std::unique_ptr<Batch>;
