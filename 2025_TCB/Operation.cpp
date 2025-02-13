@@ -108,6 +108,9 @@ const std::vector<std::pair<int, double>>& Operation::getTcMaxFwd() const {
 void Operation::setWait(double wt) { wait = wt; }
 void Operation::computeWaitingTimeFromStart(double start) {
 	wait = start - getEarliestStart();
+	if (wait < 0.0) {
+		int debug = 666;
+	}
 }
 void Operation::setPred(Operation* pre) { pred = pre; }
 void Operation::setSucc(Operation* suc) { succ = suc; }
@@ -139,6 +142,11 @@ bool Operation::repairOverlaps() {
 	return bRepaired;	
 }
 bool Operation::repairTimeConstraints() {
+
+	if (getId() == 10) {
+		int debug = 666;
+	}
+
 	bool bRepaired = false;
 	const vector<pair<int, double>>& tcMax = getTcMaxBwd();
 	if (batch != nullptr) {
@@ -148,6 +156,11 @@ bool Operation::repairTimeConstraints() {
 			if (predOp != nullptr) {
 				if (predOp->isScheduled()) {
 					Batch* predBatch = predOp->getBatch();
+
+					if (predBatch == nullptr) {
+						int debug = 666;
+					}
+
 					if (predBatch->getStart() < batch->getStart() - tcMax[i].second - TCB::precision) {
 						// time constraint is violated
 						double newStartForPred = batch->getStart() - tcMax[i].second;

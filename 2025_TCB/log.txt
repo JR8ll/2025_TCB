@@ -138,3 +138,23 @@ Info:	Problem initialized from demoProblemInstance.dat.
 Warning:	GA parameters filename not provided (default parameters initialized.)
 Info:	Problem initialized from demoProblemInstance.dat.
 Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
