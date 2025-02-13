@@ -264,14 +264,14 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, dou
 	}
 }
 
-void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait) {
-	double bestTWT = numeric_limits<double>::max();
+void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait, objectiveFunction objectiveFunction) {
+	double bestObjectiveValue = numeric_limits<double>::max();
 	double bestKappa = 0.0;
 	for (size_t kappa = 0; kappa < kappaGrid.size(); ++kappa) {
 		lSchedJobsWithSorting(rule, kappaGrid[kappa], pWait);
-		double tempTWT = getTWT();
-		if (tempTWT < bestTWT) {
-			bestTWT = tempTWT;
+		double tempObjectiveValue = objectiveFunction(this);
+		if (tempObjectiveValue < bestObjectiveValue) {
+			bestObjectiveValue = tempObjectiveValue;
 			bestKappa = kappaGrid[kappa];
 		}
 		reset();

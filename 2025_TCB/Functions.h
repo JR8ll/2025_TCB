@@ -43,6 +43,8 @@ double getAvgP(const std::vector<pJob>& unscheduledJobs);
 
 void loadGaParams(GA_params& gaParams, std::string filename);
 
+double getObjectiveTWT(const Schedule* sched);
+
 std::vector<double> getDoubleGrid(double low, double high, double step);
 
 class CompJobsByGATC {

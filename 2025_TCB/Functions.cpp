@@ -116,6 +116,10 @@ void loadGaParams(GA_params& gaParams, std::string filename) {
 
 }
 
+double getObjectiveTWT(const Schedule* sched) {
+	return sched->getTWT();
+}
+
 vector<double> getDoubleGrid(double low, double high, double step) {
 	vector<double> grid = vector<double>();
 	while (low <= high + TCB::precision) {
