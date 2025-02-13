@@ -166,8 +166,9 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 
 	// actually shift operation
 	if (!bNewBatch) {
-		(*machines[bestMacIdx])[bestBatIdx].addOp(op);
+		auto tempOp = op;
 		bat->removeOp(op);
+		(*machines[bestMacIdx])[bestBatIdx].addOp(op);
 		if (bOnlyOperation) {
 			mac->removeBatch(bIdx);
 		}
@@ -179,9 +180,10 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 		}
 		else {
 			pBat newBatch = make_unique<Batch>(machines[bestBatIdx]->getCap());
-			newBatch->addOp(op);
-			machines[bestMacIdx]->addBatch(move(newBatch), tempStart);
+			auto tempOp = op;
 			bat->removeOp(op);
+			newBatch->addOp(tempOp);
+			machines[bestMacIdx]->addBatch(move(newBatch), tempStart);	
 		}
 	}
 
