@@ -68,6 +68,9 @@ public:
 	void markAsScheduled(pJob scheduledJob);																			// adds a job to the set of scheduled jobs
 	int getNumberOfScheduledJobs() const;
 
+	Operation* findInScheduledJobs(Operation* remoteOp) const;				// find operation in scheduled jobs by id and stage
+	Operation* findInUnscheduledJobs(Operation* remoteOp) const;			// find operation in unscheduled jobs by id and stage
+
 	// LIST SCHEDULING
 	void lSchedFirstJob(double pWait = 0.0);
 	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
