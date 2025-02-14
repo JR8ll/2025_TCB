@@ -16,17 +16,13 @@ unsigned TCB::seed = 123456789;
 double TCB::precision = 0.001;
 mt19937 TCB::rng = mt19937(123456789);
 
-static const int ALG_ITERATEDMILP = 1;		// iterated MILP solving
-static const int ALG_LISTSCHEDATC = 2;		// simple List scheduling approach
-static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
-static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
-
 // argv[1] filename of problem instance to be solved
 // argv[2] seed for pseudo random-number generator
 // argv[3] int describing the solving method to be used
 // argv[4] time limit in seconds
 // argv[5] console output on(=1)/off(=0)
 // argv[6] filename of ga parameters
+// argv[7] filename of decompMILP parameters
 
 int main(int argc, char* argv[]) {
 	// PROCESS COMMAND LINE ARGUMENTS
@@ -37,8 +33,10 @@ int main(int argc, char* argv[]) {
 	int iTilimSeconds = 3600;
 	bool bConsole = false;
 	string solverName = "n/a";
+	string objectiveName = "TWT";	
 	GA_params gaParams = GA_params();
-	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, gaParams);
+	DECOMPMILP_params decompParams = DECOMPMILP_params();
+	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, gaParams, decompParams);
 
 	// PREPARE 
 	pSched sched = TCB::prob->getSchedule();
@@ -48,9 +46,9 @@ int main(int argc, char* argv[]) {
 	case ALG_ITERATEDMILP:
 		solverName = "DecompMILP";
 		{
-			Solver_MILP cplex = Solver_MILP();
+			Solver_MILP cplex = Solver_MILP(decompParams);
 			vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
-			cplex.solveDecompJobBasedDynamicSortingMILP(sched.get(), 4, iTilimSeconds, sortJobsByD, sortJobsByGATC, kappas);
+			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), 4, iTilimSeconds, sortJobsByD, sortJobsByGATC);
 		}
 		break;
 	case ALG_LISTSCHEDATC: 
@@ -75,11 +73,12 @@ int main(int argc, char* argv[]) {
 	} 
 
 	// RESULT SUMMARY (FILE OUTPUT)
-	double twt = sched->getTWT();
+	writeSolutions(sched.get(), solverName, objectiveName, iTilimSeconds, 666, &gaParams, &decompParams);	// TODO measure time
+	
 
 	// CONSOLE OUTPUT
 	if (bConsole) {
-		cout << "Solved using " << solverName << " in " << " seconds with TWT = " << twt << "." << endl;
+		cout << "Solved using " << solverName << " in " << " seconds with TWT = " << sched->getTWT() << "." << endl;
 		cout << *sched;
 	}
 
