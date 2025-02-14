@@ -1,0 +1,2 @@
+Problem	Solver	Seed	Objective	ObjectiveValue	TimeLimit	TimeUsed	GA_params	MILPCP_params	CreatedOn
+demoProblemInstance.dat	DecompMILP	666	TWT	441.285551	20	666	100|0.2|0.1|0.7|3|16	10|60|1|1|0.1|5|0.1	2025-02-14 13:55:50

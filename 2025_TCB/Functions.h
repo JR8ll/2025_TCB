@@ -2,12 +2,17 @@
 
 #include<random>
 
-#include "Solver_GA.h"		// struct GA_params
 #include "Job.h"
+#include "Common_aliases.h"
 #include "Log.h"
 
+static const int ALG_ITERATEDMILP = 1;		// iterated MILP solving
+static const int ALG_LISTSCHEDATC = 2;		// simple List scheduling approach
+static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
+static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
 
-using pJob = std::unique_ptr<Job>;
+struct GA_params;
+struct DECOMPMILP_params;
 
 class Problem;
 
@@ -27,7 +32,9 @@ public:
 	const std::string& getMessage() const { return message; }
 };
 
-void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, GA_params& gaParams);
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, GA_params& gaParams, DECOMPMILP_params& decompParams);
+void writeSolutions(Schedule* solution, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, GA_params* gaParams, DECOMPMILP_params* decompParams);
+
 
 void sortJobsByD(std::vector<pJob>& unscheduledJobs);									// by due date
 void sortJobsByR(std::vector<pJob>& unscheduledJobs);									// by release time
@@ -42,6 +49,7 @@ void shiftJobFromVecToVec(std::vector<pJob>& source, std::vector<pJob>& target, 
 double getAvgP(const std::vector<pJob>& unscheduledJobs);
 
 void loadGaParams(GA_params& gaParams, std::string filename);
+void loadDecompParams(DECOMPMILP_params& decompParams, std::string filename);
 
 double getObjectiveTWT(const Schedule* sched);
 

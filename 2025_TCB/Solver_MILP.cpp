@@ -15,7 +15,7 @@ using IloBoolVarArray3 = IloArray<IloBoolVarArray2>;
 using IloNumVarArray2 = IloArray<IloNumVarArray>;
 using IloBoolArray2 = IloArray<IloBoolArray>;
 
-Solver_MILP::Solver_MILP() {}
+Solver_MILP::Solver_MILP(DECOMPMILP_params& decompParams) : params(&decompParams) {}
 Solver_MILP::~Solver_MILP() {}
 
 double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim) {
@@ -762,7 +762,8 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, in
 
 	return schedule->getTWT();
 }
-double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash, int cplexTilim, prioRule<pJob> initRule, prioRuleKappa<pJob> dynRule, std::vector<double> kappas) {
+double Solver_MILP::solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule, int nDash, int cplexTilim, prioRule<pJob> initRule, prioRuleKappa<pJob> dynRule) {
+	vector<double> kappas = getDoubleGrid(params->kappaLow, params->kappaHigh, params->kappaStep);
 	// OBTAIN INITIAL WAITING TIMES FROM A SCHEDULE WITH LIST SCHEDULING AND SORTING BY initRule (DEFAULT: EDD)
 	unique_ptr<Schedule> initSched = schedule->clone();
 	initSched->lSchedJobsWithSorting(initRule);
@@ -779,11 +780,22 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, in
 
 		// ASSIGN THE NEXT NDASH JOBS
 		solveJobBasedMILP(schedule, nDash, cplexTilim);
-		cout << *schedule;
 	}
 
 	
 	return schedule->getTWT();
+}
+
+DECOMPMILP_params Solver_MILP::getDefaultParams() {
+	DECOMPMILP_params decompParams = DECOMPMILP_params();
+	decompParams.nDash = 10;
+	decompParams.cplexTilim = 60;
+	decompParams.method = DECOMP_SOLVER_MILP;
+	decompParams.initPrioRule = PRIORULE_EDD;
+	decompParams.kappaLow = 0.1;
+	decompParams.kappaHigh = 5.0;
+	decompParams.kappaStep = 0.1;
+	return decompParams;
 }
 
 
