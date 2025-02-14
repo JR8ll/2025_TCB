@@ -77,7 +77,7 @@ public:
 	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
 	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
-	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0, objectiveFunction objectiveFunction = &getObjectiveTWT);	// like above with a grid search of kappa values
+	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0, objectiveFunction objectiveFunction = &getObjectiveTWT);	// Dynamic ATC-like sorting with the best kappa from a grid, returns best kappa
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
 
 	double getTWT() const;											// total weighted tardiness

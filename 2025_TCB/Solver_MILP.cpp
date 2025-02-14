@@ -770,15 +770,19 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, in
 	schedule->mimicWaitingTimes(initSched.get());
 
 	while (schedule->getN() > 0) {
-		schedule->sortUnscheduled(dynRule, kappas[0]);	// TODO grid? oder best kappa von unten?
-		solveJobBasedMILP(schedule, nDash, cplexTilim);
-
 		// DYNAMIC SORTING AND UPDATE WAITING TIMES
 		unique_ptr<Schedule> tempSched = schedule->clone();
-		tempSched->lSchedJobsWithSorting(dynRule, kappas);	// GRID SEARCH
-		schedule->mimicWaitingTimes(tempSched.get());
+		double bestKappa = tempSched->lSchedJobsWithSorting(dynRule, kappas);	// GRID SEARCH
+		tempSched->updateWaitingTimes();
+		schedule->mimicWaitingTimes(tempSched.get());	
+		schedule->sortUnscheduled(dynRule, bestKappa);
+
+		// ASSIGN THE NEXT NDASH JOBS
+		solveJobBasedMILP(schedule, nDash, cplexTilim);
+		cout << *schedule;
 	}
 
+	
 	return schedule->getTWT();
 }
 

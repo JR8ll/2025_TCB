@@ -264,7 +264,7 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, dou
 	}
 }
 
-void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait, objectiveFunction objectiveFunction) {
+double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait, objectiveFunction objectiveFunction) {
 	double bestObjectiveValue = numeric_limits<double>::max();
 	double bestKappa = 0.0;
 	for (size_t kappa = 0; kappa < kappaGrid.size(); ++kappa) {
@@ -278,6 +278,7 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector
 	}
 	lSchedJobsWithSorting(rule, bestKappa, pWait);
 	TCB::logger.Log(Info, "Found a schedule with best kappa value = " + to_string(bestKappa));
+	return bestKappa;
 }
 
 void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait) {
