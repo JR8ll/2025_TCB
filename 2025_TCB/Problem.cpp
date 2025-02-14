@@ -14,6 +14,209 @@ Problem::Problem() : filename("n/a"), seed(0), omega(0), n(0), stgs(0), F(0) {
 Problem::Problem(string filename) : filename(filename), seed(0), omega(0), n(0), stgs(0), F(0) {
 	this->loadFromDat(filename);
 }
+Problem::Problem(ProbParams& params) {
+	seed = params.seed;
+	omega = params.omega;
+	flowshop = params.flowshop;
+	n = params.n;
+	stgs = params.stgs;
+	F = params.F;
+	routes = params.routes;
+
+	stages_1 = vector<int>();
+	stages_b = vector<int>();
+
+	m_o = vector<int>(stgs);
+	m_B = vector<int>(stgs);
+
+	bool bCapacityValues = params.m_BValues.size() == stgs;
+
+	uniform_int_distribution<int> moDist(params.m_oIntervals.first, params.m_oIntervals.second);
+	uniform_int_distribution<int> mbDist(params.m_BIntervals.first, params.m_BIntervals.second);
+	for (int o = 0; o < stgs; ++o) {
+		m_o[o] = moDist(TCB::rng);
+		int myB = mbDist(TCB::rng);
+		if (bCapacityValues) {
+			myB = params.m_BValues[o];
+		}
+		m_B[o] = myB;
+		if (myB <= 1) {
+			stages_1.push_back(o + 1);
+		}
+		else {
+			stages_b.push_back(o + 1);
+		}
+	}
+
+	// all empty (no preformed batches)
+	B_io = vector<vector<set<int> > >(F);
+	B_iob = vector<vector<vector<int> > >(F);
+	S_iob = vector<vector<vector<double> > >(F);
+	for (int i = 0; i < F; ++i) {
+		B_io[i] = vector<set<int> >(stgs);
+		B_iob[i] = vector<vector<int> >(stgs);
+		S_iob[i] = vector<vector<double> >(stgs);
+		for (int o = 0; o < stgs; ++o) {
+			B_io[i][o] = set<int>();
+			B_iob[i][o] = vector<int>(n);
+			S_iob[i][o] = vector<double>(n);
+		}
+	}
+	rm = vector<vector<double> >(stgs);
+	for (int o = 0; o < stgs; ++o) {
+		rm[o] = vector<double>(m_o[o]);
+		for (int m = 0; m < m_o[o]; ++m) {
+			rm[o][m] = 0.0;
+		}
+	}
+
+	// PROCESSING TIMES
+	uniform_real_distribution<double> pDist(params.pInterval.first, params.pInterval.second);
+	pTimes = vector<vector<double> >(F);
+	for (int i = 0; i < F; ++i) {
+		pTimes[i] = vector<double>(stgs);
+		for (int o = 0; o < stgs; ++o) {
+			pTimes[i][o] = pDist(TCB::rng);
+		}
+	}
+
+	uniform_int_distribution<int> nTcDist(params.nTcInterval.first, params.nTcInterval.second);
+	uniform_int_distribution<int> stepDist(0, (stgs - 1));
+	
+	// TIME CONSTRAINTS
+	tc = vector<vector<vector <double> > >(F);
+	for (int i = 0; i < F; ++i) {
+		tc[i] = vector<vector<double> >(stgs);
+		for (int o1 = 0; o1 < stgs; ++o1) {
+			tc[i][o1] = vector<double>(stgs);
+			for (int o2 = 0; o2 < stgs; ++o2) {
+				tc[i][o1][o2] = 999999;	// dummy value (no constraint)
+			}
+		}
+	}
+
+	switch (params.tcScenario) {
+	case 1:
+		for (int i = 0; i < F; ++i) {
+			set<pair<int, int> > constraints = set<pair<int, int> >();
+			int nTc = nTcDist(TCB::rng);	// number of time constraints for this product
+			for (int t = 0; t < nTc; ++t) {
+				// select two stages arbitrarily
+				int low = stepDist(TCB::rng);
+				int high = stepDist(TCB::rng);
+				if (high < low) {
+					int temp = high;
+					high = low;
+					low = temp;
+				}
+				while (low == high || constraints.find(make_pair(low, high)) != constraints.end()) {
+					high = stepDist(TCB::rng);
+					low = stepDist(TCB::rng);
+					if (high < low) {
+						int temp = high;
+						high = low;
+						low = temp;
+					}
+				}
+				constraints.insert(make_pair(low, high));
+
+				// define tc length 
+				double p = 0;
+				for (int o = low; o < high; ++o) {
+					p += pTimes[i][o];
+				}
+				double tcLength = p * params.tcFlowFactor;
+				tc[i][low][high] = tcLength;
+			}
+		}
+		break;
+	default:
+		TCB::logger.Log(Error, "missing or wrong parameter 'tcScenario' in Problem::Problem(...).");
+	}
+
+	double u = 0;
+	for (int o = 0; o < stgs; ++o) {
+		double uTemp = 0;
+		for (int i = 0; i < F; ++i) {
+			uTemp += pTimes[i][o] * ((double)n / (double)F);
+		}
+		uTemp = uTemp / (m_o[o] * F);
+		if (uTemp > u) {
+			u = uTemp;
+		}
+	}
+
+	// CREATE PRODUCTS
+	products = vector<Product>();
+	for (size_t f = 0; f < F; ++f) {
+		products.push_back(Product(f+1, routes[f]));
+		products.back().setProcessingTimes(pTimes[f]);
+		for (size_t o1 = 0; o1 < tc[f].size(); ++o1) {
+			for (size_t o2 = 0; o2 < tc[f][o1].size(); ++o2) {
+				products.back().addTcMax(o1, o2, tc[f][o1][o2]);
+			}
+		}
+	}
+
+	// SET JOB PARAMETERS
+	uniform_real_distribution<double> probabilty(0.0, 1.0);
+	uniform_real_distribution<double> rDist(params.rInterval.first, params.rInterval.second* u);
+	uniform_real_distribution<double> wDist(params.wInterval.first, params.wInterval.second);
+	uniform_real_distribution<double> ddFFDist(params.dueDateFF.first, params.dueDateFF.second);
+	uniform_int_distribution<int> sDist(params.sInterval.first, params.sInterval.second);
+
+	jobs_d = vector<double>(n);
+	jobs_r = vector<double>(n);
+	jobs_w = vector<double>(n);
+	jobs_f = vector<int>(n);
+	jobs_s = vector<int>(n);
+
+	for (size_t j = 0; j < n; ++j) {
+		double prob = probabilty(TCB::rng);
+		if (prob < params.pReadyAtZero) {		// 25% of jobs are initially ready (Klemmt & Mönch)
+			jobs_r[j] = 0.0;
+		}
+		else {
+			jobs_r[j] = rDist(TCB::rng);
+		}
+		jobs_w[j] = wDist(TCB::rng);
+		jobs_f[j] = ((j + F) % F) + 1;			// jobs are equally distributed accross products/families
+		jobs_s[j] = sDist(TCB::rng);
+
+		int nSteps = routes[jobs_f[j] - 1].size();
+		double myD = jobs_r[j];
+		double tempP = 0;
+		for (size_t o = 0; o < nSteps; ++o) {
+			tempP += pTimes[jobs_f[j] - 1][o];
+		}
+		double dueDateFF = ddFFDist(TCB::rng);
+		myD += dueDateFF * tempP;				// Klemmt & Mönch: r_j + 2 x raw_processing_time
+		jobs_d[j] = myD;
+	}
+
+
+	// CREATE JOBS
+	unscheduledJobs = vector<pJob>();
+	for (size_t j = 0; j < n; ++j) {
+		pJob newJob = make_unique<Job>(j+1, jobs_s[j], &products[jobs_f[j]-1], jobs_r[j], jobs_d[j], jobs_w[j]);
+		
+		int nSteps = routes[jobs_f[j] - 1].size();
+		for (size_t o = 0; o < nSteps; ++o) {
+			pOp newOp = make_unique<Operation>(newJob.get(), o + 1);
+			newJob->addOp(move(newOp));
+		}
+		for (size_t o = 0; o < newJob->size(); ++o) {
+			if (o > 0) {
+				(*newJob)[o].setPred(&(*newJob)[o - 1]);
+			}
+			if (o < (*newJob).size() - 1) {
+				(*newJob)[o].setSucc(&(*newJob)[o + 1]);
+			}
+		}
+		unscheduledJobs.push_back(move(newJob));
+	}
+	_setG();
+}
 
 string Problem::getFilename() { return filename; }
 
@@ -289,6 +492,11 @@ void Problem::loadFromDat(string filename) {
 	
 	TCB::logger.Log(Info, "Problem initialized from " + filename + ".");
 	input.close();
+}
+
+void Problem::_setG() {
+	// TODO implement based on problem properties
+	G = 999999;
 }
 
 pair<int, int> Problem::_tokenizeTupel(string tupel) {

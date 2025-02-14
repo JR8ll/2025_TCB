@@ -1,8 +1,22 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Functions.cpp
+  Problem.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Functions.cpp(81): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Problem.cpp(152): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(156): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(186): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(203): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(426): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(470): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(477): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(319): warning C4101: 'exc' : unreferenced local variable
+Problem.cpp(419): warning C4101: 'exc' : unreferenced local variable
+C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+          Problem.cpp(201) : see reference to function template instantiation 'std::unique_ptr<Job,std::default_delete<_Ty>> std::make_unique<Job,size_t,int&,Product*,double&,double&,double&>(size_t &&,int &,Product *&&,double &,double &,double &)' being compiled
+          with
+          [
+              _Ty=Job
+          ]
 concert.lib(ilosstructi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosstructi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
 concert.lib(ilohash.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilohash.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
 concert.lib(iloalg.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloalg.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
