@@ -221,3 +221,21 @@ Info:	Problem initialized from demoProblemInstance.dat.
 Warning:	GA parameters filename not provided (default parameters initialized.)
 Info:	Problem initialized from demoProblemInstance.dat.
 Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Found a schedule with best kappa value = 1.600000
+Info:	Found a schedule with best kappa value = 1.600000
+Info:	Found a schedule with best kappa value = 1.600000
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Found a schedule with best kappa value = 1.600000
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Found a schedule with best kappa value = 1.600000
+Info:	Problem initialized from demoProblemInstance.dat.
+Warning:	GA parameters filename not provided (default parameters initialized.)
+Info:	Found a schedule with best kappa value = 1.600000
+Info:	Found a schedule with best kappa value = 1.600000
+Info:	Found a schedule with best kappa value = 1.600000
