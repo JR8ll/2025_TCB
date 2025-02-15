@@ -25,6 +25,7 @@ mt19937 TCB::rng = mt19937(123456789);
 // argv[7] filename of decompMILP parameters
 
 int main(int argc, char* argv[]) {
+
 	// PROCESS COMMAND LINE ARGUMENTS
 	TCB::logger = Logger();
 	Problem p = Problem();
@@ -54,8 +55,7 @@ int main(int argc, char* argv[]) {
 	case ALG_LISTSCHEDATC: 
 		solverName = "ListSchedGATC";
 		{
-			vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
-			sched->lSchedJobsWithSorting(sortJobsByGATC, kappas);
+			sched->lSchedJobsWithSorting(sortJobsByGATC, decompParams);	// TODO: make pWait a parameter
 		}
 		break;
 	case ALG_BRKGALISTSCH:

@@ -1,6 +1,9 @@
 #include "Problem.h"
 
 #include<fstream>
+#include<iomanip>
+#include<sstream>
+#include <Windows.h>
 
 #include "Functions.h"
 #include "Schedule.h"
@@ -494,6 +497,266 @@ void Problem::loadFromDat(string filename) {
 	input.close();
 }
 
+void Problem::saveToDat(string filename, Schedule* sched) {
+	bool success = CreateDirectory(L".\\instances", NULL);
+
+	ofstream output;
+	output.open(".\\instances\\" + filename);
+	output << "//seed= " << seed << endl;
+	if (sched != nullptr) {
+		output << "n= " << n - sched->getNumberOfScheduledJobs() << " ;" << endl;
+	} else {
+		output << "n= " << n << " ;" << endl;
+	}
+	output << "m= " << stgs << " ;" << endl;
+	output << "F= " << F << " ;" << endl;
+	output << endl;
+	output << "omega= " << omega << " ;" << endl;
+	output << endl;
+	output << "Stages_1={ ";
+	for (int i = 0; i < stages_1.size(); ++i) {
+		output << stages_1[i] << " ";
+	}
+	output << "};" << endl;
+	output << "Stages_b={ ";
+	for (int i = 0; i < stages_b.size(); ++i) {
+		output << stages_b[i] << " ";
+	}
+	output << "};" << endl;
+	output << endl;
+	output << "m_o=[ ";
+	for (int i = 0; i < stgs; ++i) {
+		output << m_o[i] << " ";
+	}
+	output << "];" << endl;
+
+	// MACHINE RELEASE
+	output << "rm=#[ ";
+	if (sched != nullptr) {
+		for (size_t wc = 0; wc < sched->size(); ++wc) {
+			for (size_t m = 0; m < (*sched)[wc].size(); ++m) {
+				output << "<" << (wc + 1) << "," << (m + 1) << ">: " << (*sched)[wc][m].getMSP();
+				if (wc < (stgs - 1) || m < (m_o[wc] - 1)) {
+					output << ", ";
+				}
+				else {
+					output << " ";
+				}
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < stgs; ++i) {
+			for (int j = 0; j < m_o[i]; ++j) {
+				output << "<" << (i + 1) << "," << (j + 1) << ">: " << rm[i][j];
+				if (i < (stgs - 1) || j < (m_o[i] - 1)) {
+					output << ", ";
+				}
+				else {
+					output << " ";
+				}
+			}
+		}
+	}	
+	output << "]#;" << endl;
+	output << endl;
+	output << endl;
+
+	if (sched != nullptr) {
+		// B_io is vector<vector<set>>> with [F][stgs] empty sets
+		// B_iob is vector<vector<vector<int>>> with [F][stgs][n] (zero) int values
+		// S_iob is vector<vector<vector<int>>> with [F][stgs][n] (zero) double values
+		for (size_t f = 0; f < F; ++f) {
+			for (size_t wc = 0; wc < sched->size(); ++wc) {
+				int batchIdx = 1;
+				for (size_t m = 0; m < (*sched)[wc].size(); ++m) {
+					for (size_t b = 0; b < (*sched)[wc][m].size(); ++b) {
+						// B_io
+						if ((*sched)[wc][m][b].getF() == (f + 1)) {
+							B_io[f][wc].insert(batchIdx);
+							B_iob[f][wc][batchIdx - 1] = (*sched)[wc][m][b].getCap() - (*sched)[wc][m][b].getAvailableCap();
+							S_iob[f][wc][batchIdx - 1] = (*sched)[wc][m][b].getStart();
+						}
+						++batchIdx;
+					}
+				}
+			}
+		}
+	}
+
+	// BATCH INDICES
+	output << "B_io=[[{ ";
+	for (int i = 0; i < B_io.size(); ++i) {
+		for (int o = 0; o < B_io[i].size(); ++o) {
+			for (auto it = B_io[i][o].begin(); it != B_io[i][o].end(); ++it) {
+				output << *it << " ";
+			}
+			if (o < B_io[i].size() - 1) {
+				output << "}{ ";
+			}
+		}
+		if (i < B_io.size() - 1) {
+			output << "}][{ ";
+		}
+	}	
+	output << "}]]; " << endl;
+
+	// BATCH OCCUPIED CAPACITIES
+	output << "B_iob=[[[ ";
+	for (int i = 0; i < B_iob.size(); ++i) {
+		for (int o = 0; o < B_iob[i].size(); ++o) {
+			for (auto it = B_iob[i][o].begin(); it != B_iob[i][o].end(); ++it) {
+				output << *it << " ";
+			}
+			if (o < B_iob[i].size() - 1) {
+				output << "][ ";
+			}
+		}
+		if (i < B_iob.size() - 1) {
+			output << "]][[ ";
+		}
+	}
+	output << "]]]; " << endl;
+
+	// BATCH START TIMES
+	output << "S_iob=[[[ ";
+	for (int i = 0; i < S_iob.size(); ++i) {
+		for (int o = 0; o < S_iob[i].size(); ++o) {
+			for (auto it = S_iob[i][o].begin(); it != S_iob[i][o].end(); ++it) {
+				output << *it << " ";
+			}
+			if (o < S_iob[i].size() - 1) {
+				output << "][ ";
+			}
+		}
+		if (i < S_iob.size() - 1) {
+			output << "]][[ ";
+		}
+	}
+	output << "]]]; " << endl;
+
+	output << "B=[ ";
+	for (int i = 0; i < stgs; ++i) {
+		if (find(stages_b.begin(), stages_b.end(), (i + 1)) != stages_b.end()) {
+			output << m_B[i] << " ";
+		}
+	}
+	output << "];" << endl;
+	output << endl;
+	output << endl;
+
+	// TODO if sched != nullptr, only consider unscheduled jobs
+	set<int> scheduledIndices = set<int>();
+	if (sched != nullptr) {
+		for (size_t j = 0; j < sched->getNumberOfScheduledJobs(); ++j) {
+			scheduledIndices.insert(sched->getScheduledJob(j)->getId() - 1);
+		}
+	}
+
+	output << "d=[ ";
+	for (int i = 0; i < n; ++i) {
+		if (scheduledIndices.find(i) != scheduledIndices.end()) {
+			// this job is already scheduled
+		}
+		else {
+			output << jobs_d[i] << " ";
+		}
+	}
+	output << "];" << endl;
+
+	output << "r=[ ";
+	for (int i = 0; i < n; ++i) {
+		if (scheduledIndices.find(i) != scheduledIndices.end()) {
+			// this job is already scheduled
+		}
+		else {
+			output << jobs_r[i] << " ";
+		}
+	}
+	output << "];" << endl;
+
+	output << "w=[ ";
+	for (int i = 0; i < n; ++i) {
+		if (scheduledIndices.find(i) != scheduledIndices.end()) {
+			// this job is already scheduled
+		}
+		else {
+			output << jobs_w[i] << " ";
+		}
+	}
+	output << "];" << endl;
+
+	output << "f=[ ";
+	for (int i = 0; i < n; ++i) {
+		if (scheduledIndices.find(i) != scheduledIndices.end()) {
+			// this job is already scheduled
+		}
+		else {
+			output << jobs_f[i] << " ";
+		}
+	}
+	output << "];" << endl;
+
+	output << "s=[ ";
+	for (int i = 0; i < n; ++i) {
+		if (scheduledIndices.find(i) != scheduledIndices.end()) {
+			// this job is already scheduled
+		}
+		else {
+			output << jobs_s[i] << " ";
+		}
+	}
+	output << "];" << endl;
+	output << endl;
+
+
+	output << "rts=[{ ";
+	for (int i = 0; i < F; ++i) {
+		for (int step = 0; step < routes[i].size(); ++step) {
+			output << routes[i][step] << " ";
+			if (step == (routes[i].size() - 1) && i < (F - 1)) {
+				output << "}{ ";
+			}
+		}
+	}
+	output << "}];" << endl;
+
+	output << "p=[[ ";
+	for (int i = 0; i < F; ++i) {
+		for (int j = 0; j < stgs; ++j) {
+			output << pTimes[i][j] << " ";
+			if (i < (F - 1) && j == (stgs - 1)) {
+				output << "][ ";
+			}
+		}
+	}
+	output << "]];" << endl;
+
+
+	output << endl;
+	output << endl;
+
+
+
+
+	output << "tc=[[[ ";
+	for (int p = 0; p < F; ++p) {
+		for (int s = 0; s < stgs; ++s) {
+			for (int t = 0; t < stgs; ++t) {
+				output << tc[p][s][t] << " ";
+				if (s < (stgs - 1) && t == (stgs - 1)) {
+					output << "][ ";
+				}
+				if (p < (F - 1) && s == (stgs - 1) && t == (stgs - 1)) {
+					output << "]][[ ";
+				}
+			}
+		}
+	}
+	output << "]]];" << endl;
+	output.close();
+}
+
 void Problem::_setG() {
 	// TODO implement based on problem properties
 	G = 999999;
@@ -529,4 +792,67 @@ unique_ptr<Schedule> Problem::getSchedule() {
 	newSchedule->setProblemRef(this);
 	return newSchedule;
 }
+
+void Problem::genInstancesTCB25_Feb25_exact() {
+	ProbParams params;
+	params.omega = 9;
+	params.F = 2;
+	params.stgs = 5;
+	params.n = 10;
+	params.m_oIntervals = make_pair(2, 3);
+	params.m_BIntervals = make_pair(1, 3);
+	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 1;
+	params.tcFlowFactor = 1.5;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.3);
+
+	int nmax_tc = 0;	// maximum possible number of timeconstraints = sum(i in 0..stgs) i
+	for (int i = 1; i < params.stgs; ++i) {
+		nmax_tc += i;
+	}
+	int nmin_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
+	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
+
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	int nInstances = 10;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_DS3TC_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_exact.dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.F = 3;
+	params.n = 9;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_DS3TC_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_exact.dat";
+		prob.saveToDat(fileName);
+	}
+}
+
+			
 

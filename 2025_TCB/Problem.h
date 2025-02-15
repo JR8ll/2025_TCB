@@ -101,6 +101,7 @@ public:
 	Product* getProduct(size_t productIdx);
 
 	void loadFromDat(std::string filename);
+	void saveToDat(std::string filename, Schedule* sched = nullptr);
 
 	void _setG();	// set big integer
 
@@ -108,5 +109,7 @@ public:
 
 	std::unique_ptr<Schedule> getSchedule();	// machine environment + jobs to be scheduled
 
+	// EXPERIMENTATION PLANNING
+	void static genInstancesTCB25_Feb25_exact();	// small instances to be solved by cplex (n <= 10, one iteration)
 };
 
