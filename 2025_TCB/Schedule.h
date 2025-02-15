@@ -68,6 +68,7 @@ public:
 	void markAsScheduled(size_t jobIdx);
 	void markAsScheduled(pJob scheduledJob);																			// adds a job to the set of scheduled jobs
 	int getNumberOfScheduledJobs() const;
+	const Job* getScheduledJob(size_t idx) const;
 
 	Operation* findInScheduledJobs(Operation* remoteOp) const;				// find operation in scheduled jobs by id and stage
 	Operation* findInUnscheduledJobs(Operation* remoteOp) const;			// find operation in unscheduled jobs by id and stage
@@ -78,6 +79,7 @@ public:
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
 	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
 	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0, objectiveFunction objectiveFunction = &getObjectiveTWT);	// Dynamic ATC-like sorting with the best kappa from a grid, returns best kappa
+	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, DECOMPMILP_params& decompParams, double pWait = 0.0, objectiveFunction objectiveFunction = &getObjectiveTWT);
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
 
 	double getTWT() const;											// total weighted tardiness

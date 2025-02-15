@@ -4,6 +4,7 @@
 
 #include "Schedule.h"
 #include "Functions.h"
+#include "Solver_MILP.h"	// DECOMPMILP_params
 
 using namespace std;
 
@@ -213,6 +214,12 @@ int Schedule::getNumberOfScheduledJobs() const {
 	return scheduledJobs.size();
 }
 
+const Job* Schedule::getScheduledJob(size_t idx) const
+{
+	if (idx >= scheduledJobs.size()) throw out_of_range("Schedule::getScheduledJob() out of range");
+	return scheduledJobs[idx].get();
+}
+
 Operation* Schedule::findInScheduledJobs(Operation* remoteOp) const {
 	for (size_t j = 0; j < scheduledJobs.size(); ++j) {
 		if (scheduledJobs[j]->getId() == remoteOp->getId()) {
@@ -279,6 +286,11 @@ double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vect
 	lSchedJobsWithSorting(rule, bestKappa, pWait);
 	TCB::logger.Log(Info, "Found a schedule with best kappa value = " + to_string(bestKappa));
 	return bestKappa;
+}
+
+double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, DECOMPMILP_params& decompParams, double pWait, objectiveFunction objectiveFunction) {
+	vector<double> kappas = getDoubleGrid(decompParams.kappaLow, decompParams.kappaHigh, decompParams.kappaStep);
+	return lSchedJobsWithSorting(rule, kappas, pWait, objectiveFunction);
 }
 
 void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait) {
