@@ -279,18 +279,22 @@ void Schedule::lSchedJobsWithSorting(prioRule<pJob> rule, double pWait) {
 }
 void Schedule::lSchedJobsWithSorting(prioRule<pJob> rule, Sched_params& sched_params) {
 	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
-	double bestTWT = numeric_limits<double>::max();
-	double bestWait = pWaitVec[0];
-	for (size_t w = 0; w < pWaitVec.size(); ++w) {
-		unique_ptr<Schedule> copySched = this->clone();
-		copySched->lSchedJobsWithSorting(rule, pWaitVec[w]);
-		double tempTWT = copySched->getTWT();
-		if (tempTWT < bestTWT) {
-			bestTWT = tempTWT;
-			bestWait = pWaitVec[w];
+	if (pWaitVec.size() == 1) {
+		lSchedJobsWithSorting(rule, pWaitVec[0]);
+	} else {
+		double bestTWT = numeric_limits<double>::max();
+		double bestWait = pWaitVec[0];
+		for (size_t w = 0; w < pWaitVec.size(); ++w) {
+			unique_ptr<Schedule> copySched = this->clone();
+			copySched->lSchedJobsWithSorting(rule, pWaitVec[w]);
+			double tempTWT = copySched->getTWT();
+			if (tempTWT < bestTWT) {
+				bestTWT = tempTWT;
+				bestWait = pWaitVec[w];
+			}
 		}
+		lSchedJobsWithSorting(rule, bestWait);
 	}
-	lSchedJobsWithSorting(rule, bestWait);
 }
 
 void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait) {
@@ -301,23 +305,13 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, dou
 		lSchedFirstJob(pWait);
 	}
 }
-void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, Sched_params& sched_params) {
-	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
-	double bestTWT = numeric_limits<double>::max();
-	double bestWait = pWaitVec[0];
-	for (size_t w = 0; w < pWaitVec.size(); ++w) {
-		unique_ptr<Schedule> copySched = this->clone();
-		copySched->lSchedJobsWithSorting(rule, kappa, pWaitVec[w]);
-		double tempTWT = copySched->getTWT();
-		if (tempTWT < bestTWT) {
-			bestTWT = tempTWT;
-			bestWait = pWaitVec[w];
-		}
-	}
-	lSchedJobsWithSorting(rule, kappa, bestWait);
-}
 
 double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait, objectiveFunction objectiveFunction) {
+	if (kappaGrid.size() == 1) {
+		lSchedJobsWithSorting(rule, kappaGrid[0], pWait);
+		return kappaGrid[0];
+	}
+	
 	double bestObjectiveValue = numeric_limits<double>::max();
 	double bestKappa = 0.0;
 	for (size_t kappa = 0; kappa < kappaGrid.size(); ++kappa) {
@@ -334,13 +328,10 @@ double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vect
 	return bestKappa;
 }
 
-double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, DECOMPMILP_params& decompParams, double pWait, objectiveFunction objectiveFunction) {
-	vector<double> kappas = getDoubleGrid(decompParams.kappaLow, decompParams.kappaHigh, decompParams.kappaStep);
-	return lSchedJobsWithSorting(rule, kappas, pWait, objectiveFunction);
-}
-double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, Sched_params& sched_params, DECOMPMILP_params& decompParams, objectiveFunction objectiveFunction) {
+double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, Sched_params& sched_params, objectiveFunction objectiveFunction) {
 	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
-	vector<double> kappas = getDoubleGrid(decompParams.kappaLow, decompParams.kappaHigh, decompParams.kappaStep);
+	vector<double> kappas = getDoubleGrid(sched_params.kappaLow, sched_params.kappaHigh, sched_params.kappaStep);
+
 	double bestTWT = numeric_limits<double>::max();
 	double bestWait = pWaitVec[0];
 	for (size_t w = 0; w < pWaitVec.size(); ++w) {

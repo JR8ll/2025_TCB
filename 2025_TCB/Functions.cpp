@@ -95,7 +95,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 		TCB::logger.Log(Warning, warning);
 	}
 }
-void writeSolutions(Schedule* solution, string solverName, string objectiveName, int prescribedTime, int usedTime, GA_params* gaParams, DECOMPMILP_params* decompParams) {
+void writeSolutions(Schedule* solution, string solverName, string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams) {
 	bool success = CreateDirectory(L".\\results", NULL);
 	string fullPath = ".\\results\\TCB_results.csv";
 	ifstream checkFile(fullPath);
@@ -120,7 +120,7 @@ void writeSolutions(Schedule* solution, string solverName, string objectiveName,
 		}
 		if (decompParams != nullptr) {
 			decompParamsString << decompParams->nDash << "|" << decompParams->cplexTilim << "|" << decompParams->method << "|" << decompParams->initPrioRule << "|";
-			decompParamsString << decompParams->kappaLow << "|" << decompParams->kappaHigh << "|" << decompParams->kappaStep;
+			decompParamsString << schedParams->kappaLow << "|" << schedParams->kappaHigh << "|" << schedParams->kappaStep;
 		} else {
 			decompParamsString << "n/a";
 		}
@@ -205,6 +205,9 @@ void loadSchedParams(Sched_params& schedParams, std::string filename) {
 		if (key == "pWaitLow") iss >> schedParams.pWaitLow;
 		else if (key == "pWaitLow") iss >> schedParams.pWaitHigh;
 		else if (key == "pWaitLow") iss >> schedParams.pWaitStep;
+		else if (key == "kappasLow") iss >> schedParams.kappaLow;
+		else if (key == "kappasHigh") iss >> schedParams.kappaHigh;
+		else if (key == "kappasStep") iss >> schedParams.kappaStep;
 	}
 	input.close();
 }
@@ -242,9 +245,6 @@ void loadDecompParams(DECOMPMILP_params& decompParams, string filename) {
 		else if (key == "cplexTilim") iss >> decompParams.cplexTilim;
 		else if (key == "method") iss >> decompParams.method;
 		else if (key == "initPrioRule") iss >> decompParams.initPrioRule;
-		else if (key == "kappasLow") iss >> decompParams.kappaLow;
-		else if (key == "kappasHigh") iss >> decompParams.kappaHigh;
-		else if (key == "kappasStep") iss >> decompParams.kappaStep;
 	}
 	input.close();
 }
@@ -254,6 +254,11 @@ Sched_params getDefaultParams() {
 	defaultParams.pWaitLow = 0.0;
 	defaultParams.pWaitHigh = 0.0;
 	defaultParams.pWaitStep = 0.0;
+
+	defaultParams.kappaLow = 0.1;
+	defaultParams.kappaHigh = 5.0;
+	defaultParams.kappaStep = 0.1;
+
 	return Sched_params();
 }
 

@@ -28,6 +28,10 @@ struct Sched_params {	// solver indipendent generic parameters
 	double pWaitLow;	// pWait is the fraction of an operation´s processing time, that is accepted as its waiting time if the operation can rather be inserted into some existing batch
 	double pWaitHigh;
 	double pWaitStep;
+
+	double kappaLow;			// grid of kappa values considered for GATC-sorting
+	double kappaHigh;
+	double kappaStep;
 };
 
 class ExcSched {
@@ -39,7 +43,7 @@ public:
 };
 
 void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams);
-void writeSolutions(Schedule* solution, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, GA_params* gaParams, DECOMPMILP_params* decompParams);
+void writeSolutions(Schedule* solution, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams);
 
 
 void sortJobsByD(std::vector<pJob>& unscheduledJobs);									// by due date

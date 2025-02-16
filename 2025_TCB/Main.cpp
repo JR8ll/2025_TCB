@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 	case ALG_ITERATEDMILP:
 		solverName = "DecompMILP";
 		{
-			Solver_MILP cplex = Solver_MILP(decompParams);
+			Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
 			vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
 			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), 4, iTilimSeconds, sortJobsByD, sortJobsByGATC);
 		}
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 	case ALG_LISTSCHEDATC: 
 		solverName = "ListSchedGATC";
 		{
-			sched->lSchedJobsWithSorting(sortJobsByGATC, decompParams);	// TODO: make pWait a parameter
+			sched->lSchedJobsWithSorting(sortJobsByGATC, schedParams);	
 		}
 		break;
 	case ALG_BRKGALISTSCH:
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 	} 
 
 	// RESULT SUMMARY (FILE OUTPUT)
-	writeSolutions(sched.get(), solverName, objectiveName, iTilimSeconds, 666, &gaParams, &decompParams);	// TODO measure time
+	writeSolutions(sched.get(), solverName, objectiveName, iTilimSeconds, 666, &schedParams, &gaParams, &decompParams);	// TODO measure time
 	
 
 	// CONSOLE OUTPUT
