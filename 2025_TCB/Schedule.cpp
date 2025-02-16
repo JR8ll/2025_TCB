@@ -257,9 +257,40 @@ void Schedule::lSchedJobs(double pWait) {
 	}
 }
 
+void Schedule::lSchedJobs(vector<double> pWaitVec) {
+	double bestTWT = numeric_limits<double>::max();
+	double bestWait = pWaitVec[0];
+	for (size_t w = 0; w < pWaitVec.size(); ++w) {
+		unique_ptr<Schedule> copySched = this->clone();
+		copySched->lSchedJobs(pWaitVec[w]);
+		double tempTWT = copySched->getTWT();
+		if (tempTWT < bestTWT) {
+			bestTWT = tempTWT;
+			bestWait = pWaitVec[w];
+		}
+	}
+	TCB::logger.Log(Info, "List Scheduling with best pWait " + to_string(bestWait));
+	lSchedJobs(bestWait);
+}
+
 void Schedule::lSchedJobsWithSorting(prioRule<pJob> rule, double pWait) {
 	rule(unscheduledJobs);
 	lSchedJobs(pWait);
+}
+void Schedule::lSchedJobsWithSorting(prioRule<pJob> rule, Sched_params& sched_params) {
+	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
+	double bestTWT = numeric_limits<double>::max();
+	double bestWait = pWaitVec[0];
+	for (size_t w = 0; w < pWaitVec.size(); ++w) {
+		unique_ptr<Schedule> copySched = this->clone();
+		copySched->lSchedJobsWithSorting(rule, pWaitVec[w]);
+		double tempTWT = copySched->getTWT();
+		if (tempTWT < bestTWT) {
+			bestTWT = tempTWT;
+			bestWait = pWaitVec[w];
+		}
+	}
+	lSchedJobsWithSorting(rule, bestWait);
 }
 
 void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait) {
@@ -269,6 +300,21 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, dou
 		rule(unscheduledJobs, t, kappa);
 		lSchedFirstJob(pWait);
 	}
+}
+void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, Sched_params& sched_params) {
+	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
+	double bestTWT = numeric_limits<double>::max();
+	double bestWait = pWaitVec[0];
+	for (size_t w = 0; w < pWaitVec.size(); ++w) {
+		unique_ptr<Schedule> copySched = this->clone();
+		copySched->lSchedJobsWithSorting(rule, kappa, pWaitVec[w]);
+		double tempTWT = copySched->getTWT();
+		if (tempTWT < bestTWT) {
+			bestTWT = tempTWT;
+			bestWait = pWaitVec[w];
+		}
+	}
+	lSchedJobsWithSorting(rule, kappa, bestWait);
 }
 
 double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait, objectiveFunction objectiveFunction) {
@@ -292,10 +338,41 @@ double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, DECOMPMILP_para
 	vector<double> kappas = getDoubleGrid(decompParams.kappaLow, decompParams.kappaHigh, decompParams.kappaStep);
 	return lSchedJobsWithSorting(rule, kappas, pWait, objectiveFunction);
 }
+double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, Sched_params& sched_params, DECOMPMILP_params& decompParams, objectiveFunction objectiveFunction) {
+	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
+	vector<double> kappas = getDoubleGrid(decompParams.kappaLow, decompParams.kappaHigh, decompParams.kappaStep);
+	double bestTWT = numeric_limits<double>::max();
+	double bestWait = pWaitVec[0];
+	for (size_t w = 0; w < pWaitVec.size(); ++w) {
+		unique_ptr<Schedule> copySched = this->clone();
+		copySched->lSchedJobsWithSorting(rule, kappas, pWaitVec[w]);
+		double tempTWT = copySched->getTWT();
+		if (tempTWT < bestTWT) {
+			bestTWT = tempTWT;
+			bestWait = pWaitVec[w];
+		}
+	}
+	return lSchedJobsWithSorting(rule, kappas, bestWait);
+}
 
 void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait) {
 	rule(unscheduledJobs, keys);
 	lSchedJobs(pWait);
+}
+void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, Sched_params& sched_params) {
+	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
+	double bestTWT = numeric_limits<double>::max();
+	double bestWait = pWaitVec[0];
+	for (size_t w = 0; w < pWaitVec.size(); ++w) {
+		unique_ptr<Schedule> copySched = this->clone();
+		copySched->lSchedJobsWithRandomKeySorting(rule, keys, pWaitVec[w]);
+		double tempTWT = copySched->getTWT();
+		if (tempTWT < bestTWT) {
+			bestTWT = tempTWT;
+			bestWait = pWaitVec[w];
+		}
+	}
+	lSchedJobsWithRandomKeySorting(rule, keys, bestWait);
 }
 
 double Schedule::getTWT() const {

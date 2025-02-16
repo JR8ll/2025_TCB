@@ -76,11 +76,16 @@ public:
 	// LIST SCHEDULING
 	void lSchedFirstJob(double pWait = 0.0);
 	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
+	void lSchedJobs(std::vector<double> pWaitVec = { 0.0 });
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
+	void lSchedJobsWithSorting(prioRule<pJob> rule, Sched_params& sched_params);
 	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
+	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, Sched_params& sched_params);
 	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait = 0.0, objectiveFunction objectiveFunction = &getObjectiveTWT);	// Dynamic ATC-like sorting with the best kappa from a grid, returns best kappa
 	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, DECOMPMILP_params& decompParams, double pWait = 0.0, objectiveFunction objectiveFunction = &getObjectiveTWT);
+	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, Sched_params& sched_params, DECOMPMILP_params& decompParams, objectiveFunction objectiveFunction = &getObjectiveTWT);
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
+	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, Sched_params& sched_params);
 
 	double getTWT() const;											// total weighted tardiness
 	double getMinMSP(size_t stgIdx) const;							// smallest makespan of the machines at stage (workcenter)
