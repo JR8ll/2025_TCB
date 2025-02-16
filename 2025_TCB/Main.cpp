@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 
 #include "Functions.h"
@@ -46,6 +47,11 @@ int main(int argc, char* argv[]) {
 	// PREPARE 
 	pSched sched = TCB::prob->getSchedule();
 
+	// START TIME MEASUREMENT
+	auto start = chrono::high_resolution_clock::now();
+	chrono::seconds usedTime;
+	chrono::time_point<chrono::high_resolution_clock> stop;
+
 	// SOLVE
 	switch (iSolver) {
 	case ALG_ITERATEDMILP:
@@ -76,8 +82,12 @@ int main(int argc, char* argv[]) {
 		TCB::logger.Log(Warning, "Program was executed with no valid algorithm key");
 	} 
 
+	// STOP TIME MEASUREMENT
+	stop = chrono::high_resolution_clock::now();
+	usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+
 	// RESULT SUMMARY (FILE OUTPUT)
-	writeSolutions(sched.get(), solverName, objectiveName, iTilimSeconds, 666, &schedParams, &gaParams, &decompParams);	// TODO measure time
+	writeSolutions(sched.get(), solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	// TODO measure time
 	
 
 	// CONSOLE OUTPUT
