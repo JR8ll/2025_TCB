@@ -24,6 +24,12 @@ namespace TCB {
 	extern std::mt19937 rng;
 }
 
+struct Sched_params {	// solver indipendent generic parameters
+	double pWaitLow;	// pWait is the fraction of an operation´s processing time, that is accepted as its waiting time if the operation can rather be inserted into some existing batch
+	double pWaitHigh;
+	double pWaitStep;
+};
+
 class ExcSched {
 private:
 	std::string message;
@@ -32,7 +38,7 @@ public:
 	const std::string& getMessage() const { return message; }
 };
 
-void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, GA_params& gaParams, DECOMPMILP_params& decompParams);
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams);
 void writeSolutions(Schedule* solution, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, GA_params* gaParams, DECOMPMILP_params* decompParams);
 
 
@@ -48,8 +54,10 @@ void shiftJobFromVecToVec(std::vector<pJob>& source, std::vector<pJob>& target, 
 
 double getAvgP(const std::vector<pJob>& unscheduledJobs);
 
+void loadSchedParams(Sched_params& schedParams, std::string filename);
 void loadGaParams(GA_params& gaParams, std::string filename);
 void loadDecompParams(DECOMPMILP_params& decompParams, std::string filename);
+Sched_params getDefaultParams();
 
 double getObjectiveTWT(const Schedule* sched);
 

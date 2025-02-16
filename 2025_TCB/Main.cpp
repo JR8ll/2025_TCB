@@ -21,10 +21,13 @@ mt19937 TCB::rng = mt19937(123456789);
 // argv[3] int describing the solving method to be used
 // argv[4] time limit in seconds
 // argv[5] console output on(=1)/off(=0)
-// argv[6] filename of ga parameters
-// argv[7] filename of decompMILP parameters
+// argv[6] filename of scheduling parameters
+// argv[7] filename of ga parameters
+// argv[8] filename of decompMILP parameters
 
 int main(int argc, char* argv[]) {
+
+	Problem::genInstancesTCB25_Feb25_exact();
 
 	// PROCESS COMMAND LINE ARGUMENTS
 	TCB::logger = Logger();
@@ -34,10 +37,11 @@ int main(int argc, char* argv[]) {
 	int iTilimSeconds = 3600;
 	bool bConsole = false;
 	string solverName = "n/a";
-	string objectiveName = "TWT";	
+	string objectiveName = "TWT";
+	Sched_params schedParams = Sched_params();
 	GA_params gaParams = GA_params();
 	DECOMPMILP_params decompParams = DECOMPMILP_params();
-	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, gaParams, decompParams);
+	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, schedParams, gaParams, decompParams);
 
 	// PREPARE 
 	pSched sched = TCB::prob->getSchedule();

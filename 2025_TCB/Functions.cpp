@@ -13,7 +13,7 @@
 
 using namespace std;
 
-void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, GA_params& gaParams, DECOMPMILP_params& decompParams) {
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams) {
 	// argv[1] filename of problem instance to be solved
 	if (argc > 1) {
 		TCB::prob->loadFromDat(argv[1]);
@@ -41,15 +41,32 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 	if (argc > 5) {
 		if (atoi(argv[5]) == 1) bConsole = true;
 	}
-	
-	// argv[6] filename of ga parameters
+
+	// argv[6] filename of scheduling parameters
 	if (argc > 6) {
+		try {
+			loadSchedParams(schedParams, argv[6]);
+		}
+		catch (...) {
+			string warning = string("Scheduling parameters file not found: ") + string(argv[6]) + string(" (default parameters initialized.)");
+			schedParams = getDefaultParams();
+			TCB::logger.Log(Warning, warning);
+		}
+	}
+	else {
+		string warning = string("Scheduling parameters filename not provided (default parameters initialized.)");
+		schedParams = getDefaultParams();
+		TCB::logger.Log(Warning, warning);
+	}
+	
+	// argv[7] filename of ga parameters
+	if (argc > 7) {
 		if (iSolver == ALG_BRKGALISTSCH || iSolver == ALG_BRKGALS2MILP) {
 			try {
-				loadGaParams(gaParams, argv[6]);
+				loadGaParams(gaParams, argv[7]);
 			}
 			catch (...) {
-				string warning = string("GA parameters file not found: ") + string(argv[1]) + string(" (default parameters initialized.)");
+				string warning = string("GA parameters file not found: ") + string(argv[7]) + string(" (default parameters initialized.)");
 				gaParams = Solver_GA::getDefaultParams();
 				TCB::logger.Log(Warning, warning);
 			}
@@ -60,13 +77,14 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 		TCB::logger.Log(Warning, warning);
 	}
 
-	if (argc > 7) {
+	// argv[8] filename of decomp MILP parameters
+	if (argc > 8) {
 		if (iSolver == ALG_ITERATEDMILP || iSolver == ALG_BRKGALS2MILP) {
 			try {
-				loadDecompParams(decompParams, argv[7]);
+				loadDecompParams(decompParams, argv[8]);
 			}
 			catch (...) {
-				string warning = string("DecompMILP parameters file not found: ") + string(argv[1]) + string(" (default parameters initialized.)");
+				string warning = string("DecompMILP parameters file not found: ") + string(argv[8]) + string(" (default parameters initialized.)");
 				decompParams = Solver_MILP::getDefaultParams();
 				TCB::logger.Log(Warning, warning);
 			}
@@ -176,6 +194,20 @@ double getAvgP(const vector<pJob>& unscheduledJobs) {
 	return totalP / (double)unscheduledJobs.size();	// TODO check if to be divided by nJobs or nOps
 }
 
+void loadSchedParams(Sched_params& schedParams, std::string filename) {
+	ifstream input(filename);
+	string line;
+	if (!input) throw ExcSched("loadSchedParams file not found");
+	while (getline(input, line)) {
+		istringstream iss(line);
+		string key;
+		getline(iss, key, ':');
+		if (key == "pWaitLow") iss >> schedParams.pWaitLow;
+		else if (key == "pWaitLow") iss >> schedParams.pWaitHigh;
+		else if (key == "pWaitLow") iss >> schedParams.pWaitStep;
+	}
+	input.close();
+}
 void loadGaParams(GA_params& gaParams, string filename) {
 	ifstream input(filename);
 	string line;
@@ -217,12 +249,23 @@ void loadDecompParams(DECOMPMILP_params& decompParams, string filename) {
 	input.close();
 }
 
+Sched_params getDefaultParams() {
+	Sched_params defaultParams = Sched_params();
+	defaultParams.pWaitLow = 0.0;
+	defaultParams.pWaitHigh = 0.0;
+	defaultParams.pWaitStep = 0.0;
+	return Sched_params();
+}
+
 double getObjectiveTWT(const Schedule* sched) {
 	return sched->getTWT();
 }
 
 vector<double> getDoubleGrid(double low, double high, double step) {
 	vector<double> grid = vector<double>();
+	if (low >= high) {
+		return { low };
+	}
 	while (low <= high + TCB::precision) {
 		grid.push_back(low);
 		low = low + step;

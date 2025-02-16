@@ -498,10 +498,10 @@ void Problem::loadFromDat(string filename) {
 }
 
 void Problem::saveToDat(string filename, Schedule* sched) {
-	bool success = CreateDirectory(L".\\instances", NULL);
+	bool success = CreateDirectory(L".\\exp", NULL);		// exp directory usually contains problem instances and parameters
 
 	ofstream output;
-	output.open(".\\instances\\" + filename);
+	output.open(".\\exp\\" + filename);
 	output << "//seed= " << seed << endl;
 	if (sched != nullptr) {
 		output << "n= " << n - sched->getNumberOfScheduledJobs() << " ;" << endl;
