@@ -43,6 +43,8 @@ public:
 	size_t size() const;	// number of workcenters
 	size_t getN() const;	// number of jobs considered
 
+	bool contains(Operation* op) const;				// searches workcenters/machines/batches/operations (not scheduledJobs vector)
+
 	int getCapAtStageIdx(size_t stgIdx) const;		// capacity (assumption: parallel identical machines)
 
 	const std::vector<int> getBatchingStages() const;
@@ -84,6 +86,8 @@ public:
 	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, Sched_params& sched_params, objectiveFunction objectiveFunction = &getObjectiveTWT);
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, Sched_params& sched_params);
+
+	bool isValid() const;
 
 	double getTWT() const;											// total weighted tardiness
 	double getMinMSP(size_t stgIdx) const;							// smallest makespan of the machines at stage (workcenter)

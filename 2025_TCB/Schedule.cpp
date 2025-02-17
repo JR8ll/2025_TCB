@@ -4,6 +4,7 @@
 
 #include "Schedule.h"
 #include "Functions.h"
+#include "Problem.h"
 #include "Solver_MILP.h"	// DECOMPMILP_params
 
 using namespace std;
@@ -79,6 +80,21 @@ void Schedule::_reconstruct(const Schedule* orig) {
 
 size_t Schedule::size() const { return workcenters.size();  }
 size_t Schedule::getN() const { return unscheduledJobs.size(); }
+
+bool Schedule::contains(Operation* op) const {
+	for (size_t wc = 0; wc < size(); ++wc) {
+		for (size_t m = 0; m < (*workcenters[wc]).size(); ++m) {
+			for (size_t b = 0; b < (*workcenters[wc])[m].size(); ++b) {
+				for (size_t o = 0; o < (*workcenters[wc])[m][b].size(); ++o) {
+					if (op->getId() == (*workcenters[wc])[m][b][o].getId() && op->getStg() == (*workcenters[wc])[m][b][o].getStg()) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
 
 int Schedule::getCapAtStageIdx(size_t stgIdx) const {
 	if (stgIdx >= size()) throw out_of_range("Schedule::getCapAtStageIdx() out of range");
@@ -364,6 +380,51 @@ void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const s
 		}
 	}
 	lSchedJobsWithRandomKeySorting(rule, keys, bestWait);
+}
+
+bool Schedule::isValid() const {
+	// ALL OPERATIONS OF ALL JOBS ARE ASSIGNED
+	for (size_t j = 0; j < problem->getN(); ++j) {
+		for (size_t o = 0; o < (*problem)[j].size(); ++o) {
+			if (!contains(&(*problem)[j][o])) {
+				TCB::logger.Log(Error, "missing operation " + to_string((*problem)[j][o].getId()) + "." + to_string((*problem)[j][o].getStg()));
+				cout << *this;
+				return false;
+			}
+		}
+	}
+
+	// NO OVERLAPPING PROCESSING ON ANY MACHINE
+	for (size_t wc = 0; wc < size(); ++wc) {
+		for (size_t m = 0; m < (*workcenters[wc]).size(); ++m) {
+			if ((*workcenters[wc])[m].hasOverlaps()) {
+				TCB::logger.Log(Error, "overlapping processing of batches at machine " + to_string(workcenters[wc]->getId()) + "." + to_string((*workcenters[wc])[m].getId()));
+				cout << *this;
+				return false;
+			}
+		}
+	}
+
+	// NO OPERATION IS STARTED BEFORE ITS ROUTE PREDECESSOR IS COMPLETED + TIME CONSTRAINTS ARE MET
+	for (size_t wc = 0; wc < size(); ++wc) {
+		for (size_t m = 0; m < (*workcenters[wc]).size(); ++m) {
+			for (size_t b = 0; b < (*workcenters[wc])[m].size(); ++b) {
+				for (size_t o = 0; o < (*workcenters[wc])[m][b].size(); ++o) {
+					if (!(*workcenters[wc])[m][b][o].checkProcessingOrder()) {
+						TCB::logger.Log(Error, "Processing order violated");
+						cout << *this;
+						return false;
+					}
+					if (!(*workcenters[wc])[m][b][o].checkTimeConstraints()) {
+						TCB::logger.Log(Error, "Time constraint violated");
+						cout << *this;
+						return false;
+					}
+				}
+			}
+		}
+	}
+	return true;
 }
 
 double Schedule::getTWT() const {

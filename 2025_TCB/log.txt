@@ -1,30 +1,461 @@
-Info:	Problem initialized from demoProblemInstance.dat.
-Warning:	GA parameters filename not provided (default parameters initialized.)
-Warning:	DECOMPMILP parameters filename not provided (default parameters initialized.)
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Problem initialized from demoProblemInstance.dat.
-Warning:	GA parameters filename not provided (default parameters initialized.)
-Warning:	DECOMPMILP parameters filename not provided (default parameters initialized.)
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Problem initialized from demoProblemInstance.dat.
-Warning:	GA parameters filename not provided (default parameters initialized.)
-Warning:	DECOMPMILP parameters filename not provided (default parameters initialized.)
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Problem initialized from demoProblemInstance.dat.
-Warning:	GA parameters filename not provided (default parameters initialized.)
-Warning:	DECOMPMILP parameters filename not provided (default parameters initialized.)
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Problem initialized from demoProblemInstance.dat.
-Warning:	GA parameters filename not provided (default parameters initialized.)
-Warning:	DECOMPMILP parameters filename not provided (default parameters initialized.)
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
-Info:	Found a schedule with best kappa value = 1.600000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 74 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 49 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 48 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 31 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 18 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 26 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	missing operation 18.3
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 74 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 49 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 48 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 31 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 18 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 26 at stage 3
+Info:	Found a schedule with best kappa value = 0.500000
+ERROR:	missing operation 18.3
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+ERROR:	Problem in SolverMILP::solve(): infeasible op assignment 26 at stage 3
+Info:	Found a schedule with best kappa value = 0.100000
+ERROR:	missing operation 26.3
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 4.300000
+Info:	Found a schedule with best kappa value = 0.200000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+ERROR:	missing operation 1.1
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 4.300000
+Info:	Found a schedule with best kappa value = 0.200000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+ERROR:	missing operation 1.1
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+ERROR:	overlapping processing of batches at machine 1.1
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
