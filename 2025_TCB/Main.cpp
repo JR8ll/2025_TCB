@@ -19,7 +19,7 @@ mt19937 TCB::rng = mt19937(123456789);
 
 // argv[1] filename of problem instance to be solved
 // argv[2] seed for pseudo random-number generator
-// argv[3] int describing the solving method to be used
+// argv[3] int describing the solving method to be used: 1: Decomposition-MILP, 2: List Scheduling, 3: BRKGA, 4: BRKGA + final Decomposition-MILP with best sorting order (see constants in Functions.h)
 // argv[4] time limit in seconds
 // argv[5] console output on(=1)/off(=0)
 // argv[6] filename of scheduling parameters
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 	usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
 
 	// RESULT SUMMARY (FILE OUTPUT)
-	writeSolutions(sched.get(), solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	// TODO measure time
+	writeSolutions(sched.get(), iSolver, solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	// TODO measure time
 	
 
 	// CONSOLE OUTPUT

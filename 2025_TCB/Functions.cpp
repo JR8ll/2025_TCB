@@ -95,7 +95,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 		TCB::logger.Log(Warning, warning);
 	}
 }
-void writeSolutions(Schedule* solution, string solverName, string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams) {
+void writeSolutions(Schedule* solution, int solverType, string solverName, string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams) {
 	bool success = CreateDirectory(L".\\results", NULL);
 	string fullPath = ".\\results\\TCB_results.csv";
 	ifstream checkFile(fullPath);
@@ -106,7 +106,7 @@ void writeSolutions(Schedule* solution, string solverName, string objectiveName,
 	if (file.is_open()) {
 		if (!fileExists) {
 			// headings
-			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "CreatedOn" << endl;
+			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "miscReporting\t" << "CreatedOn" << endl;
 		}
 
 		
@@ -141,6 +141,15 @@ void writeSolutions(Schedule* solution, string solverName, string objectiveName,
 		tm* localTime = localtime(&now);
 		ostringstream dateString;
 		dateString << put_time(localTime, "%Y-%m-%d %H:%M:%S");
+
+		// misc reporting
+		if (solverType == ALG_BRKGALISTSCH || solverType == ALG_BRKGALS2MILP) {
+			file << "nGen=" << gaParams->iterations << "\t";
+		}
+		else {
+			file << "n/a\t";
+		}
+
 		file << dateString.str() << endl;
 		file.close();
 	} else {
