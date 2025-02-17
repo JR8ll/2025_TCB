@@ -108,15 +108,39 @@ const std::vector<std::pair<int, double>>& Operation::getTcMaxFwd() const {
 void Operation::setWait(double wt) { wait = wt; }
 void Operation::computeWaitingTimeFromStart(double start) {
 	wait = start - getEarliestStart();
-	if (wait < 0.0) {
-		int debug = 666;
-	}
 }
 void Operation::setPred(Operation* pre) { pred = pre; }
 void Operation::setSucc(Operation* suc) { succ = suc; }
 
 Job* Operation::getJob() const { return job; }
 Batch* Operation::getBatch() const { return batch; }
+
+bool Operation::checkProcessingOrder() const {
+	if (pred != nullptr) {
+		if (pred->getC() - TCB::precision > getC() - getP()) return false;
+	}
+	if (succ != nullptr) {
+		if (succ->getStart() + TCB::precision < getC()) return false;
+	}
+	return true;
+}
+
+bool Operation::checkTimeConstraints() const {
+	const vector<pair<int, double>>& tc = job->getTcMaxBwd(stg-1);
+	for (size_t t = 0; t < tc.size(); ++t) {
+		if (tc[t].second != 999999) {
+			int steps = (stg-1) - tc[t].first;
+			Operation* tcPred = pred;
+			for (size_t step = 1; step < steps; ++step) {
+				tcPred = pred->getPred();
+			}
+			if (tcPred->getStart() + tc[t].second + TCB::precision < getStart()) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
 
 void Operation::assignToBatch(Batch* newBatch) {
 	batch = newBatch;

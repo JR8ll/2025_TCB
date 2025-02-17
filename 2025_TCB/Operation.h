@@ -59,6 +59,9 @@ public:
 	Job* getJob() const;
 	Batch* getBatch() const;
 
+	bool checkProcessingOrder() const;	// true if processing order of steps is respected (predecessor.c <= successor.start)  
+	bool checkTimeConstraints() const;	// true if time constraints are respected
+
 	void assignToBatch(Batch* batch);
 	bool repairOverlaps();													// true, if an overlap was found and repaired
 	bool repairTimeConstraints();											// true, if a tc violation was found and repaired

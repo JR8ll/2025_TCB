@@ -92,11 +92,16 @@ public:
 	Problem(std::string filename);
 	Problem(ProbParams& params);
 
+	Job& operator[](size_t idx);			// access job
+	Job& operator[](size_t idx) const;	// access job
+
+	int size() const;			// number of jobs
 	std::string getFilename();
 
 	int getN() const;
 	int getStgs() const;
 	int getF() const;
+	double getG() const;	// big integer (double actually)
 
 	Product* getProduct(size_t productIdx);
 

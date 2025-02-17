@@ -21,6 +21,10 @@ Solver_MILP::~Solver_MILP() {}
 double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim) {
 	if (schedule->getProblem() == nullptr) throw ExcSched("solveDecompositionMILP missing problem reference");
 
+	//DEBUGGING
+	bool stopping = false;
+
+
 	vector<pJob> consideredJobs = vector<pJob>();
 	for (size_t j = 0; j < nDash; ++j) {
 		try {
@@ -35,7 +39,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	// PARAMETERS
 	IloNum omega = 9;	// TODO set omega
 
-	IloInt G = 99999;	// TODO compute
+	IloNum G = schedule->getProblem()->getG();	
 	IloInt m = schedule->size();
 
 	int nProducts = schedule->getProblem()->getF();
@@ -45,7 +49,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 
 	IloIntTupleSet stageMachine(env, 2);
 	for (int o = 0; o < nStages; ++o) {
-		for (int l = 0; l < (*schedule)[l].size(); ++l) {
+		for (int l = 0; l < (*schedule)[o].size(); ++l) {
 			stageMachine.add(IloIntArray(env, 2, o, l));
 		}
 	}
@@ -55,6 +59,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 		mapStgMac.insert(make_pair(make_pair((*it)[0], (*it)[1]), index));
 		index++;
 	}
+	const map<pair<int, int>, int> constMapStgMac = mapStgMac;
 
 	IloIntArray B(env);	// capacity[stage]
 	for (int o = 0; o < m; ++o) {
@@ -63,8 +68,6 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			B.add(tempCap);
 		}
 	}
-
-
 
 	IloIntArray3 B_iob(env);	// number of jobs assigned to preformed Batch[Products][Stages][Batches]
 	IloNumArray3 S_iob(env);	// start times of preformed Batch[Products][Stages][Batches]	
@@ -82,7 +85,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 
 	vector<map<pair<int, int>, pair<int, int>>> batchIdxMac = vector<map<pair<int, int>, pair<int, int>>>(nStages);
 	for (int o = 0; o < nStages; ++o) {
-		batchIdxMac[o] = map<pair<int, int>, pair<int, int> >();
+		batchIdxMac[o] = map<pair<int, int>, pair<int, int> >();	// first pair: model indices, second pair: schedule indices
 		int batchIdx = 0;
 		for (int l = 0; l < (*schedule)[o].size(); ++l) {
 			for (int b = 0; b < (*schedule)[o][l].size(); ++b) {
@@ -90,6 +93,10 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 				if (productIdx >= 0) {
 					B_io_preformed[productIdx][o].insert(batchIdx);
 					batchIdxMac[o].insert(make_pair(make_pair(productIdx, batchIdx), make_pair(l, b)));
+
+					int debugB_iob = (*schedule)[o][l][b].size();
+					double debugS_iob = (*schedule)[o][l][b].getStart();
+
 					B_iob[productIdx][o][batchIdx] = (*schedule)[o][l][b].size();
 					S_iob[productIdx][o][batchIdx] = (*schedule)[o][l][b].getStart();
 					batchIdx++;
@@ -98,6 +105,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 		}
 	}
 
+	
 	// ready times of machines
 	IloNumArray2 rm(env);	// rm[Stages][Machines] machine ready times
 	for (int o = 0; o < nStages; ++o) {
@@ -264,7 +272,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 
 					for (int b = 0; b < nJobs; ++b) {									// sum(b in Batches, l in 1..m[o])
 						for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {			
-							cR03_SumX += x[j][b][mapStgMac[{oBatch, l}]];
+							cR03_SumX += x[j][b][constMapStgMac.at({oBatch, l})];
 						}
 					}
 					IloExpr cR03_SumZ(env);
@@ -288,7 +296,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {						// l in 1..m[o]
 				IloExpr cR04_SumX(env);
 				for (int j = 0; j < nJobs; ++j) {										// sum(j in Jobs)
-					cR04_SumX += x[j][b][mapStgMac[{oBatch, l}]];
+					cR04_SumX += x[j][b][constMapStgMac.at({oBatch, l})];
 				}
 				IloExpr cR04(env);
 				cR04 = cR04_SumX; // <= B[o];
@@ -301,13 +309,16 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	// R05: capacity of preformed batches												// forall..
 	for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {					// o in Stages_b
 		int oBatch = schedule->getBatchingStages()[o] - 1;
+
 		for (auto it = batchIdxMac[oBatch].begin(); it != batchIdxMac[oBatch].end(); ++it) {
 			IloExpr cR05_SumZ(env);
 			for (int j = 0; j < nJobs; ++j) {											// sum(j in Jobs)
+
 				cR05_SumZ += z[j][oBatch][it->first.second];
 			}
 			IloExpr cR05(env);
-			cR05 = cR05_SumZ + B_iob[it->first.first][o][it->first.second];
+			cR05 = cR05_SumZ + B_iob[it->first.first][oBatch][it->first.second];
+
 			string conLabel = "R05 (o" + to_string(oBatch) + "b" + to_string(it->first.second) + "i" + to_string(it->first.first) + ")";
 			mod.add(cR05 <= B[o]).setName(conLabel.c_str());
 		}
@@ -320,7 +331,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {						// l in 1..m[o]
 				IloExpr cR06_SumY(env);
 				for (int i = 0; i < nProducts; ++i) {									// sum(i in Products)
-					cR06_SumY += y[i][b][mapStgMac[{oBatch, l}]];
+					cR06_SumY += y[i][b][constMapStgMac.at({oBatch, l})];
 				}
 				IloExpr cR06(env);
 				cR06 = cR06_SumY; // == 1;
@@ -339,9 +350,9 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 					for (int i = 0; i < nProducts; ++i) {
 						if (f[j] == (i + 1)) {											// i in Products : i == f[j]
 							IloExpr cR07(env);
-							cR07 = x[j][b][mapStgMac[{oBatch, l}]]; // <= y[i][b][oBatch, l];
+							cR07 = x[j][b][constMapStgMac.at({oBatch, l})]; // <= y[i][b][oBatch, l];
 							string conLabel = "R07 (j" + to_string(j) + "b" + to_string(b) + "o" + to_string(oBatch) + "l" + to_string(l) + "i" + to_string(i) + ")";
-							mod.add(cR07 <= y[i][b][mapStgMac[{oBatch, l}]]).setName(conLabel.c_str());
+							mod.add(cR07 <= y[i][b][constMapStgMac.at({oBatch, l})]).setName(conLabel.c_str());
 
 						}
 					}
@@ -356,7 +367,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			int oSingle = schedule->getDiscreteStages()[o] - 1;
 			IloExpr cR08_SumU(env);
 			for (int l = 0; l < (*schedule)[oSingle].size(); ++l) {							// sum(l in 1..m_o[o])
-				cR08_SumU += u[j][mapStgMac[{oSingle, l}]];
+				cR08_SumU += u[j][constMapStgMac.at({oSingle, l})];
 			}
 			IloExpr cR08(env);
 			cR08 = cR08_SumU; // == 1;
@@ -379,7 +390,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			int oSingle = schedule->getDiscreteStages()[o] - 1;
 			for (int l = 0; l < (*schedule)[oSingle].size(); ++l) {					// l in 1..m_o[o]
 				IloExpr cR10(env);
-				cR10 = s[j][oSingle] + (rm[oSingle][l] * (1 - u[j][mapStgMac[{oSingle, l}]])); // >= rm[oSingle][l];
+				cR10 = s[j][oSingle] + (rm[oSingle][l] * (1 - u[j][constMapStgMac.at({oSingle, l})])); // >= rm[oSingle][l];
 				string conLabel = "R10 (j" + to_string(j) + "o" + to_string(oSingle) + "l" + to_string(l) + ")";
 				mod.add(cR10 >= rm[oSingle][l]).setName(conLabel.c_str());
 			}
@@ -393,7 +404,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			for (int b = 0; b < nBatches; ++b) {											// b in Batches
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
 					IloExpr cR11(env);
-					cR11 = S[b][mapStgMac[{oBatch, l}]]; // >= rm[oBatch][l];
+					cR11 = S[b][constMapStgMac.at({oBatch, l})]; // >= rm[oBatch][l];
 					string conLabel = "R11 (j" + to_string(j) + "o" + to_string(oBatch) + "b" + to_string(b) + "l" + to_string(l) + ")";
 					mod.add(cR11 >= rm[oBatch][l]).setName(conLabel.c_str());
 				}
@@ -408,12 +419,12 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {						// l in 1..m_o[o]
 				IloExpr cR12_SumY(env);
 				for (int i = 0; i < nProducts; ++i) {									// sum(i in Products)
-					cR12_SumY += p[i][oBatch] * y[i][b][mapStgMac[{oBatch, l}]];
+					cR12_SumY += p[i][oBatch] * y[i][b][constMapStgMac.at({oBatch, l})];
 				}
 				IloExpr cR12(env);
-				cR12 = S[b][mapStgMac[{oBatch, l}]] + cR12_SumY; // <= S[b + 1][oBatch, l];
+				cR12 = S[b][constMapStgMac.at({oBatch, l})] + cR12_SumY; // <= S[b + 1][oBatch, l];
 				string conLabel = "R12 (o" + to_string(oBatch) + "b" + to_string(b) + "l" + to_string(l) + ")";
-				mod.add(cR12 <= S[b + 1][mapStgMac[{oBatch, l}]]).setName(conLabel.c_str());
+				mod.add(cR12 <= S[b + 1][constMapStgMac.at({oBatch, l})]).setName(conLabel.c_str());
 			}
 		}
 	}
@@ -443,7 +454,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			if (f[j] == (i + 1)) {														// i in Products : i == f[j]
 				for (int o = 0; o < (nStages - 1); ++o) {								// o in 1..(m-1)
 					IloExpr cR14(env);
-					cR14 = s[j][o] + p[i][o]; // -s[j][o + 1]; // <= p[i][o];
+					cR14 = s[j][o] + p[i][o]; 
 					string conLabel = "R14 (j" + to_string(j) + "i" + to_string(i) + "o" + to_string(o) + ")";
 					mod.add(cR14 <= s[j][o + 1]).setName(conLabel.c_str());
 				}
@@ -459,7 +470,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 					int oSingle = schedule->getDiscreteStages()[o] - 1;
 					for (int l = 0; l < (*schedule)[oSingle].size(); ++l) {				// l in 1..m_o[o]
 						IloExpr cR15(env);
-						cR15 = u[j][mapStgMac[{oSingle, l}]] + u[k][mapStgMac[{oSingle, l}]] - e[j][k][oSingle] - e[k][j][oSingle]; // <= 1;
+						cR15 = u[j][constMapStgMac.at({oSingle, l})] + u[k][constMapStgMac.at({oSingle, l})] - e[j][k][oSingle] - e[k][j][oSingle]; // <= 1;
 						string conLabel = "R15 (j" + to_string(j) + "k" + to_string(k) + "o" + to_string(oSingle) + "l" + to_string(l) + ")";
 						mod.add(cR15 <= 1).setName(conLabel.c_str());
 					}
@@ -483,16 +494,16 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 		}
 	}
 
-	// R17: matching start times of jobs and batches									// forall..
+	// R17: matching start times of jobs and batches								// forall..
 	for (int j = 0; j < nJobs; ++j) {												// j in Jobs
 		for (int o = 0; o < schedule->getBatchingStages().size(); ++o) {						// o in Stages_b
 			int oBatch = schedule->getBatchingStages()[o] - 1;
 			for (int b = 0; b < nBatches; ++b) {									// b in Batches
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
 					IloExpr cR17(env);
-					cR17 = s[j][oBatch] + (G * (1 - x[j][b][mapStgMac[{oBatch, l}]])); // >= S[b][oBatch, l];
+					cR17 = s[j][oBatch] + (G * (1 - x[j][b][constMapStgMac.at({oBatch, l})])); // >= S[b][oBatch, l];
 					string conLabel = "R17 (j" + to_string(j) + "o" + to_string(oBatch) + "b" + to_string(b) + "l" + to_string(l) + ")";
-					mod.add(cR17 >= S[b][mapStgMac[{oBatch, l}]]).setName(conLabel.c_str());
+					mod.add(cR17 >= S[b][constMapStgMac.at({oBatch, l})]).setName(conLabel.c_str());
 				}
 			}
 		}
@@ -505,9 +516,9 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			for (int b = 0; b < nBatches; ++b) {									// b in Batches
 				for (int l = 0; l < (*schedule)[oBatch].size(); ++l) {					// l in 1..m_o[o]
 					IloExpr cR18(env);
-					cR18 = s[j][oBatch] + (G * (x[j][b][mapStgMac[{oBatch, l}]] - 1)); // <= S[b][oBatch, l];
+					cR18 = s[j][oBatch] + (G * (x[j][b][constMapStgMac.at({oBatch, l})] - 1)); // <= S[b][oBatch, l];
 					string conLabel = "R18 (j" + to_string(j) + "o" + to_string(oBatch) + "b" + to_string(b) + "l" + to_string(l) + ")";
-					mod.add(cR18 <= S[b][mapStgMac[{oBatch, l}]]).setName(conLabel.c_str());
+					mod.add(cR18 <= S[b][constMapStgMac.at({oBatch, l})]).setName(conLabel.c_str());
 				}
 			}
 		}
@@ -610,6 +621,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 		env.end();
 	}
 
+	cout << ".";
 	// construct schedule from solution
 	for (int stg = 0; stg < nStages; ++stg) {
 		if (schedule->getCapAtStageIdx(stg) <= 1) {
@@ -619,14 +631,14 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 				newSingleBatch->addOp(consideredJobs[j]->getOpPtr(stg));
 				int macIdx;
 				for (int mac = 0; mac < (*schedule)[stg].size(); ++mac) {
-					IloNum val = cplex.getValue(u[j][mapStgMac[{stg, mac}]]);		// u[j][stgMac]	: machine assignment
+					IloNum val = cplex.getValue(u[j][constMapStgMac.at({stg, mac})]);		// u[j][stgMac]	: machine assignment
 					if (val >= 1 - TCB::precision) {
 						macIdx = mac;
 					}
 				}
 				IloNum start = cplex.getValue(s[j][stg]);
 				if (!(*schedule)[stg][macIdx].addBatch(move(newSingleBatch), start)) { 
-					std::cout << "Problem in SolverMILP::solve(): infeasible op assignment " << (j + 1) << " at stage " << (stg + 1) << ": " << start << endl;
+					TCB::logger.Log(Error, "Problem in SolverMILP::solve(): infeasible op assignment " + to_string((j + 1)) + " at stage " + to_string((stg + 1)) + ": " + to_string(start));
 				}
 			}
 		}
@@ -653,15 +665,15 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			}
 
 			// form fresh batches (dvar x[j][b][o][l])
-			int batchingStageIndex = 0;
-			const vector<int>& stagesB = schedule->getBatchingStages();
-			for (int i = 0; i < stagesB.size(); ++i) {
-				if (stagesB[i] == (stg + 1)) {
-					batchingStageIndex = i;
-					break;
-				}
-			}
-			int capacity = schedule->getCapAtStageIdx(batchingStageIndex);
+			//int batchingStageIndex = 0;
+			//const vector<int>& stagesB = schedule->getBatchingStages();
+			//for (int i = 0; i < stagesB.size(); ++i) {
+			//	if (stagesB[i] == (stg + 1)) {
+			//		batchingStageIndex = i;
+			//		break;
+			//	}
+			//}
+			int capacity = schedule->getCapAtStageIdx(stg);
 			vector<vector<pBat>> newBatches = vector<vector<pBat>>((*schedule)[stg].size());
 			for (size_t l = 0; l < ((*schedule)[stg].size()); ++l) {
 				for (size_t b = 0; b < nBatches; ++b) {
@@ -681,7 +693,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			for (int b = 0; b < nJobs; ++b) {
 				for (int j = 0; j < nJobs; ++j) {
 					for (int mac = 0; mac < (*schedule)[stg].size(); ++mac) {
-						IloNum xJBOL = cplex.getValue(x[j][b][mapStgMac[{stg, mac}]]);
+						IloNum xJBOL = cplex.getValue(x[j][b][constMapStgMac.at({stg, mac})]);
 						if (xJBOL >= 1 - TCB::precision) {
 							if (!newBatches[mac][b]->addOp(consideredJobs[j]->getOpPtr(stg))) {
 								throw ExcSched("Could not add op to batch (invalid solution?), SolverMILP::initModel()");
@@ -695,17 +707,19 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 			for (int b = 0; b < nJobs; ++b) {
 				for (int mac = 0; mac < (*schedule)[stg].size(); ++mac) {
 					for (int j = 0; j < nJobs; ++j) {
-						IloNum xJBOL = cplex.getValue(x[j][b][mapStgMac[{stg, mac}]]);
+						IloNum xJBOL = cplex.getValue(x[j][b][constMapStgMac.at({stg, mac})]);
 						if (xJBOL >= 1 - TCB::precision) {
 							IloNum sBOL = cplex.getValue(S[b][mapStgMac[{stg, mac}]]);
+							IloNum sJO = cplex.getValue(s[j][stg]);
 							try {
 								if (newBatches[mac][b] != nullptr) {
-									(*schedule)[stg][mac].addBatch(move(newBatches[mac][b]), (double)sBOL);
+									if (!(*schedule)[stg][mac].addBatch(move(newBatches[mac][b]), (double)sBOL)) {
+										throw ExcSched("");
+									}	// sBOL and sJO should be equal but the tolerance is too high (big G too large?)
 								}	 
 							}
 							catch (ExcSched& e) {
 								TCB::logger.Log(Error, e.getMessage());
-
 								break; // batch must only be assigned once
 							}
 						}
@@ -780,6 +794,7 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule
 
 		// ASSIGN THE NEXT NDASH JOBS
 		solveJobBasedMILP(schedule, nDash, cplexTilim);
+
 	}
 
 	

@@ -27,7 +27,12 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 	const long unsigned rngSeed = TCB::seed;
 	MTRand rng(rngSeed);
 
-	BRKGA<GaDecoderJobLs, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, params->maxThreads);
+	int processor_count = std::thread::hardware_concurrency();
+	const unsigned MAXT = max(1, processor_count);
+
+	params->maxThreads = MAXT;
+
+	BRKGA<GaDecoderJobLs, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, MAXT);
 
 	int iterationCounter = 0;
 	do {

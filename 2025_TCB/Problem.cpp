@@ -221,11 +221,26 @@ Problem::Problem(ProbParams& params) {
 	_setG();
 }
 
+Job& Problem::operator[](size_t idx) {
+	return *unscheduledJobs[idx];
+}
+Job& Problem::operator[](size_t idx) const {
+	return *unscheduledJobs[idx];
+}
+
+int Problem::size() const {
+	return unscheduledJobs.size();
+}
+
 string Problem::getFilename() { return filename; }
 
 int Problem::getN() const { return n; }
 int Problem::getStgs() const { return stgs; }
 int Problem::getF() const { return F; }
+
+double Problem::getG() const {
+	return G;
+}
 
 Product* Problem::getProduct(size_t productIdx) {
 	if (productIdx >= products.size()) throw out_of_range("Problem::getProduct() out of range");
@@ -492,6 +507,8 @@ void Problem::loadFromDat(string filename) {
 			}
 		}
 	}
+
+	_setG();
 	
 	TCB::logger.Log(Info, "Problem initialized from " + filename + ".");
 	input.close();
@@ -758,8 +775,14 @@ void Problem::saveToDat(string filename, Schedule* sched) {
 }
 
 void Problem::_setG() {
-	// TODO implement based on problem properties
-	G = 999999;
+	double bigInteger = 0;
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < (*unscheduledJobs[j]).size(); ++o) {
+			bigInteger += (*unscheduledJobs[j])[o].getP();
+		}
+	}
+
+	G = bigInteger;
 }
 
 pair<int, int> Problem::_tokenizeTupel(string tupel) {

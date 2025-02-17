@@ -14,7 +14,7 @@ LogPriority Logger::verbosity = Info;
 const char* Logger::filepath = "log.txt";
 Logger TCB::logger;
 unsigned TCB::seed = 123456789;
-double TCB::precision = 0.001;
+double TCB::precision = 0.1;
 mt19937 TCB::rng = mt19937(123456789);
 
 // argv[1] filename of problem instance to be solved
@@ -58,8 +58,7 @@ int main(int argc, char* argv[]) {
 		solverName = "DecompMILP";
 		{
 			Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
-			vector<double> kappas = getDoubleGrid(0.1, 2.5, 0.1);
-			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), 4, iTilimSeconds, sortJobsByD, sortJobsByGATC);
+			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, iTilimSeconds, sortJobsByD, sortJobsByGATC);
 		}
 		break;
 	case ALG_LISTSCHEDATC: 

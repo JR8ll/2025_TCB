@@ -83,6 +83,7 @@ void Batch::setC(double newC, bool checkvalidity) {
 			double test = ops[op]->getEarliestStart();
 			double test2 = ops[op]->getP();
 
+			double test3 = ops[op]->getEarliestStart() + ops[op]->getP() - TCB::precision;
 			if (ops[op]->getEarliestStart() + ops[op]->getP() - TCB::precision > newC) throw ExcSched("Batch::setC() infeasible");
 		}
 	}

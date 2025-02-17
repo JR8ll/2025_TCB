@@ -50,6 +50,8 @@ public:
 
 	void assignToWorkcenter(Workcenter* wc);
 
+	bool hasOverlaps() const;	// true if processing of any two batches overlaps
+
 	void updateWaitingTimes();
 
 	double getTWT() const;	// total weighted tardiness

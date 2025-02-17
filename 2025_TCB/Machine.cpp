@@ -178,6 +178,26 @@ void Machine::assignToWorkcenter(Workcenter* wc) {
 	workcenter = wc;
 }
 
+bool Machine::hasOverlaps() const {
+	for (size_t b1 = 0; b1 < size(); ++b1) {
+		double start1 = batches[b1]->getStart(); 
+		double completion1 = batches[b1]->getC();
+		for (size_t b2 = 0; b2 < size(); ++b2) {
+			if (b1 != b2) {
+				double start2 = batches[b2]->getStart();
+				double completion2 = batches[b2]->getC();
+				if (start1 + TCB::precision < start2 && completion1 - TCB::precision > start2) {
+					return true;
+				}
+				if (start1 - TCB::precision > start2 && completion1 + TCB::precision < completion2) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void Machine::updateWaitingTimes() {
 	for (size_t b = 0; b < size(); ++b) {
 		batches[b]->updateWaitingTimes();

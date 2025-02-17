@@ -106,25 +106,37 @@ void writeSolutions(Schedule* solution, string solverName, string objectiveName,
 	if (file.is_open()) {
 		if (!fileExists) {
 			// headings
-			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "GA_params\t" << "MILPCP_params\t" << "CreatedOn" << endl;
+			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "CreatedOn" << endl;
 		}
-		file << solution->getProblem()->getFilename() << "\t" << solverName << "\t" << to_string(TCB::seed) << "\t" << objectiveName << "\t";
-		file << to_string(solution->getTWT()) << "\t" << to_string(prescribedTime) << "\t" << to_string(usedTime) << "\t";
 
+		
+		double objectiveValue = 999999;	// invalid
+		if (solution->isValid()) {
+			objectiveValue = solution->getTWT();
+		}
+
+		file << solution->getProblem()->getFilename() << "\t" << solverName << "\t" << to_string(TCB::seed) << "\t" << objectiveName << "\t";
+		file << to_string(objectiveValue) << "\t" << to_string(prescribedTime) << "\t" << to_string(usedTime) << "\t";
+
+		ostringstream schedParamsString;
 		ostringstream gaParamsString;
 		ostringstream decompParamsString;
+		if (schedParams != nullptr) {
+			schedParamsString << "kap{" << schedParams->kappaLow << "/" << schedParams->kappaHigh << "/" << schedParams->kappaStep << "}pW{" << schedParams->pWaitLow << "/" << schedParams->pWaitHigh << "/" << schedParams->pWaitStep << "}";
+		} else {
+			schedParamsString << "n/a";
+		}
 		if (gaParams != nullptr) {
 			gaParamsString << gaParams->nPop << "|" << gaParams->pElt << "|" << gaParams->pRpM << "|" << gaParams->rhoe  << "|" << gaParams->K << "|" << gaParams->maxThreads;
 		} else {
 			gaParamsString << "n/a";
 		}
 		if (decompParams != nullptr) {
-			decompParamsString << decompParams->nDash << "|" << decompParams->cplexTilim << "|" << decompParams->method << "|" << decompParams->initPrioRule << "|";
-			decompParamsString << schedParams->kappaLow << "|" << schedParams->kappaHigh << "|" << schedParams->kappaStep;
+			decompParamsString << decompParams->nDash << "|" << decompParams->cplexTilim << "|" << decompParams->method << "|" << decompParams->initPrioRule;
 		} else {
 			decompParamsString << "n/a";
 		}
-		file << gaParamsString.str() << "\t" << decompParamsString.str() << "\t";
+		file << schedParamsString.str() << "\t" << gaParamsString.str() << "\t" << decompParamsString.str() << "\t";
 		time_t now = time(nullptr);
 		tm* localTime = localtime(&now);
 		ostringstream dateString;
@@ -203,11 +215,11 @@ void loadSchedParams(Sched_params& schedParams, std::string filename) {
 		string key;
 		getline(iss, key, ':');
 		if (key == "pWaitLow") iss >> schedParams.pWaitLow;
-		else if (key == "pWaitLow") iss >> schedParams.pWaitHigh;
-		else if (key == "pWaitLow") iss >> schedParams.pWaitStep;
-		else if (key == "kappasLow") iss >> schedParams.kappaLow;
-		else if (key == "kappasHigh") iss >> schedParams.kappaHigh;
-		else if (key == "kappasStep") iss >> schedParams.kappaStep;
+		else if (key == "pWaitHigh") iss >> schedParams.pWaitHigh;
+		else if (key == "pWaitStep") iss >> schedParams.pWaitStep;
+		else if (key == "kappaLow") iss >> schedParams.kappaLow;
+		else if (key == "kappaHigh") iss >> schedParams.kappaHigh;
+		else if (key == "kappaStep") iss >> schedParams.kappaStep;
 	}
 	input.close();
 }
