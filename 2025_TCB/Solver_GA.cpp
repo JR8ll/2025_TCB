@@ -44,6 +44,7 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 
 	TCB::logger.Log(Info, "Solver_GA::solveBRKGA_List_jobBased finished after " + to_string(iterationCounter) + " iterations.");
 	decoder.formSchedule(algorithm.getBestChromosome());
+	params->iterations = iterationCounter;
 	return sched.getTWT();
 }
 

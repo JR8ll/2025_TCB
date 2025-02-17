@@ -43,7 +43,7 @@ public:
 };
 
 void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams);
-void writeSolutions(Schedule* solution, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams);
+void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams);
 
 
 void sortJobsByD(std::vector<pJob>& unscheduledJobs);									// by due date

@@ -459,3 +459,22 @@ Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Warning:	GA parameters file not found: none (default parameters initialized.)
+Info:	Solver_GA::solveBRKGA_List_jobBased finished after 16 iterations.
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.500000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
+Info:	Found a schedule with best kappa value = 0.100000
