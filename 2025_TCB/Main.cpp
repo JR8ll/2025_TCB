@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 	case ALG_BRKGALISTSCH:
 		solverName = "BRKGA"; 
 		{
-			Solver_GA brkga = Solver_GA(gaParams);
+			Solver_GA brkga = Solver_GA(schedParams, gaParams);
 			brkga.solveBRKGA_List_jobBased(*sched.get(), iTilimSeconds);
 		}
 		break;

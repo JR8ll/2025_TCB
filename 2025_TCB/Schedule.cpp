@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <queue>
 #include <map>
 
 #include "Schedule.h"
@@ -380,6 +381,39 @@ void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const s
 		}
 	}
 	lSchedJobsWithRandomKeySorting(rule, keys, bestWait);
+}
+
+void Schedule::lSchedGifflerThompson(prioRule<pJob> rule) {
+	// 1) consider all "next" operations of jobs to be processed
+	vector<queue<Operation*>> unscheduledOps = vector<queue<Operation*>>(unscheduledJobs.size());
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < (*unscheduledJobs[j]).size(); ++o) {
+			unscheduledOps[j].push(&(*unscheduledJobs[j])[o]);
+		}
+	}
+
+	// 2) get earliest completion time at any suitable workcenter => op*: operation with min C, wc*: corresponding workcenter 
+	bool allOpsScheduled = false;
+	double earliestC = numeric_limits<double>::max();
+	while (!allOpsScheduled) {
+		size_t nextOp = 0;
+		allOpsScheduled = true;
+		for (size_t j = 0; j < unscheduledOps.size(); ++j) {
+			if (!unscheduledOps[j].empty()) {
+				allOpsScheduled = false;
+
+				//double tempC getEarliestC(unscheduledOps[j].front());
+
+			}
+		}
+	} 
+	
+	// 3) further consider all operations which can be started before the completion of op* at wc* (Overlapping set)
+
+	// Original Giffler & Thompson algorithm: branch (construct all possible schedules with any of the ops of 3) to be processed next and loop back to 1))
+	// List scheduling adaptation: assign op from set 3) by priority index, loop back to 1)
+
+
 }
 
 bool Schedule::isValid() const {

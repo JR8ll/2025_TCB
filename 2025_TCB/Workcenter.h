@@ -38,6 +38,7 @@ public:
 	void schedOp(Operation* op, double pWait = 0.0);
 	void ensureValidity(Operation* op);
 	void rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait = 0.0);	// indices identify op to be right-shifted, from is the new earliest starting time
+	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait = 0.0);
 
 	void moveBatch(Batch* batch, size_t tgtMac, double newStart);
 
