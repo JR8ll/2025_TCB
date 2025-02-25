@@ -1,6 +1,7 @@
 #pragma once
 
 #include<vector>
+#include "Functions.h"
 
 class Schedule;
 
@@ -18,10 +19,11 @@ class Solver_GA {
 private:
 	bool completed;
 	std::vector<double> bestChromosome;
+	Sched_params* schedParams;
 	GA_params* params;
 
 public:
-	Solver_GA(GA_params& params);
+	Solver_GA(Sched_params& schedParams, GA_params& gaParams);
 	~Solver_GA();
 
 	double solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds);
