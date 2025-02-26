@@ -57,6 +57,9 @@
     <ClInclude Include="Common_aliases.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="Solver_ILS.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Operation.cpp">
@@ -99,6 +102,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Solver_MILP.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Solver_ILS.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

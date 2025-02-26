@@ -383,7 +383,7 @@ void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const s
 	lSchedJobsWithRandomKeySorting(rule, keys, bestWait);
 }
 
-void Schedule::lSchedGifflerThompson(prioRule<pJob> rule) {
+void Schedule::lSchedGifflerThompson(prioRule<pJob> rule, double pWait) {
 	// 1) consider all "next" operations of jobs to be processed
 	vector<queue<Operation*>> unscheduledOps = vector<queue<Operation*>>(unscheduledJobs.size());
 	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
@@ -402,6 +402,9 @@ void Schedule::lSchedGifflerThompson(prioRule<pJob> rule) {
 			if (!unscheduledOps[j].empty()) {
 				allOpsScheduled = false;
 
+				size_t bestMacIdx = 0;
+				size_t bestBatIdx = 0;
+				double bestStart = 0.0;
 				//double tempC getEarliestC(unscheduledOps[j].front());
 
 			}

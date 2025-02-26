@@ -3,6 +3,7 @@
 
 #include "Functions.h"
 #include "Problem.h"
+#include "Solver_ILS.h"
 #include "Solver_GA.h"
 #include "Solver_MILP.h"
 
@@ -76,6 +77,14 @@ int main(int argc, char* argv[]) {
 		break;
 	case ALG_BRKGALS2MILP:
 		solverName = "BRKGA_MILP";
+		break;
+	case ALG_ILS:
+		solverName = "ILS";
+		{
+			Solver_ILS ils = Solver_ILS(schedParams);
+			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
+			ils.solveILS(*sched.get(), init, sortJobsByD, iTilimSeconds);
+		}
 		break;
 	default:
 		TCB::logger.Log(Warning, "Program was executed with no valid algorithm key");

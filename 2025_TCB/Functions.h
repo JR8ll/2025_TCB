@@ -10,6 +10,7 @@ static const int ALG_ITERATEDMILP = 1;		// iterated MILP solving
 static const int ALG_LISTSCHEDATC = 2;		// simple List scheduling approach
 static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
 static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
+static const int ALG_ILS = 5;
 
 struct GA_params;
 struct DECOMPMILP_params;
