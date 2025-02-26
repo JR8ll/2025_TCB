@@ -86,7 +86,7 @@ public:
 	double lSchedJobsWithSorting(prioRuleKappa<pJob> rule, Sched_params& sched_params, objectiveFunction objectiveFunction = &getObjectiveTWT);
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, Sched_params& sched_params);
-	void lSchedGifflerThompson(prioRule<pJob> rule);
+	void lSchedGifflerThompson(prioRule<pJob> rule, double pWait = 0.0);
 
 	bool isValid() const;
 

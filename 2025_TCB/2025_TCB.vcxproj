@@ -147,6 +147,7 @@
     <ClInclude Include="Product.h" />
     <ClInclude Include="Schedule.h" />
     <ClInclude Include="Solver_GA.h" />
+    <ClInclude Include="Solver_ILS.h" />
     <ClInclude Include="Solver_MILP.h" />
     <ClInclude Include="Workcenter.h" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClCompile Include="Product.cpp" />
     <ClCompile Include="Schedule.cpp" />
     <ClCompile Include="Solver_GA.cpp" />
+    <ClCompile Include="Solver_ILS.cpp" />
     <ClCompile Include="Solver_MILP.cpp" />
     <ClCompile Include="Workcenter.cpp" />
   </ItemGroup>

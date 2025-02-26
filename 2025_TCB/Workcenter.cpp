@@ -69,7 +69,7 @@ void Workcenter::schedOp(Operation* op, double pWait) {
 	findBestStart(op, bNewBatch, bestMacIdx, bestBatIdx, tempStart, pWait);
 
 	// [JR-2025-02-25] findBestStart not yet tested
-	//// find best batch/time slot for operation TODO: call findBestStart instead
+	// find best batch/time slot for operation TODO: call findBestStart instead
 	//for (size_t m = 0; m < machines.size(); ++m) {
 	//	Machine* mac = machines[m].get();
 	//	// consider existing batches
@@ -138,8 +138,8 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 
 	findBestStart(op, bNewBatch, bestMacIdx, bestBatIdx, bestStart, pWait);
 
-	// [JR-2025-Feb-25] findBestStart not yet tested
-	// find best batch/time slot for operation TODO: call findBestStart instead
+	//// [JR-2025-Feb-25] findBestStart not yet tested
+	//// find best batch/time slot for operation TODO: call findBestStart instead
 	//double tempStart = numeric_limits<double>::max();
 	//for (size_t m = 0; m < size(); ++m) {
 	//	Machine* tempMac = machines[m].get();
@@ -186,7 +186,7 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 
 		}
 		else {
-			pBat newBatch = make_unique<Batch>(machines[bestBatIdx]->getCap());
+			pBat newBatch = make_unique<Batch>(machines[bestMacIdx]->getCap());
 			auto tempOp = op;
 			bat->removeOp(op);
 			newBatch->addOp(tempOp);

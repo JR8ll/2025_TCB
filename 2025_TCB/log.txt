@@ -478,3 +478,9 @@ Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
+Info:	Problem initialized from exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat.
