@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;IL_STD;_LIB;_CRT_SECURE_NO_WARNINGS;BOOST_NO_CX11_TEMPLATE_ALIASES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;C:\ILOG_1271\concert\include;C:\ILOG_1271\cplex\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;C:\ILOG_1271\concert\include;C:\ILOG_1271\cplex\include;C:\Boost\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>

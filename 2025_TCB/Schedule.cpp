@@ -2,12 +2,16 @@
 #include <iostream>
 #include <queue>
 #include <map>
+#include <Windows.h>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include "Schedule.h"
 #include "Functions.h"
 #include "Problem.h"
 #include "Solver_MILP.h"	// DECOMPMILP_params
 
+namespace pt = boost::property_tree;
 using namespace std;
 
 Schedule::Schedule() {
@@ -275,7 +279,7 @@ void Schedule::lSchedJobs(double pWait) {
 }
 
 void Schedule::lSchedJobs(vector<double> pWaitVec) {
-	double bestTWT = numeric_limits<double>::max();
+	double bestTWT = DBL_MAX; // numeric_limits<double>::max();
 	double bestWait = pWaitVec[0];
 	for (size_t w = 0; w < pWaitVec.size(); ++w) {
 		unique_ptr<Schedule> copySched = this->clone();
@@ -299,7 +303,7 @@ void Schedule::lSchedJobsWithSorting(prioRule<pJob> rule, Sched_params& sched_pa
 	if (pWaitVec.size() == 1) {
 		lSchedJobsWithSorting(rule, pWaitVec[0]);
 	} else {
-		double bestTWT = numeric_limits<double>::max();
+		double bestTWT = DBL_MAX; // numeric_limits<double>::max();
 		double bestWait = pWaitVec[0];
 		for (size_t w = 0; w < pWaitVec.size(); ++w) {
 			unique_ptr<Schedule> copySched = this->clone();
@@ -323,13 +327,13 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, dou
 	}
 }
 
-double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const std::vector<double>& kappaGrid, double pWait, objectiveFunction objectiveFunction) {
+double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const vector<double>& kappaGrid, double pWait, objectiveFunction objectiveFunction) {
 	if (kappaGrid.size() == 1) {
 		lSchedJobsWithSorting(rule, kappaGrid[0], pWait);
 		return kappaGrid[0];
 	}
 	
-	double bestObjectiveValue = numeric_limits<double>::max();
+	double bestObjectiveValue = DBL_MAX; //  numeric_limits<double>::max();
 	double bestKappa = 0.0;
 	for (size_t kappa = 0; kappa < kappaGrid.size(); ++kappa) {
 		lSchedJobsWithSorting(rule, kappaGrid[kappa], pWait);
@@ -349,7 +353,7 @@ double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, Sched_params& s
 	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
 	vector<double> kappas = getDoubleGrid(sched_params.kappaLow, sched_params.kappaHigh, sched_params.kappaStep);
 
-	double bestTWT = numeric_limits<double>::max();
+	double bestTWT = DBL_MAX; //  numeric_limits<double>::max();
 	double bestWait = pWaitVec[0];
 	for (size_t w = 0; w < pWaitVec.size(); ++w) {
 		unique_ptr<Schedule> copySched = this->clone();
@@ -369,7 +373,7 @@ void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const s
 }
 void Schedule::lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, Sched_params& sched_params) {
 	vector<double> pWaitVec = getDoubleGrid(sched_params.pWaitLow, sched_params.pWaitHigh, sched_params.pWaitStep);
-	double bestTWT = numeric_limits<double>::max();
+	double bestTWT = DBL_MAX; // numeric_limits<double>::max();
 	double bestWait = pWaitVec[0];
 	for (size_t w = 0; w < pWaitVec.size(); ++w) {
 		unique_ptr<Schedule> copySched = this->clone();
@@ -394,7 +398,7 @@ void Schedule::lSchedGifflerThompson(prioRule<pJob> rule, double pWait) {
 
 	// 2) get earliest completion time at any suitable workcenter => op*: operation with min C, wc*: corresponding workcenter 
 	bool allOpsScheduled = false;
-	double earliestC = numeric_limits<double>::max();
+	double earliestC = DBL_MAX; // numeric_limits<double>::max();
 	while (!allOpsScheduled) {
 		size_t nextOp = 0;
 		allOpsScheduled = true;
@@ -475,4 +479,60 @@ double Schedule::getTWT() const {
 double Schedule::getMinMSP(size_t stgIdx) const {
 	if (stgIdx >= size()) throw out_of_range("Schedule::getMSP() out of range");
 	return workcenters[stgIdx]->getMinMSP();
+}
+
+void Schedule::saveJson(std::string solver) {
+	pt::ptree treeFile;
+
+	treeFile.put("Problem", TCB::prob->getFilename());
+	treeFile.put("Solver", solver);
+	stringstream ssTWT;
+	ssTWT << setprecision(3) << fixed << getTWT();
+	treeFile.put("TWT", ssTWT.str());
+
+	pt::ptree treeSchedule;
+	for (size_t wc = 0; wc < workcenters.size(); ++wc) {
+		Workcenter* WC = &(*workcenters[wc]);
+		pt::ptree treeWorkcenter;
+		treeWorkcenter.put("stage", WC->getId());
+		for (size_t m = 0; m < WC->size(); ++m) {
+			Machine* MAC = &(*WC)[m];
+			pt::ptree treeMachine;
+			treeMachine.put("id", MAC->getId());
+			treeMachine.put("capacity", MAC->getCap());
+			for (size_t b = 0; b < MAC->size(); ++b) {
+				Batch* BAT = &(*MAC)[b];
+				pt::ptree treeBatch;
+				stringstream ssStart;
+				stringstream ssCompletion;
+				ssStart << setprecision(3) << fixed << BAT->getStart();
+				ssCompletion << setprecision(3) << fixed << BAT->getC();
+				treeBatch.put("start", ssStart.str());
+				treeBatch.put("completion", ssCompletion.str());
+				for (size_t j = 0; j < BAT->size(); ++j) {
+					Operation* OP = &(*BAT)[j];
+					pt::ptree treeOp;
+					treeOp.put("id", OP->getId());
+					treeOp.put("stage", OP->getStg());
+					treeBatch.add_child("operations.Operation", treeOp);
+				}
+				treeMachine.add_child("batches.Batch", treeBatch);
+			}
+			treeWorkcenter.add_child("machines.Machine", treeMachine);
+		}
+		treeSchedule.add_child("workcenters.Workcenter", treeWorkcenter);
+	}
+	treeFile.add_child("Schedule", treeSchedule);
+
+	string probFileName = extractFileName(TCB::prob->getFilename());
+	string probFileNameWithoutExtension = probFileName.substr(0, probFileName.find(".dat"));
+	string solverName = solver;
+	replaceWindowsSpecialCharsWithUnderscore(solverName);
+
+	string sSeed = to_string(TCB::seed);
+	string schedFileName = probFileNameWithoutExtension + "_" + solverName + sSeed + ".json";
+
+	bool success = CreateDirectory(L".\\results", NULL);
+	string pathAndFilename = string(".\\results\\").append(schedFileName);
+	pt::write_json(pathAndFilename, treeFile);
 }
