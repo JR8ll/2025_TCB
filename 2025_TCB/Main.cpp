@@ -84,6 +84,8 @@ int main(int argc, char* argv[]) {
 			Solver_ILS ils = Solver_ILS(schedParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
 			ils.solveILS(*sched.get(), init, sortJobsByD, iTilimSeconds);
+
+
 		}
 		break;
 	default:

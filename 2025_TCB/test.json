@@ -1,0 +1,90 @@
+{
+    "Problem": "exp\/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_1.dat",
+    "Solver": "ILS",
+    "TWT": "0.000",
+    "Schedule": {
+        "workcenters": {
+            "Workcenter": {
+                "stage": "1",
+                "machines": {
+                    "Machine": {
+                        "id": "1",
+                        "capacity": "1"
+                    },
+                    "Machine": {
+                        "id": "2",
+                        "capacity": "1"
+                    },
+                    "Machine": {
+                        "id": "3",
+                        "capacity": "1"
+                    }
+                }
+            },
+            "Workcenter": {
+                "stage": "2",
+                "machines": {
+                    "Machine": {
+                        "id": "1",
+                        "capacity": "2"
+                    },
+                    "Machine": {
+                        "id": "2",
+                        "capacity": "2"
+                    }
+                }
+            },
+            "Workcenter": {
+                "stage": "3",
+                "machines": {
+                    "Machine": {
+                        "id": "1",
+                        "capacity": "2"
+                    },
+                    "Machine": {
+                        "id": "2",
+                        "capacity": "2"
+                    }
+                }
+            },
+            "Workcenter": {
+                "stage": "4",
+                "machines": {
+                    "Machine": {
+                        "id": "1",
+                        "capacity": "4"
+                    },
+                    "Machine": {
+                        "id": "2",
+                        "capacity": "4"
+                    },
+                    "Machine": {
+                        "id": "3",
+                        "capacity": "4"
+                    },
+                    "Machine": {
+                        "id": "4",
+                        "capacity": "4"
+                    }
+                }
+            },
+            "Workcenter": {
+                "stage": "5",
+                "machines": {
+                    "Machine": {
+                        "id": "1",
+                        "capacity": "1"
+                    },
+                    "Machine": {
+                        "id": "2",
+                        "capacity": "1"
+                    },
+                    "Machine": {
+                        "id": "3",
+                        "capacity": "1"
+                    }
+                }
+            }
+        }
+    }
+}

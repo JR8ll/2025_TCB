@@ -93,4 +93,6 @@ public:
 	double getTWT() const;											// total weighted tardiness
 	double getMinMSP(size_t stgIdx) const;							// smallest makespan of the machines at stage (workcenter)
 
+	void saveJson(std::string solver = "N/A");
+
 };

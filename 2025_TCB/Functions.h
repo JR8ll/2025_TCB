@@ -68,6 +68,9 @@ double getObjectiveTWT(const Schedule* sched);
 
 std::vector<double> getDoubleGrid(double low, double high, double step);
 
+std::string extractFileName(const std::string& fullPath);
+void replaceWindowsSpecialCharsWithUnderscore(std::string& input);
+
 class CompJobsByGATC {
 public:
 	double avgP;

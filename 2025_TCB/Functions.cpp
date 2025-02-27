@@ -299,3 +299,22 @@ vector<double> getDoubleGrid(double low, double high, double step) {
 	return grid;
 }
 
+string extractFileName(const string& fullPath) {
+	size_t lastSlash = fullPath.find_last_of("/\\");
+	if (lastSlash != std::string::npos) {
+		return fullPath.substr(lastSlash + 1);
+	}
+	return fullPath; // Falls kein Slash gefunden wurde, geben wir den gesamten String zurück
+}
+void replaceWindowsSpecialCharsWithUnderscore(string& input) {
+	replace(input.begin(), input.end(), '*', '_');
+	replace(input.begin(), input.end(), '"', '_');
+	replace(input.begin(), input.end(), '/', '_');
+	replace(input.begin(), input.end(), '\\', '_');
+	replace(input.begin(), input.end(), '<', '_');
+	replace(input.begin(), input.end(), '>', '_');
+	replace(input.begin(), input.end(), ':', '_');
+	replace(input.begin(), input.end(), '|', '_');
+	replace(input.begin(), input.end(), '?', '_');
+}
+
