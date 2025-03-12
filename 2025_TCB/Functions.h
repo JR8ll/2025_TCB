@@ -47,11 +47,17 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams);
 
 
-void sortJobsByD(std::vector<pJob>& unscheduledJobs);									// by due date
-void sortJobsByR(std::vector<pJob>& unscheduledJobs);									// by release time
-void sortJobsByGATC(std::vector<pJob>& unscheduledJobs, double t, double kappa);		// by global ATC
-void sortJobsByRK(std::vector<pJob>& unscheduledJobs, const std::vector<double>& chr);	// by random keys 
+void sortJobsByC(std::vector<pJob>& jobs);									// by completion (to be called on scheduled jobs)
+void sortJobsByStart(std::vector<pJob>& jobs);								// by start	(to be called on scheduled jobs)
+void sortJobsByWaitingTimeDecr(std::vector<pJob>& jobs);					// by waiting time (to be called on scheduled jobs)
+void sortJobsByD(std::vector<pJob>& jobs);									// by due date
+void sortJobsByR(std::vector<pJob>& jobs);									// by release time
+void sortJobsByGATC(std::vector<pJob>& jobs, double t, double kappa);		// by global ATC
+void sortJobsByRK(std::vector<pJob>& jobs, const std::vector<double>& chr);	// by random keys 
 
+bool compJobsByC(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
+bool compJobsByStart(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
+bool compJobsByWaitingTimeDecr(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByD(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByR(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 

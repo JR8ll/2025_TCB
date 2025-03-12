@@ -157,15 +157,24 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 	}
 }
 
-void sortJobsByD(vector<pJob>& unscheduledJobs) {
-	sort(unscheduledJobs.begin(), unscheduledJobs.end(), compJobsByD);
+void sortJobsByC(std::vector<pJob>& jobs) {
+	sort(jobs.begin(), jobs.end(), compJobsByC);
 }
-void sortJobsByR(vector<pJob>& unscheduledJobs) {
-	sort(unscheduledJobs.begin(), unscheduledJobs.end(), compJobsByR);
+void sortJobsByStart(std::vector<pJob>& jobs) {
+	sort(jobs.begin(), jobs.end(), compJobsByStart);
 }
-void sortJobsByGATC(vector<pJob>& unscheduledJobs, double t, double kappa) {
-	double avgP = getAvgP(unscheduledJobs);
-	sort(unscheduledJobs.begin(), unscheduledJobs.end(), CompJobsByGATC(avgP, t, kappa));
+void sortJobsByWaitingTimeDecr(std::vector<pJob>& jobs) {
+	sort(jobs.begin(), jobs.end(), compJobsByWaitingTimeDecr);
+}
+void sortJobsByD(vector<pJob>& jobs) {
+	sort(jobs.begin(), jobs.end(), compJobsByD);
+}
+void sortJobsByR(vector<pJob>& jobs) {
+	sort(jobs.begin(), jobs.end(), compJobsByR);
+}
+void sortJobsByGATC(vector<pJob>& jobs, double t, double kappa) {
+	double avgP = getAvgP(jobs);
+	sort(jobs.begin(), jobs.end(), CompJobsByGATC(avgP, t, kappa));
 }
 
 void sortJobsByRK(vector<pJob>& unscheduledJobs, const vector<double>& chr) {
@@ -188,6 +197,30 @@ void sortJobsByRK(vector<pJob>& unscheduledJobs, const vector<double>& chr) {
 	}
 }
 
+bool compJobsByC(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
+	double cA = a->getC();
+	double cB = b->getC();
+	if (cA == cB) {
+		return a->getId() < b->getId();
+	}
+	return cA < cB;
+}
+bool compJobsByStart(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
+	double startA = a->getStart();
+	double startB = b->getStart();
+	if (startA == startB) {
+		return a->getId() < b->getId();
+	}
+	return startA < startB;
+}
+bool compJobsByWaitingTimeDecr(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
+	double waitA = a->getWait();
+	double waitB = b->getWait();
+	if (waitA == waitB) {
+		return a->getId() < b->getId();
+	}
+	return waitA > waitB;
+}
 bool compJobsByD(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 	if (a->getD() == b->getD()) {
 		return a->getId() < b->getId();

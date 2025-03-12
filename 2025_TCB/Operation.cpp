@@ -107,7 +107,11 @@ const std::vector<std::pair<int, double>>& Operation::getTcMaxFwd() const {
 
 void Operation::setWait(double wt) { wait = wt; }
 void Operation::computeWaitingTimeFromStart(double start) {
-	wait = start - getEarliestStart();
+	double earliest = getEarliestStart();
+	if (earliest - TCB::precision > start) {
+		throw ExcSched("Negative waiting time");
+	}
+	wait = max(0.0, start - earliest);	// could be zero only by marginal value (precision)
 }
 void Operation::setPred(Operation* pre) { pred = pre; }
 void Operation::setSucc(Operation* suc) { succ = suc; }

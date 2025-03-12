@@ -42,6 +42,10 @@ public:
 	double getP(size_t stgIdx) const;
 	double getTotalP() const;
 
+	double getC() const;
+	double getStart() const;
+	double getWait() const;
+
 	double getGATC(double avgP, double t, double kappa) const;
 
 	const std::vector<std::pair<int, double>>& getTcMaxFwd(size_t stgIdx) const;

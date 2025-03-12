@@ -51,6 +51,15 @@ double Job::getTotalP() const {
 	return totalP;
 }
 
+double Job::getC() const {
+	return ops[ops.size()-1]->getC();
+}
+double Job::getStart() const {
+	return ops[0]->getStart();
+}
+double Job::getWait() const {
+	return ops[0]->getWait();
+}
 
 
 double Job::getGATC(double avgP, double t, double kappa) const {

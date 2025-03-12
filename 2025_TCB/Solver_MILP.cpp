@@ -592,7 +592,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	IloCplex cplex(mod);
 	cplex.setOut(env.getNullStream());				// GO-LIVE: uncomment
 	//cplex.exportModel("milp.lp");					// GO-LIVE: comment
-	cplex.setParam(IloCplex::TiLim, cplexTilim);	// TODO extract timelimit parameter
+	cplex.setParam(IloCplex::TiLim, cplexTilim);	
 
 	try {
 		if (!cplex.solve()) {

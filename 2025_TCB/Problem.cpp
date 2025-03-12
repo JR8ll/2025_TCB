@@ -877,5 +877,112 @@ void Problem::genInstancesTCB25_Feb25_exact() {
 	}
 }
 
+void Problem::genInstancesEURO25() {
+	ProbParams params;
+	params.omega = 9;
+	params.F = 5;
+	params.stgs = 10;
+	params.n = 50;
+	params.m_oIntervals = make_pair(2, 4);
+	params.m_BIntervals = make_pair(1, 3);
+	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 1;
+	params.tcFlowFactor = 1.5;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.3);
+	params.pReadyAtZero = 0.25;
+
+	int nmax_tc = 0;	// maximum possible number of timeconstraints = sum(i in 0..stgs) i
+	for (int i = 1; i < params.stgs; ++i) {
+		nmax_tc += i;
+	}
+	int nmin_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
+	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
+
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	int nInstances = 10;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// 2nd factor combination
+
+	params.F = 10;
+	params.n = 100;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// 3rd factor combination
+
+	params.F = 5;
+	params.n = 50;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+
+	// 4th factor combination
+
+	params.F = 10;
+	params.n = 100;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+}
+
 			
 
