@@ -191,6 +191,11 @@ void Schedule::sortUnscheduled(prioRuleKappa<pJob> rule, double kappa) {
 	rule(unscheduledJobs, t, kappa);
 }
 
+void Schedule::sortScheduled(prioRule<pJob> rule) {
+	updateWaitingTimes();
+	rule(scheduledJobs);
+}
+
 void Schedule::updateWaitingTimes() {
 	for (size_t wc = 0; wc < size(); ++wc) {
 		workcenters[wc]->updateWaitingTimes();
@@ -421,6 +426,27 @@ void Schedule::lSchedGifflerThompson(prioRule<pJob> rule, double pWait) {
 	// List scheduling adaptation: assign op from set 3) by priority index, loop back to 1)
 
 
+}
+
+void Schedule::localSearchLeftShifting(prioRule<pJob> rule, double pWait) {
+	bool bImproved = true;
+	while (bImproved) {
+		bImproved = false;
+		rule(scheduledJobs);
+		for (size_t j = 0; j < scheduledJobs.size(); ++j) {
+			for (size_t o = 0; o < (*scheduledJobs[j]).size(); ++o) {
+				size_t wcIdx = (*scheduledJobs[j])[o].getWorkcenterId() - 1;
+				size_t mIdx = 0;
+				size_t bIdx = 0;
+				size_t jIdx = 0;
+				if(workcenters[wcIdx]->locateOp(&(*scheduledJobs[j])[o], mIdx, bIdx, jIdx)) {
+					if (workcenters[wcIdx]->leftShift(mIdx, bIdx, jIdx, pWait)) {
+						bImproved = true;
+					}
+				}
+			}
+		}
+	}
 }
 
 bool Schedule::isValid() const {

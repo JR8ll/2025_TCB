@@ -37,8 +37,12 @@ public:
 
 	void schedOp(Operation* op, double pWait = 0.0);
 	void ensureValidity(Operation* op);
+	bool leftShift(size_t mIdx, size_t bIdx, size_t jIdx, double pWait = 0.0);	// true if left-shift was performed
 	void rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait = 0.0);	// indices identify op to be right-shifted, from is the new earliest starting time
 	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait = 0.0);
+	bool locateOp(Operation* op, size_t& mIdx, size_t& batIdx, size_t& jIdx);	// true if found
+
+	bool localSearchLeftShift(double pWait = 0.0);	// true if at least one operation was shifted left
 
 	void moveBatch(Batch* batch, size_t tgtMac, double newStart);
 

@@ -116,5 +116,6 @@ public:
 
 	// EXPERIMENTATION PLANNING
 	void static genInstancesTCB25_Feb25_exact();	// small instances to be solved by cplex (n <= 10, one iteration)
+	void static genInstancesEURO25();				// medium-sized instances for EURO conference abstract, oriented on Klemmt & Mönch (2012)
 };
 

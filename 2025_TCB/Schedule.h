@@ -64,6 +64,7 @@ public:
 
 	void sortUnscheduled(prioRule<pJob> rule);
 	void sortUnscheduled(prioRuleKappa<pJob> rule, double kappa);
+	void sortScheduled(prioRule<pJob> rule);
 	void updateWaitingTimes();
 	void mimicWaitingTimes(const Schedule* wtSchedule);		// set waiting times of operations in this schedule according to the waiting times in the wtSchedule
 	
@@ -87,6 +88,8 @@ public:
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, double pWait = 0.0);			// Sorting by given random keys
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, Sched_params& sched_params);
 	void lSchedGifflerThompson(prioRule<pJob> rule, double pWait = 0.0);
+
+	void localSearchLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);
 
 	bool isValid() const;
 

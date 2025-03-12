@@ -29,7 +29,7 @@ mt19937 TCB::rng = mt19937(123456789);
 
 int main(int argc, char* argv[]) {
 
-	Problem::genInstancesTCB25_Feb25_exact();
+	//Problem::genInstancesEURO25();
 
 	// PROCESS COMMAND LINE ARGUMENTS
 	TCB::logger = Logger();
@@ -59,13 +59,20 @@ int main(int argc, char* argv[]) {
 		solverName = "DecompMILP";
 		{
 			Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
-			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, iTilimSeconds, sortJobsByD, sortJobsByGATC);
+			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim, sortJobsByD, sortJobsByGATC);
 		}
 		break;
 	case ALG_LISTSCHEDATC: 
 		solverName = "ListSchedGATC";
 		{
 			sched->lSchedJobsWithSorting(sortJobsByGATC, schedParams);	
+
+		// DEBUGGING
+		double beforeTWT = sched->getTWT();
+		sched->localSearchLeftShifting();
+		double twtAfter = sched->getTWT();
+		int debugger = 666;
+
 		}
 		break;
 	case ALG_BRKGALISTSCH:
@@ -89,7 +96,7 @@ int main(int argc, char* argv[]) {
 		}
 		break;
 	default:
-		TCB::logger.Log(Warning, "Program was executed with no valid algorithm key");
+		TCB::logger.Log(Error, "Program was executed with no valid algorithm key");
 	} 
 
 	// STOP TIME MEASUREMENT
@@ -99,7 +106,6 @@ int main(int argc, char* argv[]) {
 	// RESULT SUMMARY (FILE OUTPUT)
 	writeSolutions(sched.get(), iSolver, solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	// TODO measure time
 	
-
 	// CONSOLE OUTPUT
 	if (bConsole) {
 		cout << "Solved using " << solverName << " in " << " seconds with TWT = " << sched->getTWT() << "." << endl;

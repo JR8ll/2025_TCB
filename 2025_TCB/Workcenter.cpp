@@ -121,6 +121,45 @@ void Workcenter::ensureValidity(Operation* op) {
 		bValid = !bOverlaps && !bTcViolations;
 	}
 }
+
+bool Workcenter::leftShift(size_t mIdx, size_t bIdx, size_t jIdx, double pWait) {
+	Operation* op = &(*machines[mIdx])[bIdx][jIdx];
+	Batch* bat = op->getBatch();
+	double currentStart = op->getStart();
+	bool bNewBatch = false;
+	size_t bestMacIdx = 0;
+	size_t bestBatIdx = 0;
+	double betterStart = currentStart;
+	findBestStart(op, bNewBatch, bestMacIdx, bestBatIdx, betterStart, pWait);
+	if (betterStart < currentStart) {
+		// actually shift operation
+		size_t currentBatIdx = op->getBatch()->getIdx();
+		size_t currentMacIdx = op->getBatch()->getMachine()->getIdx();
+		if (!bNewBatch) {
+			auto tempOp = op;
+			(*machines[currentMacIdx])[currentBatIdx].removeOp(op);
+			(*machines[bestMacIdx])[bestBatIdx].addOp(tempOp);
+			if ((*machines[currentMacIdx])[currentBatIdx].isEmpty()) {
+				machines[currentMacIdx]->removeBatch(currentBatIdx);
+			}
+		}
+		else {
+			if ((*machines[currentMacIdx])[currentBatIdx].size() == 1) {
+				moveBatch(bat, bestMacIdx, betterStart);
+
+			}
+			else {
+				pBat newBatch = make_unique<Batch>(machines[bestMacIdx]->getCap());
+				auto tempOp = op;
+				bat->removeOp(op);
+				newBatch->addOp(tempOp);
+				machines[bestMacIdx]->addBatch(move(newBatch), betterStart);
+			}
+		}
+		return true;
+	}
+	return false;
+}
 void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait) {
 	// TODO outsource search for best scheduling option from schedOp and rightShift to new method + ensure validity
 	Machine* mac = machines[mIdx].get();
@@ -175,7 +214,7 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 	if (!bNewBatch) {
 		auto tempOp = op;
 		bat->removeOp(op);
-		(*machines[bestMacIdx])[bestBatIdx].addOp(op);
+		(*machines[bestMacIdx])[bestBatIdx].addOp(tempOp);	// [JR-2025-Mar-03] replaced op with tempOp
 		if (bOnlyOperation) {
 			mac->removeBatch(bIdx);
 		}
@@ -229,6 +268,44 @@ void Workcenter::findBestStart(Operation* op, bool& bNewBatch, size_t& bestMacId
 		}
 	}
 }
+bool Workcenter::locateOp(Operation* op, size_t& mIdx, size_t& batIdx, size_t& jIdx) {
+	for (size_t m = 0; m < machines.size(); ++m) {
+		for (size_t b = 0; b < (*machines[m]).size(); ++b) {
+			for (size_t j = 0; j < (*machines[m])[b].size(); ++j) {
+				Operation* candidate = &(*machines[m])[b][j];
+				if (op->getId() == candidate->getId() && op->getStg() == candidate->getStg()) {
+					mIdx = m;
+					batIdx = b;
+					jIdx = j;
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool Workcenter::localSearchLeftShift(double pWait) {
+	// t´would be nice if we considered batches by order of non-decreasing start times
+	size_t mIdx = 0;	
+	size_t bIdx = 0;
+	//double tempStart = DBL_MAX;
+	//for (size_t m = 0; m < machines.size(); ++m) {
+	//	if (machines[m]->size() > bIdx) {
+	//		if ((*machines[m])[bIdx].getStart() < tempStart) {
+	//			tempStart = (*machines[m])[bIdx].getStart();
+	//			mIdx = m;
+	//		}
+	//	}
+	//	bool bShifted = false;
+	//	for (size_t j = 0; j < (*machines[mIdx])[bIdx].size(); ++j) {
+	//		if (leftShift(mIdx, bIdx, j, pWait)) {
+	//			bShifted = true;
+	//		}
+	//	}
+	//}
+	return false;
+}
 
 void Workcenter::moveBatch(Batch* batch, size_t tgtMac, double newStart) {
 	size_t batIdx = batch->getIdx();
@@ -255,7 +332,6 @@ double Workcenter::getTWT() const {
 	}
 	return twt;
 }
-
 double Workcenter::getMinMSP() const {
 	double minMSP = numeric_limits<double>::max();
 	for (size_t m = 0; m < size(); ++m) {
