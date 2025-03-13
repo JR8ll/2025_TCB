@@ -108,7 +108,6 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 			// headings
 			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "miscReporting\t" << "CreatedOn" << endl;
 		}
-
 		
 		double objectiveValue = 999999;	// invalid
 		if (solution->isValid()) {
@@ -145,8 +144,9 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		// misc reporting
 		if (solverType == ALG_BRKGALISTSCH || solverType == ALG_BRKGALS2MILP) {
 			file << "nGen=" << gaParams->iterations << "\t";
-		}
-		else {
+		} else if (solverType == ALG_LISTSCHEDATC) {
+			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
+		} else {
 			file << "n/a\t";
 		}
 

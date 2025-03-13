@@ -12,7 +12,7 @@ struct GA_params {
 	double rhoe;			// probability that offspring inherit allele from elite parent
 	unsigned K;				// number of independent populations
 	int maxThreads;			// number of parallel threads
-	int iterations;			// number of generations processed (reporting)
+	int iterations;			// REPORTING: number of generations processed 
 };
 
 class Solver_GA {

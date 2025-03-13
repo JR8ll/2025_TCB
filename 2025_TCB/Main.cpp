@@ -66,13 +66,11 @@ int main(int argc, char* argv[]) {
 		solverName = "ListSchedGATC";
 		{
 			sched->lSchedJobsWithSorting(sortJobsByGATC, schedParams);	
-
-		// DEBUGGING
-		double beforeTWT = sched->getTWT();
-		sched->localSearchLeftShifting();
-		double twtAfter = sched->getTWT();
-		int debugger = 666;
-
+			// MISC REPORTING
+			double twtBefore = sched->getTWT();
+			sched->localSearchLeftShifting();	// try parameters sortJobsByC, sortJobsByStart, ...pWait
+			double twtAfter = sched->getTWT();
+			schedParams.leftShiftImprovement = (twtBefore - twtAfter) / twtBefore;
 		}
 		break;
 	case ALG_BRKGALISTSCH:
@@ -104,7 +102,7 @@ int main(int argc, char* argv[]) {
 	usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
 
 	// RESULT SUMMARY (FILE OUTPUT)
-	writeSolutions(sched.get(), iSolver, solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	// TODO measure time
+	writeSolutions(sched.get(), iSolver, solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	
 	
 	// CONSOLE OUTPUT
 	if (bConsole) {
