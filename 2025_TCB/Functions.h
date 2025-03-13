@@ -33,6 +33,8 @@ struct Sched_params {	// solver indipendent generic parameters
 	double kappaLow;			// grid of kappa values considered for GATC-sorting
 	double kappaHigh;
 	double kappaStep;
+
+	double leftShiftImprovement;	// REPORTING: objective decrease achieved by left-shifting local search
 };
 
 class ExcSched {

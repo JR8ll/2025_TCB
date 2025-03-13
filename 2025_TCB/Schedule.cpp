@@ -445,6 +445,17 @@ void Schedule::localSearchLeftShifting(prioRule<pJob> rule, double pWait) {
 					}
 				}
 			}
+			/*for (int o = (*scheduledJobs[j]).size() - 1; o >= 0; --o) {
+				size_t wcIdx = (*scheduledJobs[j])[o].getWorkcenterId() - 1;
+				size_t mIdx = 0;
+				size_t bIdx = 0;
+				size_t jIdx = 0;
+				if (workcenters[wcIdx]->locateOp(&(*scheduledJobs[j])[o], mIdx, bIdx, jIdx)) {
+					if (workcenters[wcIdx]->leftShift(mIdx, bIdx, jIdx, pWait)) {
+						bImproved = true;
+					}
+				}
+			}*/
 		}
 	}
 }
