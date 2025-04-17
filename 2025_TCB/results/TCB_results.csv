@@ -1,2 +1,7 @@
 Problem	Solver	Seed	Objective	ObjectiveValue	TimeLimit	TimeUsed	SchedParams	GA_params	MILPCP_params	miscReporting	CreatedOn
 exp/ProbI_DS3TC_F5m5n75tcSc1tcFF1.50_2.dat	ListSchedGATC	202502169	TWT	12107.974427	180	20	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	leftShImpr=0.000120107	2025-03-13 19:31:42
+exp/ProbI_DS3TC_F3m5n9tcSc1tcFF1.50_1_exact_B1.dat	ListSchedGATC	202504061	TWT	289.464657	60	5	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	leftShImpr=0	2025-04-09 10:43:20
+exp/ProbI_DS3TC_F3m5n9tcSc1tcFF1.50_1_exact_B1.dat	ListSchedGATC	202504061	TWT	289.464657	60	3	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	leftShImpr=0	2025-04-09 10:45:44
+exp/ProbI_DS3TC_F3m5n9tcSc1tcFF1.50_1_exact_B1.dat	ListSchedGATC	202504061	TWT	289.464657	60	0	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	leftShImpr=0	2025-04-09 14:04:19
+exp/ProbI_DS3TC_F3m5n9tcSc1tcFF1.50_1_exact_B1.dat	ListSchedGATC	202504061	TWT	289.464657	60	0	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	leftShImpr=0	2025-04-09 14:28:54
+exp/ProbI_DS3TC_F3m5n9tcSc1tcFF1.50_1_exact_B1.dat	ListSchedGATC	202504061	TWT	289.464657	60	0	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	leftShImpr=0	2025-04-10 16:02:44

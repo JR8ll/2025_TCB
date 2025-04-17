@@ -11,6 +11,7 @@ static const int ALG_LISTSCHEDATC = 2;		// simple List scheduling approach
 static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
 static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
 static const int ALG_ILS = 5;
+static const int ALG_ITMILPLSHIFT = 6;		// iterated MILP solving with final left-shifting local search improvement
 
 struct GA_params;
 struct DECOMPMILP_params;
@@ -56,12 +57,14 @@ void sortJobsByD(std::vector<pJob>& jobs);									// by due date
 void sortJobsByR(std::vector<pJob>& jobs);									// by release time
 void sortJobsByGATC(std::vector<pJob>& jobs, double t, double kappa);		// by global ATC
 void sortJobsByRK(std::vector<pJob>& jobs, const std::vector<double>& chr);	// by random keys 
+void sortJobsDebugging(std::vector<pJob>& jobs);
 
 bool compJobsByC(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByStart(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByWaitingTimeDecr(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByD(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByR(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
+bool compJobsDebugging(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 
 void shiftJobFromVecToVec(std::vector<pJob>& source, std::vector<pJob>& target, size_t sourceIdx);
 

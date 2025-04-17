@@ -191,6 +191,10 @@ void Schedule::sortUnscheduled(prioRuleKappa<pJob> rule, double kappa) {
 	rule(unscheduledJobs, t, kappa);
 }
 
+void Schedule::sortUnscheduled(prioRuleKeySet<pJob> rule, std::vector<double>& chr) {
+	rule(unscheduledJobs, chr);
+}
+
 void Schedule::sortScheduled(prioRule<pJob> rule) {
 	updateWaitingTimes();
 	rule(scheduledJobs);
@@ -560,6 +564,96 @@ void Schedule::saveJson(std::string solver) {
 		treeSchedule.add_child("workcenters.Workcenter", treeWorkcenter);
 	}
 	treeFile.add_child("Schedule", treeSchedule);
+
+	string probFileName = extractFileName(TCB::prob->getFilename());
+	string probFileNameWithoutExtension = probFileName.substr(0, probFileName.find(".dat"));
+	string solverName = solver;
+	replaceWindowsSpecialCharsWithUnderscore(solverName);
+
+	string sSeed = to_string(TCB::seed);
+	string schedFileName = probFileNameWithoutExtension + "_" + solverName + sSeed + ".json";
+
+	bool success = CreateDirectory(L".\\results", NULL);
+	string pathAndFilename = string(".\\results\\").append(schedFileName);
+	pt::write_json(pathAndFilename, treeFile);
+}
+void Schedule::saveJsonFactory(std::string solver) {
+	pt::ptree treeFile;
+
+	treeFile.put("Problem", TCB::prob->getFilename());
+	treeFile.put("Solver", solver);
+	stringstream ssTWT;
+	ssTWT << setprecision(3) << fixed << getTWT();
+	treeFile.put("TWT", ssTWT.str());
+
+	pt::ptree treeFactory;
+	pt::ptree arrayWorkareas;
+	pt::ptree treeWorkarea;
+	treeWorkarea.put("name", "Flow Shop");
+	pt::ptree arrayWorkcenters;
+
+	for (size_t wc = 0; wc < workcenters.size(); ++wc) {
+		Workcenter* WC = &(*workcenters[wc]);
+		pt::ptree treeWorkcenter;
+		pt::ptree arrayResources;
+		treeWorkcenter.put("name", "Stage " + to_string(WC->getId()));
+
+		for (size_t m = 0; m < WC->size(); ++m) {
+			Machine* MAC = &(*WC)[m];
+			pt::ptree treeMachine;
+			pt::ptree arrayLoad;
+			treeMachine.put("name", "M" + to_string(MAC->getId()));
+			
+			for (size_t b = 0; b < MAC->size(); ++b) {
+				Batch* BAT = &(*MAC)[b];
+				pt::ptree treeBatch;
+				pt::ptree arrayContent;
+				stringstream ssStart;
+				stringstream ssCompletion;
+				stringstream ssP;
+				ssStart << setprecision(3) << fixed << BAT->getStart();
+				ssCompletion << setprecision(3) << fixed << BAT->getC();
+				ssP << setprecision(3) << fixed << BAT->getP();
+				treeBatch.put("id", "B" + to_string((b + 1)));
+				treeBatch.put("type", "Batch");
+				treeBatch.put("start", ssStart.str());
+				treeBatch.put("C", ssCompletion.str());
+				treeBatch.put("f", BAT->getF());
+				treeBatch.put("p", ssP.str());
+				treeBatch.put("capacity", BAT->getCap());
+				for (size_t j = 0; j < BAT->size(); ++j) {
+					Operation* OP = &(*BAT)[j];
+					stringstream ssD;
+					stringstream ssR;
+					stringstream ssW;	
+					ssD << setprecision(3) << fixed << OP->getD();
+					ssR << setprecision(3) << fixed << OP->getR();
+					ssW << setprecision(3) << fixed << OP->getW();
+					pt::ptree treeOp;
+					treeOp.put("id", to_string(OP->getId()) + "." + to_string(OP->getStg()));
+					treeOp.put("type", "Operation");
+					treeOp.put("d", ssD.str());
+					treeOp.put("r", ssR.str());
+					treeOp.put("p", to_string(OP->getP()));
+					treeOp.put("f", to_string(OP->getF()));
+					treeOp.put("s", to_string(OP->getS()));
+					treeOp.put("w", ssW.str());
+					arrayContent.push_back(make_pair("", treeOp));
+				}
+				treeBatch.add_child("content", arrayContent);
+				arrayLoad.push_back(make_pair("", treeBatch));
+			}
+			treeMachine.add_child("load", arrayLoad);
+			arrayResources.push_back(std::make_pair("", treeMachine));
+		}
+		treeWorkcenter.add_child("resources", arrayResources);
+		arrayWorkcenters.push_back(make_pair("", treeWorkcenter));
+		
+	}
+	treeWorkarea.add_child("workcenters", arrayWorkcenters);
+	arrayWorkareas.push_back(make_pair("", treeWorkarea));
+	treeFactory.add_child("workareas", arrayWorkareas);
+	treeFile.add_child("Factory", treeFactory);
 
 	string probFileName = extractFileName(TCB::prob->getFilename());
 	string probFileNameWithoutExtension = probFileName.substr(0, probFileName.find(".dat"));

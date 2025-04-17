@@ -17,7 +17,7 @@ Problem::Problem() : filename("n/a"), seed(0), omega(0), n(0), stgs(0), F(0) {
 Problem::Problem(string filename) : filename(filename), seed(0), omega(0), n(0), stgs(0), F(0) {
 	this->loadFromDat(filename);
 }
-Problem::Problem(ProbParams& params) {
+Problem::Problem(ProbParams& params, bool bDiscrete) {
 	seed = params.seed;
 	omega = params.omega;
 	flowshop = params.flowshop;
@@ -79,7 +79,11 @@ Problem::Problem(ProbParams& params) {
 	for (int i = 0; i < F; ++i) {
 		pTimes[i] = vector<double>(stgs);
 		for (int o = 0; o < stgs; ++o) {
-			pTimes[i][o] = pDist(TCB::rng);
+			double pTemp = pDist(TCB::rng);
+			if (bDiscrete) {
+				pTemp = round(pTemp);
+			}
+			pTimes[i][o] = pTemp;
 		}
 	}
 
@@ -129,6 +133,9 @@ Problem::Problem(ProbParams& params) {
 					p += pTimes[i][o];
 				}
 				double tcLength = p * params.tcFlowFactor;
+				if (bDiscrete) {
+					tcLength = round(tcLength);
+				}
 				tc[i][low][high] = tcLength;
 			}
 		}
@@ -180,7 +187,11 @@ Problem::Problem(ProbParams& params) {
 			jobs_r[j] = 0.0;
 		}
 		else {
-			jobs_r[j] = rDist(TCB::rng);
+			double rTemp = rDist(TCB::rng);
+			if (bDiscrete) {
+				rTemp = round(rTemp);
+			}
+			jobs_r[j] = rTemp;
 		}
 		jobs_w[j] = wDist(TCB::rng);
 		jobs_f[j] = ((j + F) % F) + 1;			// jobs are equally distributed accross products/families
@@ -194,6 +205,9 @@ Problem::Problem(ProbParams& params) {
 		}
 		double dueDateFF = ddFFDist(TCB::rng);
 		myD += dueDateFF * tempP;				// Klemmt & Mönch: r_j + 2 x raw_processing_time
+		if (bDiscrete) {
+			myD = round(myD);
+		}
 		jobs_d[j] = myD;
 	}
 
@@ -873,6 +887,47 @@ void Problem::genInstancesTCB25_Feb25_exact() {
 		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
 		string fileName = "ProbI_DS3TC_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_exact.dat";
+		prob.saveToDat(fileName);
+	}
+}
+
+void Problem::genInstancesTCB25_Mar25_discr() {
+	ProbParams params;
+	params.omega = 9;
+	params.F = 5;
+	params.stgs = 5;
+	params.n = 75;
+	params.m_oIntervals = make_pair(2, 4);
+	params.m_BIntervals = make_pair(4, 4);
+	params.m_BValues = vector<int>({ 4, 1, 1, 1, 1 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 1;
+	params.tcFlowFactor = 1.5;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.3);
+	params.pReadyAtZero = 0.25;
+	int nmax_tc = 0;	// maximum possible number of timeconstraints = sum(i in 0..stgs) i
+	for (int i = 1; i < params.stgs; ++i) {
+		nmax_tc += i;
+	}
+	int nmin_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
+	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	int nInstances = 10;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);	// true for discrete time values
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_MISTA_DISCR_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
 		prob.saveToDat(fileName);
 	}
 }

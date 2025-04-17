@@ -21,10 +21,6 @@ Solver_MILP::~Solver_MILP() {}
 double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim) {
 	if (schedule->getProblem() == nullptr) throw ExcSched("solveDecompositionMILP missing problem reference");
 
-	//DEBUGGING
-	bool stopping = false;
-
-
 	vector<pJob> consideredJobs = vector<pJob>();
 	for (size_t j = 0; j < nDash; ++j) {
 		try {
@@ -737,6 +733,14 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	//double bestObjectiveValue = cplex.getBestObjValue();
 	env.end();
 	return schedule->getTWT();	// bestObjectiveValue; // integrated objective function
+}
+double Solver_MILP::solveDecompJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim) {
+	double twt = FLT_MAX;
+	while (schedule->getN() > 0) {
+		// SOLVE with nDash Jobs
+		twt = solveJobBasedMILP(schedule, nDash, cplexTilim);
+	}
+	return twt;
 }
 double Solver_MILP::solveDecompJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim, prioRuleKappa<pJob> rule, double kappa)
 {	

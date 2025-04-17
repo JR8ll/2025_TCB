@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;IL_STD;_LIB;_CRT_SECURE_NO_WARNINGS;BOOST_NO_CX11_TEMPLATE_ALIASES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;C:\ILOG_1271\concert\include;C:\ILOG_1271\cplex\include;C:\Boost\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\rocholl\brkgaAPI\src;C:\ILOG_1271\concert\include;C:\ILOG_1271\cpoptimizer\include;C:\ILOG_1271\cplex\include;C:\Boost\boost_1_72_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\ILOG_1271\concert\lib\x64_windows_vs2013\stat_mda\concert.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\cplex1271.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\ilocplex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\ILOG_1271\concert\lib\x64_windows_vs2013\stat_mda\concert.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\cplex1271.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\ilocplex.lib;C:\ILOG_1271\cpoptimizer\lib\x64_windows_vs2013\stat_mda\cp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,7 +123,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;IL_STD;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Boost\boost_1_72_0;C:\ILOG_1271\cplex\include;C:\ILOG_1271\concert\include;C:\Users\rocholl\brkgaAPI\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Boost\boost_1_72_0;C:\ILOG_1271\cpoptimizer\include;C:\ILOG_1271\cplex\include;C:\ILOG_1271\concert\include;C:\Users\rocholl\brkgaAPI\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\ILOG_1271\concert\lib\x64_windows_vs2013\stat_mda\concert.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\cplex1271.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\ilocplex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\ILOG_1271\concert\lib\x64_windows_vs2013\stat_mda\concert.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\cplex1271.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\ilocplex.lib;C:\ILOG_1271\cpoptimizer\lib\x64_windows_vs2013\stat_mda\cp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -146,6 +146,7 @@
     <ClInclude Include="Problem.h" />
     <ClInclude Include="Product.h" />
     <ClInclude Include="Schedule.h" />
+    <ClInclude Include="Solver_CP.h" />
     <ClInclude Include="Solver_GA.h" />
     <ClInclude Include="Solver_ILS.h" />
     <ClInclude Include="Solver_MILP.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="Problem.cpp" />
     <ClCompile Include="Product.cpp" />
     <ClCompile Include="Schedule.cpp" />
+    <ClCompile Include="Solver_CP.cpp" />
     <ClCompile Include="Solver_GA.cpp" />
     <ClCompile Include="Solver_ILS.cpp" />
     <ClCompile Include="Solver_MILP.cpp" />
