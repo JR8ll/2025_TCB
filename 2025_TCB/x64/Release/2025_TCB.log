@@ -8,55 +8,51 @@ Functions.cpp(99): warning C4800: 'BOOL' : forcing value to bool 'true' or 'fals
   GaDecoder.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Job.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  Log.cpp
   Machine.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Main.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Main.cpp(100): warning C4244: 'argument' : conversion from '__int64' to 'int', possible loss of data
+Main.cpp(136): warning C4244: 'argument' : conversion from '__int64' to 'int', possible loss of data
   Operation.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Operation.cpp(157): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(158): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(159): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(193): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(194): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(195): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(161): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(162): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(163): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(197): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(198): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Operation.cpp(199): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
   Problem.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Problem.cpp(155): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(159): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(189): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(206): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(232): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(444): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(488): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(495): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(337): warning C4101: 'exc' : unreferenced local variable
-Problem.cpp(437): warning C4101: 'exc' : unreferenced local variable
-Problem.cpp(518): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-Problem.cpp(785): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Problem.cpp(162): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(166): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(200): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(220): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(246): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(458): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(502): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(509): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(351): warning C4101: 'exc' : unreferenced local variable
+Problem.cpp(451): warning C4101: 'exc' : unreferenced local variable
+Problem.cpp(532): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Problem.cpp(799): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-          Problem.cpp(204) : see reference to function template instantiation 'std::unique_ptr<Job,std::default_delete<_Ty>> std::make_unique<Job,size_t,int&,Product*,double&,double&,double&>(size_t &&,int &,Product *&&,double &,double &,double &)' being compiled
+          Problem.cpp(218) : see reference to function template instantiation 'std::unique_ptr<Job,std::default_delete<_Ty>> std::make_unique<Job,size_t,int&,Product*,double&,double&,double&>(size_t &&,int &,Product *&&,double &,double &,double &)' being compiled
           with
           [
               _Ty=Job
           ]
-  Product.cpp
-Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 Schedule.cpp(113): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(122): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(235): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(535): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(244): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(576): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(666): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
   Solver_GA.cpp
 C:\Users\rocholl\brkgaAPI\src\MTRand.h(257): warning C4800: 'size_t' : forcing value to bool 'true' or 'false' (performance warning)
 c:\users\rocholl\brkgaapi\src\Population.h(69): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
@@ -73,12 +69,12 @@ C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(3428): warning C4996: 'IloCplex::
           C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Solver_MILP.cpp(46): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Solver_MILP.cpp(47): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Solver_MILP.cpp(97): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Solver_MILP.cpp(112): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Solver_MILP.cpp(320): warning C4244: 'argument' : conversion from 'IloInt' to 'IloNum', possible loss of data
-Solver_MILP.cpp(32): warning C4101: 'ex' : unreferenced local variable
+Solver_MILP.cpp(42): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(43): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(93): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(108): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Solver_MILP.cpp(316): warning C4244: 'argument' : conversion from 'IloInt' to 'IloNum', possible loss of data
+Solver_MILP.cpp(28): warning C4101: 'ex' : unreferenced local variable
 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): warning C4244: 'initializing' : conversion from '__int64' to 'int', possible loss of data
           C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157) : see reference to function template instantiation 'std::pair<int,int>::pair<__int64,__int64,void>(std::pair<__int64,__int64> &&)' being compiled
           C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157) : see reference to function template instantiation 'std::pair<int,int>::pair<__int64,__int64,void>(std::pair<__int64,__int64> &&)' being compiled
@@ -148,7 +144,7 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): war
               _Kty=std::pair<int,int>
   ,            _Ty=int
           ]
-          Solver_MILP.cpp(59) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
+          Solver_MILP.cpp(55) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
           with
           [
               _Kty=std::pair<int,int>
@@ -157,7 +153,7 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): war
   ,            _Alloc=std::allocator<std::pair<const std::pair<int,int>,int>>
   ,            _Valty=std::pair<std::pair<__int64,__int64>,int>
           ]
-          Solver_MILP.cpp(59) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
+          Solver_MILP.cpp(55) : see reference to function template instantiation 'std::pair<std::_Tree_iterator<std::_Tree_val<std::_Tree_simple_types<std::pair<const _Kty,_Ty>>>>,bool> std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert<std::pair<std::pair<__int64,__int64>,int>>(_Valty &&)' being compiled
           with
           [
               _Kty=std::pair<int,int>

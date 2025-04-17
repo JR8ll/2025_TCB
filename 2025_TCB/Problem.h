@@ -90,7 +90,7 @@ private:
 public:
 	Problem();
 	Problem(std::string filename);
-	Problem(ProbParams& params);
+	Problem(ProbParams& params, bool discreteTime = false);
 
 	Job& operator[](size_t idx);			// access job
 	Job& operator[](size_t idx) const;	// access job
@@ -116,6 +116,7 @@ public:
 
 	// EXPERIMENTATION PLANNING
 	void static genInstancesTCB25_Feb25_exact();	// small instances to be solved by cplex (n <= 10, one iteration)
+	void static genInstancesTCB25_Mar25_discr();	// discrete time-based values
 	void static genInstancesEURO25();				// medium-sized instances for EURO conference abstract, oriented on Klemmt & Mönch (2012)
 };
 

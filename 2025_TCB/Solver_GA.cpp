@@ -47,11 +47,13 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 	TCB::logger.Log(Info, "Solver_GA::solveBRKGA_List_jobBased finished after " + to_string(iterationCounter) + " iterations.");
 	decoder.formSchedule(algorithm.getBestChromosome());
 	params->iterations = iterationCounter;
+	completed = true;
+	bestChromosome = algorithm.getBestChromosome();
 	return sched.getTWT();
 }
 
 bool Solver_GA::hasCompleted() { return completed; }
-std::vector<double> Solver_GA::getBestChromosome() { return std::vector<double>(); }
+std::vector<double> Solver_GA::getBestChromosome() { return bestChromosome; }
 
 GA_params Solver_GA::getDefaultParams() {
 	GA_params gaParams = GA_params();

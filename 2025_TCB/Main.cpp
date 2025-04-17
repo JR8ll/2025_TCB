@@ -29,7 +29,7 @@ mt19937 TCB::rng = mt19937(123456789);
 
 int main(int argc, char* argv[]) {
 
-	//Problem::genInstancesEURO25();
+	//Problem::genInstancesTCB25_Mar25_discr();
 
 	// PROCESS COMMAND LINE ARGUMENTS
 	TCB::logger = Logger();
@@ -52,6 +52,16 @@ int main(int argc, char* argv[]) {
 	auto start = chrono::high_resolution_clock::now();
 	chrono::seconds usedTime;
 	chrono::time_point<chrono::high_resolution_clock> stop;
+
+
+	//// DEBUGGING 2025-Apr-07
+	//// sort jobs 6 8 5 9 2 7 3 1 4
+	//sched->sortUnscheduled(sortJobsDebugging);	// DEBUGGING change sortUnscheduled
+	//// solve with list-sched
+	//sched->lSchedJobs(0.0);
+	//cout << *sched;
+	//sched->localSearchLeftShifting();
+	//cout << *sched;
 
 	// SOLVE
 	switch (iSolver) {
@@ -82,6 +92,19 @@ int main(int argc, char* argv[]) {
 		break;
 	case ALG_BRKGALS2MILP:
 		solverName = "BRKGA_MILP";
+		{
+			pSched gaSched = sched->clone();
+			Solver_GA brkga = Solver_GA(schedParams, gaParams);
+			brkga.solveBRKGA_List_jobBased(*gaSched.get(), iTilimSeconds);
+			if (brkga.hasCompleted()) {
+				gaSched->saveJson("BRKGA");
+				vector<double> bestChromosome = brkga.getBestChromosome();
+				sched->sortUnscheduled(sortJobsByRK, bestChromosome);
+				Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
+				cplex.solveDecompJobBasedMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim);
+				sched->saveJson("BRKGA2MILP");
+			}
+		}
 		break;
 	case ALG_ILS:
 		solverName = "ILS";
@@ -89,10 +112,18 @@ int main(int argc, char* argv[]) {
 			Solver_ILS ils = Solver_ILS(schedParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
 			ils.solveILS(*sched.get(), init, sortJobsByD, iTilimSeconds);
-
-
 		}
 		break;
+	case ALG_ITMILPLSHIFT: 
+		solverName = "MILP2LSHIFT";
+		{
+			Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
+			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim, sortJobsByD, sortJobsByGATC);
+			double twtBefore = sched->getTWT();
+			sched->localSearchLeftShifting();
+			double twtAfter = sched->getTWT();
+			schedParams.leftShiftImprovement = (twtBefore - twtAfter) / twtBefore;
+		}
 	default:
 		TCB::logger.Log(Error, "Program was executed with no valid algorithm key");
 	} 
@@ -103,7 +134,8 @@ int main(int argc, char* argv[]) {
 
 	// RESULT SUMMARY (FILE OUTPUT)
 	writeSolutions(sched.get(), iSolver, solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	
-	
+	sched->saveJsonFactory(solverName);
+
 	// CONSOLE OUTPUT
 	if (bConsole) {
 		cout << "Solved using " << solverName << " in " << " seconds with TWT = " << sched->getTWT() << "." << endl;

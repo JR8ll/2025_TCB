@@ -32,10 +32,11 @@ public:
 	Solver_MILP(Sched_params& sched_params, DECOMPMILP_params& decompParams);
 	~Solver_MILP();
 
-	double solveJobBasedMILP(Schedule* schedule, int nDash = 10, int cplexTilim = 60);	// job based MILP by Cailloux & Mönch (MISTA 2019), iteratively considering max. nDash jobs, given sorting (static)
-	double solveDecompJobBasedMILP(Schedule* schedule, int nDash = 10, int cplexTilim = 60, prioRuleKappa<pJob> rule = nullptr, double kappa = 1.0);	// like above with dynamic sorting (ATC-like priority rule)
-	double solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash = 10, int cplexTilim = 60, prioRule<pJob> initRule = sortJobsByD, prioRuleKappa<pJob> dynRule = sortJobsByGATC, double kappa = 1.0);
-	double solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule, int nDash = 10, int cplexTilim = 60, prioRule<pJob> initRule = sortJobsByD, prioRuleKappa<pJob> dynRule = sortJobsByGATC);	// kappa grid from internal class member params
+	double solveJobBasedMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60);	// job based MILP by Cailloux & Mönch (MISTA 2019), iteratively considering max. nDash jobs, given sorting (static)
+	double solveDecompJobBasedMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60);
+	double solveDecompJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim, prioRuleKappa<pJob> rule, double kappa);	// like above with dynamic sorting (ATC-like priority rule)
+	double solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60, prioRule<pJob> initRule = sortJobsByD, prioRuleKappa<pJob> dynRule = sortJobsByGATC, double kappa = 1.0);
+	double solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60, prioRule<pJob> initRule = sortJobsByD, prioRuleKappa<pJob> dynRule = sortJobsByGATC);	// kappa grid from internal class member params
 
 	static DECOMPMILP_params getDefaultParams();
 };

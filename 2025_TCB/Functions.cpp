@@ -79,7 +79,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 
 	// argv[8] filename of decomp MILP parameters
 	if (argc > 8) {
-		if (iSolver == ALG_ITERATEDMILP || iSolver == ALG_BRKGALS2MILP) {
+		if (iSolver == ALG_ITERATEDMILP || iSolver == ALG_BRKGALS2MILP || iSolver == ALG_ITMILPLSHIFT) {
 			try {
 				loadDecompParams(decompParams, argv[8]);
 			}
@@ -144,7 +144,8 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		// misc reporting
 		if (solverType == ALG_BRKGALISTSCH || solverType == ALG_BRKGALS2MILP) {
 			file << "nGen=" << gaParams->iterations << "\t";
-		} else if (solverType == ALG_LISTSCHEDATC) {
+		}
+		else if (solverType == ALG_LISTSCHEDATC || solverType == ALG_ITMILPLSHIFT) {
 			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
 		} else {
 			file << "n/a\t";
@@ -197,6 +198,10 @@ void sortJobsByRK(vector<pJob>& unscheduledJobs, const vector<double>& chr) {
 	}
 }
 
+void sortJobsDebugging(std::vector<pJob>& jobs) {
+	sort(jobs.begin(), jobs.end(), compJobsDebugging);
+}
+
 bool compJobsByC(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
 	double cA = a->getC();
 	double cB = b->getC();
@@ -232,6 +237,29 @@ bool compJobsByR(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 		return a->getId() < b->getId();
 	}
 	return a->getR() < b->getR();
+}
+
+bool compJobsDebugging(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
+	switch (a->getId()) {
+	case 1:
+		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9 && b->getId() != 2 && b->getId() != 7 && b->getId() != 3;
+	case 2:
+		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9;
+	case 3:
+		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9 && b->getId() != 2 && b->getId() != 7;
+	case 4:
+		return false;
+	case 5:
+		return b->getId() != 8 && b->getId() != 6;
+	case 6:
+		return true;
+	case 7:
+		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9 && b->getId() != 2;
+	case 8:
+		return b->getId() != 6;
+	case 9:
+		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5;
+	}
 }
 
 void shiftJobFromVecToVec(vector<pJob>& source, vector<pJob>& target, size_t sourceIdx) {

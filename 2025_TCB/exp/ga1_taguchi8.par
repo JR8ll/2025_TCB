@@ -1,0 +1,6 @@
+nPop: 500
+pElt: 0.2
+pRpM: 0.05
+rhoe: 0.8
+K: 3
+maxThreads: 16

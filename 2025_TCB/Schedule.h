@@ -64,6 +64,7 @@ public:
 
 	void sortUnscheduled(prioRule<pJob> rule);
 	void sortUnscheduled(prioRuleKappa<pJob> rule, double kappa);
+	void sortUnscheduled(prioRuleKeySet<pJob> rule, std::vector<double>& chr);
 	void sortScheduled(prioRule<pJob> rule);
 	void updateWaitingTimes();
 	void mimicWaitingTimes(const Schedule* wtSchedule);		// set waiting times of operations in this schedule according to the waiting times in the wtSchedule
@@ -97,5 +98,6 @@ public:
 	double getMinMSP(size_t stgIdx) const;							// smallest makespan of the machines at stage (workcenter)
 
 	void saveJson(std::string solver = "N/A");
+	void saveJsonFactory(std::string solver = "N/A");				// format complying zui5_gantt viewer application
 
 };
