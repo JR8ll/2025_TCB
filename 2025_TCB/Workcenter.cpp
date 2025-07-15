@@ -161,7 +161,6 @@ bool Workcenter::leftShift(size_t mIdx, size_t bIdx, size_t jIdx, double pWait) 
 	return false;
 }
 void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait) {
-	// TODO outsource search for best scheduling option from schedOp and rightShift to new method + ensure validity
 	Machine* mac = machines[mIdx].get();
 	Batch* bat = &(*mac)[bIdx];
 	Operation* op = &(*bat)[jIdx];
@@ -176,39 +175,6 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 	double bestStart = numeric_limits<double>::max();
 
 	findBestStart(op, bNewBatch, bestMacIdx, bestBatIdx, bestStart, pWait);
-
-	//// [JR-2025-Feb-25] findBestStart not yet tested
-	//// find best batch/time slot for operation TODO: call findBestStart instead
-	//double tempStart = numeric_limits<double>::max();
-	//for (size_t m = 0; m < size(); ++m) {
-	//	Machine* tempMac = machines[m].get();
-	//	for (size_t b = 0; b < tempMac->size(); ++b) {
-	//		Batch* tempBat = &(*tempMac)[b];
-	//		if (tempBat->getStart() > tempStart) {
-	//			break;	// earlier option already found
-	//		}
-	//		// consider existing batches
-	//		if (tempBat->getStart() >= newStart && tempBat->getF() == op->getF() && tempBat->getAvailableCap() >= op->getS()) {
-	//			if (tempBat->getStart() < tempStart) {
-	//				tempStart = bat->getStart();
-	//				bestMacIdx = m;
-	//				bestBatIdx = b;
-	//				bNewBatch = false;
-	//			}
-	//			break;
-	//		}
-	//	}
-
-	//	// consider formation of a new batch
-	//	double earliestSlot = tempMac->getEarliestSlot(newStart, op->getP());
-	//	if (earliestSlot + (op->getP() * pWait) < tempStart) {
-	//		if (tempStart >= newStart) {
-	//			tempStart = earliestSlot;
-	//			bestMacIdx = m;
-	//			bNewBatch = true;
-	//		}
-	//	}
-	//}
 
 	// actually shift operation
 	if (!bNewBatch) {
@@ -258,7 +224,7 @@ void Workcenter::findBestStart(Operation* op, bool& bNewBatch, size_t& bestMacId
 		}
 
 		// consider formation of a new batch
-		double earliestSlot = mac->getEarliestSlot(idealStart, op->getP());
+		double earliestSlot = mac->getEarliestSlot(idealStart, *op);
 		if (earliestSlot + (op->getP() * pWait) < tempStart) {
 			if (tempStart >= idealStart) {
 				tempStart = earliestSlot;

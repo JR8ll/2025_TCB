@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 
 #include "Functions.h"
 #include "Solver_GA.h"
@@ -240,26 +241,25 @@ bool compJobsByR(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 }
 
 bool compJobsDebugging(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
-	switch (a->getId()) {
-	case 1:
-		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9 && b->getId() != 2 && b->getId() != 7 && b->getId() != 3;
-	case 2:
-		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9;
-	case 3:
-		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9 && b->getId() != 2 && b->getId() != 7;
-	case 4:
-		return false;
-	case 5:
-		return b->getId() != 8 && b->getId() != 6;
-	case 6:
-		return true;
-	case 7:
-		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5 && b->getId() != 9 && b->getId() != 2;
-	case 8:
-		return b->getId() != 6;
-	case 9:
-		return b->getId() != 8 && b->getId() != 6 && b->getId() != 5;
-	}
+	static std::unordered_map<int, int> jobOrder = {
+		{3, 0},
+		{5, 1},
+		{6, 2},
+		{9, 3},
+		{7, 4},
+		{1, 5},
+		{10, 6},
+		{8, 7},
+		{4, 8},
+		{2, 9}
+	};
+
+	int aId = a->getId();
+	int bId = b->getId();
+
+	int aPriority = jobOrder[aId];
+	int bPriority = jobOrder[bId];
+	return aPriority < bPriority;
 }
 
 void shiftJobFromVecToVec(vector<pJob>& source, vector<pJob>& target, size_t sourceIdx) {

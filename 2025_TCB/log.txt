@@ -839,3 +839,26 @@ Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 0.100000
 Info:	Found a schedule with best kappa value = 2.100000
+Info:	Problem initialized from rkdemoprob.dat.
+Info:	Found a schedule with best kappa value = 1.200000
+ERROR:	Could not open ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)
+Info:	Problem initialized from ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_11.dat.
+Warning:	GA parameters file not found: noga (default parameters initialized.)

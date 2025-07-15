@@ -1,4 +1,5 @@
 #include <iostream>
+#include <set>
 
 #include "Batch.h"
 #include "Functions.h"
@@ -27,6 +28,22 @@ unique_ptr<Batch> Batch::clone() const {
 	auto newBatch = make_unique<Batch>();
 	// shallow copy
 	return newBatch;
+}
+
+bool Batch::operator==(const Batch& other) const
+{
+	if(ops.size() != other.size()) return false;
+
+	multiset<int> idsThis;
+	multiset<int> idsOther;
+
+	for (const auto& op : ops) {
+		if (op) idsThis.insert(op->getId());
+	}
+	for (const auto& op : other.getOps()) {
+		if (op) idsOther.insert(op->getId());
+	}
+	return idsThis == idsOther;
 }
 
 Operation& Batch::operator[](size_t idx) { return *ops[idx]; }

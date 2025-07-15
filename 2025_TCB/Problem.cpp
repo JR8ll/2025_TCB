@@ -1039,5 +1039,142 @@ void Problem::genInstancesEURO25() {
 	}
 }
 
+void Problem::genInstancesEURO25_exact(){
+	ProbParams params;
+	params.omega = 9;
+	params.F = 2;
+	params.stgs = 4;
+	params.n = 10;
+	params.m_oIntervals = make_pair(1, 2);
+	//params.m_BIntervals = make_pair(1, 3);
+	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 1;
+	params.tcFlowFactor = 1.5;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.3);
+	params.pReadyAtZero = 0.25;
+
+	int nmax_tc = 0;	// maximum possible number of timeconstraints = sum(i in 0..stgs) i
+	for (int i = 1; i < params.stgs; ++i) {
+		nmax_tc += i;
+	}
+	int nmin_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
+	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
+
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	// just one randomly chosen batching stage
+	uniform_int_distribution<int> batchingStageDist(0, params.stgs - 1);
+	int nInstances = 30;
+	for (int i = 0; i < nInstances; ++i) {
+		int batchingStageIdx = batchingStageDist(TCB::rng);
+		params.m_BValues = vector<int>();
+		for (int stg = 0; stg < params.stgs; ++stg) {
+			if (stg == batchingStageIdx) {
+				params.m_BValues.push_back(3);
+			} else {
+				params.m_BValues.push_back(1);
+			}
+		}
+
+		Problem prob = Problem(params);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_EURO_exact_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+}
+
+void Problem::genInstancesTCB25_Jun25_exactMILPvsCP() {
+	ProbParams params;
+	params.omega = 9;
+	params.F = 2;
+	params.stgs = 3;
+	params.n = 8;
+	params.m_oIntervals = make_pair(2, 3);
+	params.m_BIntervals = make_pair(1, 3);
+	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 1;
+	params.tcFlowFactor = 1.5;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.3);
+
+	int nmax_tc = 0;	// maximum possible number of timeconstraints = sum(i in 0..stgs) i
+	for (int i = 1; i < params.stgs; ++i) {
+		nmax_tc += i;
+	}
+	int nmin_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
+	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
+
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	int nInstances = 10;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_TCB_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_exact.dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.F = 3;
+	params.n = 9;
+	params.stgs = 4;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_TCB_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_exact.dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.F = 2;
+	params.n = 10;
+	params.stgs = 5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "ProbI_TCB_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_exact.dat";
+		prob.saveToDat(fileName);
+	}
+}
+
 			
 
