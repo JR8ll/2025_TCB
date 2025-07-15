@@ -115,8 +115,10 @@ public:
 	std::unique_ptr<Schedule> getSchedule();	// machine environment + jobs to be scheduled
 
 	// EXPERIMENTATION PLANNING
-	void static genInstancesTCB25_Feb25_exact();	// small instances to be solved by cplex (n <= 10, one iteration)
-	void static genInstancesTCB25_Mar25_discr();	// discrete time-based values
-	void static genInstancesEURO25();				// medium-sized instances for EURO conference abstract, oriented on Klemmt & Mönch (2012)
+	void static genInstancesTCB25_Feb25_exact();			// small instances to be solved by cplex (n <= 10, one iteration)
+	void static genInstancesTCB25_Mar25_discr();			// discrete time-based values
+	void static genInstancesEURO25();						// medium-sized instances for EURO conference abstract, oriented on Klemmt & Mönch (2012)
+	void static genInstancesEURO25_exact();					// small-sized instances for exact references
+	void static genInstancesTCB25_Jun25_exactMILPvsCP();	// small instances to be solved to optimality in one iteration
 };
 

@@ -39,7 +39,7 @@ public:
 	Workcenter* getWorkcenter();
 	const std::vector<pBat>& getBatches() const;
 
-	double getEarliestSlot(double from, double duration) const;
+	double getEarliestSlot(double from, const Operation& op) const;
 
 	bool addBatch(pBat batch, double start, bool checkvalidity = true);
 	void eraseNullptr(size_t batIdx);

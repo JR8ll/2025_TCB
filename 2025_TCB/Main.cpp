@@ -29,7 +29,8 @@ mt19937 TCB::rng = mt19937(123456789);
 
 int main(int argc, char* argv[]) {
 
-	//Problem::genInstancesTCB25_Mar25_discr();
+	//Problem::genInstancesTCB25_Jun25_exactMILPvsCP();
+	Problem::genInstancesEURO25_exact();
 
 	// PROCESS COMMAND LINE ARGUMENTS
 	TCB::logger = Logger();
@@ -54,14 +55,14 @@ int main(int argc, char* argv[]) {
 	chrono::time_point<chrono::high_resolution_clock> stop;
 
 
-	//// DEBUGGING 2025-Apr-07
-	//// sort jobs 6 8 5 9 2 7 3 1 4
-	//sched->sortUnscheduled(sortJobsDebugging);	// DEBUGGING change sortUnscheduled
-	//// solve with list-sched
-	//sched->lSchedJobs(0.0);
-	//cout << *sched;
-	//sched->localSearchLeftShifting();
-	//cout << *sched;
+	// DEBUGGING 2025-Apr-07
+	// sort jobs 3 5 6 9 7 1 10 8 4 2
+	sched->sortUnscheduled(sortJobsDebugging);	// DEBUGGING change sortUnscheduled
+	// solve with list-sched
+	sched->lSchedJobs(0.0);
+	cout << *sched;
+	sched->localSearchLeftShifting();
+	cout << *sched;
 
 	// SOLVE
 	switch (iSolver) {

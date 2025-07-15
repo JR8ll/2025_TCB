@@ -26,8 +26,11 @@ public:
 
 	std::unique_ptr<Batch> clone() const;	// shallow (no content)
 
+	bool operator==(const Batch& other) const;	// true, if content is identical
+	
 	Operation& operator[](size_t idx);
 	Operation& operator[](size_t idx) const;
+
 
 	size_t getIdx() const;	// index in its machine
 	size_t size() const;

@@ -229,7 +229,6 @@ void Schedule::mimicWaitingTimes(const Schedule* wtSched) {
 			(*scheduledJobs[j])[o].setWait(mapWait[make_pair((*scheduledJobs[j])[o].getId(), (*scheduledJobs[j])[o].getStg())]);
 		}
 	}
-
 }
 
 void Schedule::markAsScheduled(size_t jobIdx) {
@@ -278,6 +277,7 @@ Operation* Schedule::findInUnscheduledJobs(Operation* remoteOp) const {
 void Schedule::lSchedFirstJob(double pWait) {
 	for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {
 		schedOp(&(**unscheduledJobs.begin())[op], pWait);
+		cout << *this;
 	}
 	shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
 }

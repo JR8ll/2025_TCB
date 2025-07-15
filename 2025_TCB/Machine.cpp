@@ -56,13 +56,16 @@ const std::vector<pBat>& Machine::getBatches() const {
 	return batches;
 }
 
-double Machine::getEarliestSlot(double from, double duration) const {
+double Machine::getEarliestSlot(double from, const Operation& op) const {
 	double slot = max(r, from);
 	for (size_t b = 0; b < batches.size(); ++b) {
-		if ((slot + duration) <= batches[b]->getStart()) {
+		if ((slot + op.getP()) <= batches[b]->getStart()
+			|| batches[b]->size() == 1 && (*batches[b])[0].getId() == op.getId()) {	// [JR-2025-Jul-15] case: overlapping with self
 			return slot;
 		}
-		slot = max(slot, batches[b]->getC());
+		if (batches[b]->size() != 1 || (*batches[b])[0].getId() != op.getId()) {	// [JR-2025-Jul-15] case: overlapping with self
+			slot = max(slot, batches[b]->getC());
+		}	
 	}
 	return slot;
 }
@@ -146,7 +149,8 @@ void Machine::moveBatch(Batch* batch, double newStart) {
 		}
 		else {
 			if (it == (batches.end() - 1)) {
-				if (it->get()->getC() <= newStart) {
+				if (it->get()->getC() <= newStart ||
+					it->get() == batch) {	// [JR-2025-Jul-15] case: overlapping with self
 					toIdx = it - batches.begin();
 					bGapFound = true;
 					bToTheEnd = true;
