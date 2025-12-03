@@ -56,6 +56,7 @@ public:
 
 	bool addOp(Operation* op);
 	void removeOp(Operation* op);
+	void removeOp(size_t idx);
 	void removeAllOps();
 
 	void updateWaitingTimes();

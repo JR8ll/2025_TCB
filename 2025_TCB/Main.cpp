@@ -30,7 +30,8 @@ mt19937 TCB::rng = mt19937(123456789);
 int main(int argc, char* argv[]) {
 
 	//Problem::genInstancesTCB25_Jun25_exactMILPvsCP();
-	Problem::genInstancesEURO25_exact();
+	//Problem::genInstancesEURO25_exact();
+	//Problem::genInstancesEURO25();
 
 	// PROCESS COMMAND LINE ARGUMENTS
 	TCB::logger = Logger();
@@ -57,12 +58,18 @@ int main(int argc, char* argv[]) {
 
 	// DEBUGGING 2025-Apr-07
 	// sort jobs 3 5 6 9 7 1 10 8 4 2
-	sched->sortUnscheduled(sortJobsDebugging);	// DEBUGGING change sortUnscheduled
+	//sched->sortUnscheduled(sortJobsDebugging);	// DEBUGGING change sortUnscheduled
 	// solve with list-sched
-	sched->lSchedJobs(0.0);
-	cout << *sched;
-	sched->localSearchLeftShifting();
-	cout << *sched;
+	//sched->lSchedJobsInflated(0.0, 0.25, true, false);
+	//sched->lSchedJobs(0.0);
+	//cout << *sched;
+	//sched->localSearchLeftShifting();
+	//cout << *sched;
+
+//	bool test = false;
+	//sched->locSearchEvaluateLeftShift(4, test);
+
+	//sched->localSearchJobSwapping();
 
 	// SOLVE
 	switch (iSolver) {

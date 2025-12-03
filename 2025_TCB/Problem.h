@@ -48,7 +48,7 @@ struct ProbParams {
 
 class Problem {
 private:
-	std::string filename;
+	
 
 	std::vector<Product> products;
 	std::vector<pJob> unscheduledJobs;
@@ -88,6 +88,7 @@ private:
 	std::vector<std::vector<std::vector<double>>> tc;	// time constraints [product][stage1][stage2]
 
 public:
+	std::string filename;	// DEBUGGING, TODO: move to private section
 	Problem();
 	Problem(std::string filename);
 	Problem(ProbParams& params, bool discreteTime = false);
@@ -106,7 +107,8 @@ public:
 	Product* getProduct(size_t productIdx);
 
 	void loadFromDat(std::string filename);
-	void saveToDat(std::string filename, Schedule* sched = nullptr);
+	void saveToDat(std::string filename, Schedule* sched = nullptr, ProbParams* params = nullptr);
+	void createAutoSchedModelFiles(std::string topfolder, std::string subfolder, ProbParams& params) const;
 
 	void _setG();	// set big integer
 

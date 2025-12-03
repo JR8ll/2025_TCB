@@ -242,15 +242,15 @@ bool compJobsByR(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 
 bool compJobsDebugging(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
 	static std::unordered_map<int, int> jobOrder = {
-		{3, 0},
+		{1, 0},
 		{5, 1},
-		{6, 2},
-		{9, 3},
-		{7, 4},
-		{1, 5},
-		{10, 6},
-		{8, 7},
-		{4, 8},
+		{4, 2},
+		{7, 3},
+		{9, 4},
+		{3, 5},
+		{8, 6},
+		{6, 7},
+		{10, 8},
 		{2, 9}
 	};
 

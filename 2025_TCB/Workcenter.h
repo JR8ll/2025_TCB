@@ -36,11 +36,15 @@ public:
 	void addMachine(pMac mac);
 
 	void schedOp(Operation* op, double pWait = 0.0);
+	void schedOp(Operation* op, double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);
 	void ensureValidity(Operation* op);
 	bool leftShift(size_t mIdx, size_t bIdx, size_t jIdx, double pWait = 0.0);	// true if left-shift was performed
+	bool leftShift(size_t mIdx, size_t bIdx, double pWait = 0.0);				// true if left-shift was performed
 	void rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait = 0.0);	// indices identify op to be right-shifted, from is the new earliest starting time
 	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait = 0.0);
+	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait, double inflation);
 	bool locateOp(Operation* op, size_t& mIdx, size_t& batIdx, size_t& jIdx);	// true if found
+	bool swapOps(size_t mIdx1, size_t bIdx1, size_t jIdx1, size_t mIdx2, size_t bIdx2, size_t jIdx2);
 
 	bool localSearchLeftShift(double pWait = 0.0);	// true if at least one operation was shifted left
 

@@ -1,7 +1,10 @@
 #include "Problem.h"
 
+#include<algorithm>
 #include<fstream>
 #include<iomanip>
+#include<numeric>
+#include<random>
 #include<sstream>
 #include <Windows.h>
 
@@ -528,8 +531,15 @@ void Problem::loadFromDat(string filename) {
 	input.close();
 }
 
-void Problem::saveToDat(string filename, Schedule* sched) {
+void Problem::saveToDat(string filename, Schedule* sched, ProbParams* params) {
 	bool success = CreateDirectory(L".\\exp", NULL);		// exp directory usually contains problem instances and parameters
+	
+	string subfolder = filename;
+	size_t extensionStart = subfolder.find_last_of('.');
+	if (extensionStart != string::npos) {
+		subfolder.erase(extensionStart);
+	}
+	
 
 	ofstream output;
 	output.open(".\\exp\\" + filename);
@@ -786,6 +796,188 @@ void Problem::saveToDat(string filename, Schedule* sched) {
 	}
 	output << "]]];" << endl;
 	output.close();
+	if (params != nullptr) {
+		createAutoSchedModelFiles("exp", subfolder, *params);
+	}
+}
+
+//#include <tchar.h> // Include for _T macro
+
+void Problem::createAutoSchedModelFiles(string topfolder, string subfolder, ProbParams& params) const {
+	int lotSize = 25;
+	double pTimeSpread = 0.2;	// processing time is uniformly distributed between p - (p * pTimeSpread) and p + (p * pTimeSpread)
+	int mttf = 10080;			// mean time to failure (downcal.txt)
+	int mttr = 120;				// mean time to repair (downcal.txt)
+	double leadTimeFF = 1.3;	// raw processing time * leadTimeFF = lead time (due date is set := release + lead time in simulation)
+
+	string fullpath = topfolder + "\\" + subfolder;
+    wstring wideFilename = wstring(fullpath.begin(), fullpath.end());
+    CreateDirectory(wideFilename.c_str(), NULL);
+
+	string toolTxt = topfolder + "\\" + subfolder + "\\tool.txt";
+	ofstream toolStream(toolTxt);
+	toolStream << "STNFAM\t" << "STN\t" << "RULE\t" << "FWLRANK\t" << "WAKERESRANK\t" << "BATCHCRITF\t" << "BATCHPER\t" << "LTIME\t" << "LTUNITS\t" << "ULTIME\t" << "ULTUNITS\t" << "STNCAP\t" << "STNQTY\t" << "STNGRP\t" << "STNFAMSTEP_ACTLIST\t" << "STNFAMLOC\t" << "PRERULERWL\t" << "SETUPGRP" << endl;
+	for (size_t o = 1; o <= stgs; ++o) {
+		toolStream << "STAGE_" << to_string(o) << "\t";											//STNFAM
+		toolStream << "STN_" << to_string(o) << "_" << to_string(1) << "\t";					//STN
+		toolStream << "rule_FIRST" << "\t";														//RULE				TODO: custom rule 'rule_tcb'
+		toolStream << "rank_FIFO" << "\t";														//FWLRANK			TODO: custom rank 'rank_tcb'
+		toolStream << "\t";																		//WAKERESRANK
+		toolStream << "crit_samepart" << "\t";													//BATCHCRITF		TODO: custom crit 'crit_tcb'
+		toolStream << "lot" << "\t";															//BATCHPER
+		toolStream << "1" << "\t";																//LTIME
+		toolStream << "min" << "\t";															//LTNUNITS
+		toolStream << "1" << "\t";																//ULTIME
+		toolStream << "min" << "\t";															//ULTUNITS
+		toolStream << to_string(m_B[o-1]) << "\t";												//STNCAP
+		toolStream << to_string(m_o[o - 1]) << "\t";											//STNQTY
+		toolStream << "GRP_" << to_string(o) << "\t";											//STNGRP
+		toolStream << "Custom_actlist_ASISemiOpersDuringSetupAndAdditionalLoadUnload" << "\t";	//STNFAMSTEP_ATCLIST
+		toolStream << "Fab" << "\t";															//STNFAMLOC
+		toolStream << "no" << "\t";																//PRERULERWL
+		toolStream << "\t";																		//SETUPGRP
+		toolStream << endl;
+	}
+	toolStream.close();
+
+	string partTxt = topfolder + "\\" + subfolder + "\\part.txt";
+	ofstream partStream(partTxt);
+	partStream << "PARTGRP\t" << "PARTFAM\t" << "PART\t" << "ROUTEFILE\t" << "ROUTE\t" << "DFLTLD\t" << "DFLTLDU" << endl;
+	for (size_t i = 1; i <= F; ++i) {
+		partStream << "Saleable\t";
+		partStream << "product_" << to_string(i) << "\t";
+		partStream << "part_" << to_string(i) << "\t";
+		partStream << "route_" << to_string(i) << ".txt" << "\t";
+		partStream << "r_" << to_string(i) << "\t";
+		int leadTime = 0;
+		uniform_real_distribution<double> ddFFDist(params.dueDateFF.first, params.dueDateFF.second);
+		double tempP = 0;
+		for (size_t o = 0; o < stgs; ++o) {
+			tempP += pTimes[i - 1][o];
+		}
+		double dueDateFF = ddFFDist(TCB::rng);
+		leadTime = tempP * dueDateFF;
+		partStream << to_string(leadTime) << "\t";
+		partStream << "min";
+		partStream << endl;
+	}
+	partStream.close();
+
+	string orderTxt = topfolder + "\\" + subfolder + "\\order.txt";
+	ofstream orderStream(orderTxt);
+	orderStream << "LOT\t" << "PART\t" << "PRIOR\t" << "PIECES\t" << "START\t" << "RDIST\t" << "REPEAT\t" << "RUNITS\t" << "RPT#\t" << "LOTSPERRPT\t" << "ORDER\t" << "HOTLOT\t" << endl;
+	for (size_t i = 1; i <= F; ++i) {
+		orderStream << "Lot_" << to_string(i) << "\t";
+		orderStream << "part_" << to_string(i) << "\t";
+		orderStream << "10" << "\t";
+		orderStream << to_string(lotSize) << "\t";
+		orderStream << "01/01/2018 00:00:00" << "\t";		// MM / DD / YYYY HH : MM:SS
+		orderStream << "exponential" << "\t";					// TODO: define interarrival distribution
+		orderStream << "50" << "\t";						// TODO: define interarrival mean
+		orderStream << "min" << "\t";
+		orderStream << "200000" << "\t";
+		orderStream << "1" << "\t";
+		//orderStream << "01/15/2018 10:05:00" << "\t";		// MM/DD/YYYY HH:MM:SS		due dates are defined be default lead time set in part.txt
+		orderStream << "O_Lot_" << to_string(i) << "\t";
+		orderStream << "no" << "\t";
+		orderStream << endl;
+	}
+	orderStream.close();
+
+	string downcalTxt = topfolder + "\\" + subfolder + "\\downcal.txt";
+	ofstream downcalStream(downcalTxt);
+	downcalStream << "DOWNCALNAME\t" << "DOWNCALTYPE\t" << "MTTFDIST\t" << "MTTF\t" << "MTTFUNITS\t" << "MTTRDIST\t" << "MTTR\t" << "MTTRUNITS\t" << endl;
+	for (size_t i = 1; i <= stgs; ++i) {
+		downcalStream << "BREAK_" << to_string(i) << "\t";
+		downcalStream << "mttf_by_cal" << "\t";
+		downcalStream << "exponential" << "\t";
+		downcalStream << to_string(mttf) << "\t";
+		downcalStream << "min" << "\t";
+		downcalStream << "exponential" << "\t";
+		downcalStream << to_string(mttr) << "\t";
+		downcalStream << "min" << "\t";
+		downcalStream << endl;
+	}
+	downcalStream.close();
+
+	string attachTxt = topfolder + "\\" + subfolder + "\\attach.txt";
+	ofstream attachStream(attachTxt);
+	attachStream << "CALNAME\t" << "CALTYPE\t" << "RESTYPE\t" << "RESNAME\t" << "FOADIST\t" << "FOA\t" << "FOAUNITS\t" << endl;
+	for (size_t i = 1; i <= stgs; ++i) {
+		attachStream << "BREAK_" << to_string(i) << "\t";
+		attachStream << "down" << "\t";
+		attachStream << "stngrp" << "\t";
+		attachStream << "GRP_" << to_string(i) << "\t"; 
+		attachStream << "exponential" << "\t";
+		attachStream << to_string(mttf) << "\t";
+		attachStream << "min" << "\t";
+		attachStream << endl;
+	}
+	attachStream.close();
+
+	for (size_t i = 1; i <= F; ++i) {
+		string routeTxt = topfolder + "\\" + subfolder + "\\route_" + to_string(i) + ".txt";
+		ofstream routeStream(routeTxt);
+		routeStream << "ROUTE\t" << "STEP\t" << "DESC\t" << "STNFAM\t" << "PDIST\t" << "PTIME\t" << "PTIME2\t" << "PTUNITS\t" << "PTPER\t" << "BATCHMN\t" << "BATCHMX\t" << "SETUP\t" << "WHEN\t" << "STIME\t" << "STUNITS\t" << "SVESTN\t" << "FORSTEP\t" << "BatchInterval\t" << "BatchIntUnits\t" << "PartInterval\t" << "PartIntUnits\t" << "RWKSTEP\t" << "REWORK\t" << "RWKTYPE\t" << "StepPercent\t" << "STEP_CQT\t" << "CQT\t" << endl;
+		for (size_t o = 1; o <= stgs; ++o) {
+			routeStream << "r_" << to_string(i) << "\t";								//ROUTE	
+			routeStream << to_string(o) << "\t";										// STEP	
+			routeStream << "stage_" << to_string(o) << "\t";							// DESC	
+			routeStream << "STAGE_" << to_string(o) << "\t";							// STNFAM	
+			routeStream << "uniform" << "\t";											// PDIST	
+			routeStream << to_string(pTimes[i-1][o-1]) << "\t";							// PTIME		
+			routeStream << to_string(pTimes[i - 1][o - 1] * pTimeSpread) << "\t";		// PTIME2		
+			routeStream << "min" << "\t";												// PTUNITS	
+			bool batchingStage = m_B[o - 1] > 1;
+			if (batchingStage) {
+				routeStream << "per_batch" << "\t";										// PTPER
+				routeStream << to_string(1) << "\t";									// BATCHMN	
+				routeStream << to_string(m_B[o-1]) << "\t";								// BATCHMX	
+			}
+			else {
+				routeStream << "per_lot" << "\t";										// PTPER
+				routeStream << "\t";													// BATCHMN	
+				routeStream << "\t";													// BATCHMX	
+			}	
+			routeStream << "\t";	// SETUP	
+			routeStream << "\t";	// WHEN	
+			routeStream << "\t";	// STIME	
+			routeStream << "\t";	// STUNITS	
+			routeStream << "\t";	// SVESTN	
+			routeStream << "\t";	// FORSTEP	
+			routeStream << "\t";	// BatchInterval	
+			routeStream << "\t";	// BatchIntUnits	
+			routeStream << "\t";	// PartInterval	
+			routeStream << "\t";	// PartIntUnits	
+			routeStream << "\t";	// RWKSTEP	
+			routeStream << "\t";	// REWORK	
+			routeStream << "\t";	// RWKTYPE	
+			routeStream << "\t";	// StepPercent	
+
+			//std::vector<std::vector<std::vector<double>>> tc;	// time constraints [product][stage1][stage2]
+			bool tcExists = false;
+			size_t nTc = tc[i - 1][o - 1].size();
+			vector<size_t> seq(nTc);
+			iota(seq.begin(), seq.end(), 0);
+			shuffle(seq.begin(), seq.end(), TCB::rng);
+			for (size_t step = 0; step < nTc; ++step) {
+				double tcValue = tc[i - 1][o - 1][seq[step]];
+				if (tcValue != 999999) {
+					routeStream << to_string(seq[step] + 1) << "\t";	// STEP_CQT	
+					routeStream << to_string(tcValue) << "\t";	// CQT
+					tcExists = true;
+					break;
+				}
+			}
+			if (!tcExists) {
+				routeStream << "\t";	// STEP_CQT	
+				routeStream << "\t";	// CQT
+			}
+			
+			routeStream << endl;
+		}
+		routeStream.close();
+	}
 }
 
 void Problem::_setG() {
@@ -972,7 +1164,7 @@ void Problem::genInstancesEURO25() {
 		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
 		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
-		prob.saveToDat(fileName);
+		prob.saveToDat(fileName, nullptr, &params);
 	}
 
 	// 2nd factor combination
@@ -992,7 +1184,7 @@ void Problem::genInstancesEURO25() {
 		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
 		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
-		prob.saveToDat(fileName);
+		prob.saveToDat(fileName, nullptr, &params);
 	}
 
 	// 3rd factor combination
@@ -1013,7 +1205,7 @@ void Problem::genInstancesEURO25() {
 		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
 		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
-		prob.saveToDat(fileName);
+		prob.saveToDat(fileName, nullptr, &params);
 	}
 
 
@@ -1035,7 +1227,7 @@ void Problem::genInstancesEURO25() {
 		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
 		string fileName = "ProbI_EURO_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
-		prob.saveToDat(fileName);
+		prob.saveToDat(fileName, nullptr, &params);
 	}
 }
 

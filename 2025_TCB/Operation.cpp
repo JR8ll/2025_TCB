@@ -50,6 +50,13 @@ double Operation::getP() const {
 	return job->getP(stg-1); 
 }
 double Operation::getR() const { return job->getR(); }
+double Operation::getRconsideringRawP() const {
+	double r = job->getR();
+	for (size_t o = 0; o < (this->stg-1); ++o) {
+		r += job->getOpPtr(o)->getP();
+	}
+	return r;
+}
 double Operation::getW() const { return job->getW(); }
 
 bool Operation::isScheduled() const {

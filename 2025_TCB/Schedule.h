@@ -55,6 +55,7 @@ public:
 	void addJob(pJob job);
 
 	void schedOp(Operation* op, double pWait = 0.0);
+	void schedOp(Operation* op, double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);
 
 	Problem* getProblem() const;
 	void setProblemRef(Problem* prob);
@@ -79,8 +80,10 @@ public:
 
 	// LIST SCHEDULING
 	void lSchedFirstJob(double pWait = 0.0);
+	void lSchedFirstJobInflated(double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);	// insert every operation (if it constitutes a new batch) delayed by (p * inflation)  
 	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	void lSchedJobs(std::vector<double> pWaitVec = { 0.0 });
+	void lSchedJobsInflated(double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
 	void lSchedJobsWithSorting(prioRule<pJob> rule, Sched_params& sched_params);
 	void lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, double pWait = 0.0);							// Dynamic ATC-like sorting with parameters t and kappa
@@ -90,8 +93,21 @@ public:
 	void lSchedJobsWithRandomKeySorting(prioRuleKeySet<pJob> rule, const std::vector<double>& keys, Sched_params& sched_params);
 	void lSchedGifflerThompson(prioRule<pJob> rule, double pWait = 0.0);
 
-	void localSearchLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);
+	void leftShiftBatches();
 
+	// LOCAL SEARCH
+	void localSearchLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);
+	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);			// if not bestFit => firstFit
+
+	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
+	double locSearchEvaluateLeftShift(size_t idxFirst, bool& feasible);
+	double locSearchEvaluateConsolidation(size_t idxFirst, bool& feasible);	// positive return value => improvement
+	
+	bool locSearchSwapJobs(size_t idxFirst, size_t idxSecond);
+
+	// UTILITY FUNCTIONS FOR LOCAL SEARCH
+	std::vector<std::pair<double, bool>> getLeftShiftOptions(Operation* op); // return vector: [stage][shift option] true => continuous value (not depending on batching)
+	
 	bool isValid() const;
 
 	double getTWT() const;											// total weighted tardiness

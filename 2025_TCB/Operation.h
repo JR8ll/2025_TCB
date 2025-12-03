@@ -36,6 +36,7 @@ public:
 	double getD() const;		// external due date (of the job)
 	double getP() const;
 	double getR() const;		// external release date (of the job)
+	double getRconsideringRawP() const;
 	double getW() const;
 		
 	bool isScheduled() const;

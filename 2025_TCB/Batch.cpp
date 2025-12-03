@@ -134,6 +134,13 @@ void Batch::removeOp(Operation* op) {
 		op->assignToBatch(nullptr);
 	}
 }
+void Batch::removeOp(size_t opIdx) {
+	if (opIdx < ops.size()) {
+		auto it = ops.begin() + opIdx;
+		(*it)->assignToBatch(nullptr);
+		ops.erase(it);
+	}
+}
 
 void Batch::removeAllOps() {
 	for (size_t o = 0; o < size(); ++o) {
