@@ -61,6 +61,12 @@ size_t Batch::findOp(const Operation* op) const {
 	throw ExcSched("Batch::findOp() Operation not found");
 }
 bool Batch::isEmpty() const { return ops.empty(); }
+bool Batch::contains(const Operation* op) const {
+	for (size_t j = 0; j < size(); ++j) {
+		if (ops[j] == op) return true;
+	}
+	return false;
+}
 double Batch::getStart() const { return start; }
 double Batch::getC() const { return c; }
 

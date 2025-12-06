@@ -106,8 +106,13 @@ public:
 	bool locSearchSwapJobs(size_t idxFirst, size_t idxSecond);
 
 	// UTILITY FUNCTIONS FOR LOCAL SEARCH
-	std::vector<std::pair<double, bool>> getLeftShiftOptions(Operation* op); // return vector: [stage][shift option] true => continuous value (not depending on batching)
+	std::vector<std::pair<double, double>> getLeftShiftOptions(Operation* op);		   // return vector: [stage][possible improvement option from/to] Example 1: <0.0, 8.0> can be left shifted from 0 to 8 time units; Example 2
+	std::vector<double> getLeeway(Job* job);										   // gets leeway between a job´s operations´ processing (to define min left shifts for predecessors)
+	std::vector<std::vector<std::pair<size_t, double>>> getTcSlack(Job* job);   // (to define max left shifts constrained by maximal time lags)
 	
+	bool constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway);	// returns true if a change was applied to the options
+	bool constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<std::vector<std::pair<size_t, double>>>& tcSlack);
+
 	bool isValid() const;
 
 	double getTWT() const;											// total weighted tardiness

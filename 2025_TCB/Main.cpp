@@ -61,13 +61,14 @@ int main(int argc, char* argv[]) {
 	//sched->sortUnscheduled(sortJobsDebugging);	// DEBUGGING change sortUnscheduled
 	// solve with list-sched
 	//sched->lSchedJobsInflated(0.0, 0.25, true, false);
-	//sched->lSchedJobs(0.0);
+	sched->lSchedJobs(0.0);
 	//cout << *sched;
-	//sched->localSearchLeftShifting();
+	//sched->localSearchLeftShifting();	// Operation based leftShifting (too narrowly constrained to work properly)
 	//cout << *sched;
 
-//	bool test = false;
-	//sched->locSearchEvaluateLeftShift(4, test);
+	bool test = false;
+	sched->saveJsonFactory("BEFORE");
+	sched->locSearchEvaluateLeftShift(3, test);	// utility for job based left shifting
 
 	//sched->localSearchJobSwapping();
 

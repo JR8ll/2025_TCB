@@ -36,6 +36,7 @@ public:
 	size_t size() const;
 	size_t findOp(const Operation* op) const;	// returns index of operation 
 	bool isEmpty() const;
+	bool contains(const Operation* op) const;			
 
 	double getStart() const;
 	double getC() const;
