@@ -11,7 +11,7 @@ Schedule.cpp(688): warning C4267: 'initializing' : conversion from 'size_t' to '
 Schedule.cpp(749): warning C4804: '>' : unsafe use of type 'bool' in operation
 Schedule.cpp(790): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(791): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(945): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-Schedule.cpp(1035): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(995): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(1085): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(673): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

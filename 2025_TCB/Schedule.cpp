@@ -789,14 +789,14 @@ bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std
 	bool changeApplied = false;
 	for (int o = options.size() - 1; o >= 1; --o) {
 		for (int opt = options[o].size() - 1; opt >= 0; --opt) {
-			double OptFrom = options[o][opt].first;
-			double OptTill = options[o][opt].second;
+			double optFrom = options[o][opt].first;
+			double optTill = options[o][opt].second;
 						
 			// 1) delete discrete options if infeasible
-			if (OptFrom == OptTill) {
+			if (optFrom == optTill) {
 				bool feasible = false;
 				for (size_t prevOpt = 0; prevOpt < options[o - 1].size(); ++prevOpt) {
-					if (OptFrom <= options[o - 1][prevOpt].first + leeway[o]) {
+					if (optFrom <= options[o - 1][prevOpt].first + leeway[o]) {
 						feasible = true;
 						break;
 					}
@@ -808,7 +808,7 @@ bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std
 			}
 			
 			// 2) reduce continuous options if necessary
-			if (OptFrom > OptTill) {
+			if (optFrom > optTill) {
 				double maxLeftShift = 0.0;
 				for (size_t prevOpt = 0; prevOpt < options[o - 1].size(); ++prevOpt) {
 					maxLeftShift = max(maxLeftShift, options[o - 1][prevOpt].first + leeway[o]);
@@ -816,7 +816,7 @@ bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std
 				
 				if (maxLeftShift < options[o][opt].first) {
 					changeApplied = true;
-					if (maxLeftShift <= 0) {
+					if (maxLeftShift < options[o][opt].second) {
 						options[o].erase(options[o].begin() + opt);
 					} else {
 						options[o][opt].first = maxLeftShift;
@@ -828,8 +828,57 @@ bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std
 	return changeApplied;
 }
 bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, vector<vector<pair<size_t, double>>>& tcSlack) {
-	cout << "Schedule::constrainLeftShiftOptionsFromTimeConstraints not yet implemented." << endl;
-	return false;
+	bool changeApplied = false;
+	for (int o = 0; o < options.size() - 1; ++o) {
+		for (int opt = 0; opt < options[o].size(); ++opt) {
+			double optFrom = options[o][opt].first;
+			double optTill = options[o][opt].second;
+
+			// 1) reduce discrete options if infeasible
+			if (optFrom == optTill) {
+				bool feasible = false;
+				if (tcSlack[o].size() < 1) { 
+					feasible = true;
+				}
+				for (size_t tc = 0; tc < tcSlack[o].size(); ++tc) {
+					size_t succO = tcSlack[o][tc].first;	// successive stage connected by a time constraint
+					for (size_t succOpt = 0; succOpt < options[succO].size(); ++succOpt) {
+						if (options[o][opt].first <= options[succO][succOpt].first + tcSlack[o][tc].second) {
+							feasible = true;
+							break;
+						}
+					}
+					if (feasible) break;
+				}
+				
+				if (!feasible) {
+					changeApplied = true;
+					options[o].erase(options[o].begin() + opt);
+				}
+			}
+
+			// 2) reduce continuous options if necessary
+			if (optFrom > optTill) {
+				double maxLeftShift = 0;
+				for (size_t tc = 0; tc < tcSlack[o].size(); ++tc) {
+					size_t succO = tcSlack[o][tc].first;
+					for (size_t succOpt = 0; succOpt < options[succO].size(); ++succOpt) {
+						maxLeftShift = max(maxLeftShift, options[succO][succOpt].first + tcSlack[o][tc].second);
+					}
+					if (maxLeftShift < options[o][opt].first) {
+						changeApplied = true;
+						if (maxLeftShift < options[o][opt].second) {
+							options[o].erase(options[o].begin() + opt);
+						} else {
+							options[o][opt].first = maxLeftShift;
+						}
+					}
+				}
+			}
+
+		}
+	}
+	return changeApplied;
 }
 
 
