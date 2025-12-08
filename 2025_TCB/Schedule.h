@@ -96,12 +96,14 @@ public:
 	void leftShiftBatches();
 
 	// LOCAL SEARCH
-	void localSearchLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);
-	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);			// if not bestFit => firstFit
-
+	// LOCAL SEARCH OPERATION BASED
+	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		
+	
+	// LOCAL SEARCH JOB BASED
+	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);		// if not bestFit => firstFit
 	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
-	double locSearchEvaluateLeftShift(size_t idxFirst, bool& feasible);
-	double locSearchEvaluateConsolidation(size_t idxFirst, bool& feasible);	// positive return value => improvement
+	std::pair<double, double> locSearchEvaluateJobLeftShift(size_t idxFirst, bool& feasible);	// positive return value => improvement (first = job left shift (last op), second = sum of intermediate ops´ left shift) JOB BASED
+	double locSearchEvaluateConsolidation(size_t idxFirst, bool& feasible);						// positive return value => improvement
 	
 	bool locSearchSwapJobs(size_t idxFirst, size_t idxSecond);
 
@@ -112,6 +114,8 @@ public:
 	
 	bool constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway);	// returns true if a change was applied to the options
 	bool constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<std::vector<std::pair<size_t, double>>>& tcSlack);
+	void executeLeftShiftOptions(size_t jobIdx, std::vector<std::vector<std::pair<double, double>>>& options);		// left shift of best option for all operations of a job
+	void executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<double, double>& option);									// left shift of single operation
 
 	bool isValid() const;
 
@@ -121,4 +125,8 @@ public:
 	void saveJson(std::string solver = "N/A");
 	void saveJsonFactory(std::string solver = "N/A");				// format complying zui5_gantt viewer application
 
+
+	// DEBUGGING TOOLS (MAY LEAD TO INFEASIBLE SOLUTIONS)
+	void debugSetR(size_t scheduledJobIdx, double newR);			// change r of a scheduled job
+	void debugAddMachine(size_t stgIdx);							// add an empty machine
 };

@@ -67,8 +67,17 @@ int main(int argc, char* argv[]) {
 	//cout << *sched;
 
 	bool test = false;
+	
+	sched->debugSetR(2, 40);
+	sched->debugSetR(8, 0);
+	sched->debugAddMachine(3);
 	sched->saveJsonFactory("BEFORE");
-	sched->locSearchEvaluateLeftShift(3, test);	// utility for job based left shifting
+	pair<double, double> test0 = sched->locSearchEvaluateJobLeftShift(0, test);	// utility for job based left shifting
+	pair<double, double> test1 = sched->locSearchEvaluateJobLeftShift(1, test);	// utility for job based left shifting
+	pair<double, double> test2 = sched->locSearchEvaluateJobLeftShift(2, test);	// utility for job based left shifting
+	pair<double, double> test3 = sched->locSearchEvaluateJobLeftShift(3, test);	// utility for job based left shifting
+	pair<double, double> test4 = sched->locSearchEvaluateJobLeftShift(4, test);	// utility for job based left shifting
+	pair<double, double> test8 = sched->locSearchEvaluateJobLeftShift(8, test);	// utility for job based left shifting
 
 	//sched->localSearchJobSwapping();
 
@@ -87,7 +96,7 @@ int main(int argc, char* argv[]) {
 			sched->lSchedJobsWithSorting(sortJobsByGATC, schedParams);	
 			// MISC REPORTING
 			double twtBefore = sched->getTWT();
-			sched->localSearchLeftShifting();	// try parameters sortJobsByC, sortJobsByStart, ...pWait
+			sched->localSearchOpLeftShifting();	// try parameters sortJobsByC, sortJobsByStart, ...pWait
 			double twtAfter = sched->getTWT();
 			schedParams.leftShiftImprovement = (twtBefore - twtAfter) / twtBefore;
 		}
@@ -129,7 +138,7 @@ int main(int argc, char* argv[]) {
 			Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
 			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim, sortJobsByD, sortJobsByGATC);
 			double twtBefore = sched->getTWT();
-			sched->localSearchLeftShifting();
+			sched->localSearchOpLeftShifting();
 			double twtAfter = sched->getTWT();
 			schedParams.leftShiftImprovement = (twtBefore - twtAfter) / twtBefore;
 		}

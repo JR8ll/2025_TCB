@@ -469,7 +469,7 @@ void Schedule::leftShiftBatches() {
 	}
 }
 
-void Schedule::localSearchLeftShifting(prioRule<pJob> rule, double pWait) {
+void Schedule::localSearchOpLeftShifting(prioRule<pJob> rule, double pWait) {
 	bool bImproved = true;
 	while (bImproved) {
 		bImproved = false;
@@ -577,58 +577,33 @@ double Schedule::locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, boo
 	return grossBetter - grossWorse;
 }
 
-double Schedule::locSearchEvaluateLeftShift(size_t idxFirst, bool& feasible) {
-	
+pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, bool& feasible) {
 	Job* job = scheduledJobs[idxFirst].get();
 	vector<vector<pair<double, double>>> possibleLeftShift = vector<vector<pair<double, double>>>(size());		// [stage][shift option] true => continuous value (not depending on batching)
-	
 
 	// 1) at each stage check the potential for left shifting disregarding maximal time lags (time constraints) and previous stages
 	double earliest = job->getR();
 	for (size_t o = 0; o < size(); ++o) {
 		possibleLeftShift[o] = this->getLeftShiftOptions(job->getOpPtr(o));
 	}
-	
-	// sort stages starting from the most restrictive one 
-	vector<size_t> stagesOrder = vector<size_t>(size());
-	iota(stagesOrder.begin(), stagesOrder.end(), 0);
-	sort(stagesOrder.begin(), stagesOrder.end(), [&](size_t a, size_t b) {
-		return possibleLeftShift[a][0].first < possibleLeftShift[b][0].first;
-	});
+
+	// 2) remove mutually exclusive options 	
 	vector<double> currentLeeway = getLeeway(job);	// as of now, how much time between end and start of succeeding operations? => if job[i] is left shifted by t, then job[i-1] must be left shifted by at least max((t - leeway[i]), 0)
 	vector<vector<pair<size_t, double>>> currentTcSlack = getTcSlack(job);
-	// DEBUGGING
-	bool test = constrainLeftShiftOptionsFromOverlaps(possibleLeftShift, currentLeeway);
-	test = constrainLeftShiftOptionsFromTimeConstraints(possibleLeftShift, currentTcSlack);
+	bool possibleOverlaps = false;
+	bool possibleTcViolations = false;
+	do {
+		possibleOverlaps = constrainLeftShiftOptionsFromOverlaps(possibleLeftShift, currentLeeway);
+		possibleTcViolations = constrainLeftShiftOptionsFromTimeConstraints(possibleLeftShift, currentTcSlack);
+	} while (possibleOverlaps || possibleTcViolations);
 
-	double maxLeftShift = 0.0;
-	// constrain left shifts
-	for (size_t o = 0; o < size(); ++o) {
-		size_t currentStage = stagesOrder[o];
-		std::vector<std::pair<int, double>> tcBwd = job->getTcMaxBwd(currentStage);
-		for (size_t tc = 0; tc < tcBwd.size(); ++tc) {
-			int prevStage = tcBwd[tc].first;
-			double maxLeeway =  (*job)[prevStage].getStart() - ((*job)[currentStage].getStart() - tcBwd[tc].second);
-			maxLeeway += possibleLeftShift[currentStage][0].first;
-			// constrain left shifts for predecessors
-			for (size_t predOp = possibleLeftShift[prevStage].size() - 1; predOp >= 0; --predOp) {
-				if (possibleLeftShift[prevStage][predOp].first > maxLeeway) {
-					if (possibleLeftShift[prevStage][predOp].second) {
-						possibleLeftShift[prevStage][predOp].first = maxLeeway;
-					} else {
-						possibleLeftShift[prevStage].erase(possibleLeftShift[prevStage].begin() + predOp);
-						// TODO: maybo don´t delete if first == 0.0
-					}
-				}
-			}
-		}
-		
-		
-	
-
+	// 3) evaluate best options
+	pair<double, double> evaluation = make_pair(possibleLeftShift[possibleLeftShift.size()-1][0].first, 0);	
+	for (size_t i = 0; i < (possibleLeftShift.size() - 1); ++i) {
+		evaluation.second += possibleLeftShift[i][0].first;
 	}
-	return -1.0;
 
+	return evaluation; // first = actual left shift of job (=last operation), second = secondary left shifts of intermediate operations
 }
 
 double Schedule::locSearchEvaluateConsolidation(size_t idxFirst, bool& feasible) {
@@ -754,14 +729,13 @@ vector<pair<double, double>> Schedule::getLeftShiftOptions(Operation* op) {
 		}
 	}
 
-	// NON-DECREASING ORDER
+	// NON-INCREASING ORDER
 	sort(options.begin(), options.end(), [&](pair<double, double> a, pair<double, double> b) {
-		return a.first < b.first;
+		return a.first > b.first;
 		});
 	
 	return options;
 }
-
 vector<double> Schedule::getLeeway(Job* job) {
 	vector<double> leeway = vector<double>(job->size());
 	leeway[0] = (*job)[0].getStart() - job->getR();
@@ -784,7 +758,6 @@ vector<vector<pair<size_t, double>>> Schedule::getTcSlack(Job* job) {
 	}
 	return tcSlack;
 }
-
 bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway) {
 	bool changeApplied = false;
 	for (int o = options.size() - 1; o >= 1; --o) {
@@ -836,22 +809,26 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 
 			// 1) reduce discrete options if infeasible
 			if (optFrom == optTill) {
-				bool feasible = false;
+				bool allFeasible = true;
+				bool tempFeasible = false;
 				if (tcSlack[o].size() < 1) { 
-					feasible = true;
+					tempFeasible = true;
 				}
 				for (size_t tc = 0; tc < tcSlack[o].size(); ++tc) {
+					tempFeasible = false;
 					size_t succO = tcSlack[o][tc].first;	// successive stage connected by a time constraint
 					for (size_t succOpt = 0; succOpt < options[succO].size(); ++succOpt) {
 						if (options[o][opt].first <= options[succO][succOpt].first + tcSlack[o][tc].second) {
-							feasible = true;
+							tempFeasible = true;
 							break;
 						}
 					}
-					if (feasible) break;
+					if (!tempFeasible) {
+						allFeasible = false;
+					} 
 				}
 				
-				if (!feasible) {
+				if (!allFeasible) {
 					changeApplied = true;
 					options[o].erase(options[o].begin() + opt);
 				}
@@ -879,6 +856,15 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 		}
 	}
 	return changeApplied;
+}
+void Schedule::executeLeftShiftOptions(size_t jobIdx, std::vector<std::vector<std::pair<double, double>>>& options) {
+	Job* job = scheduledJobs[jobIdx].get();
+	for (size_t o = 0; o < job->size(); ++o) {
+		executeLeftShiftOption(jobIdx, o, options[o][0]);	// first option must be largest shift
+	}
+}
+void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<double, double>& option) {
+	cout << "Schedule::executeLeftShiftOption(...) not yet implemented." << endl;
 }
 
 
@@ -1084,4 +1070,13 @@ void Schedule::saveJsonFactory(std::string solver) {
 	bool success = CreateDirectory(L".\\results", NULL);
 	string pathAndFilename = string(".\\results\\").append(schedFileName);
 	pt::write_json(pathAndFilename, treeFile);
+}
+
+void Schedule::debugSetR(size_t scheduledJobIdx, double newR) {
+	cout << "+++ WARNING: INFEASIBLE OPERATION EXECUTED IN COURSE OF DEBUGGING +++" << endl;
+	scheduledJobs[scheduledJobIdx]->setR(newR);
+}
+void Schedule::debugAddMachine(size_t stgIdx) {
+	unique_ptr<Machine> newMac = make_unique<Machine>((*workcenters[stgIdx])[workcenters[stgIdx]->size()-1].getId() + 1, workcenters[stgIdx]->getCap(), &(*workcenters[stgIdx]));
+	workcenters[stgIdx]->addMachine(move(newMac));
 }
