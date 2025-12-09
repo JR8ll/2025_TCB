@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
 
 	Operation* testOp = sched->getScheduledJob(3)->getOpPtr(1);
 	vector<pair<double, double>> rShiftOptions = sched->getRightShiftOptions(testOp, 25);
+	pair<double, double> testR0 = sched->locSearchEvaluateJobRightShift(3, 1, 25, testOption);
 
 	pair<double, double> test0 = sched->locSearchEvaluateJobLeftShift(0, testOption);	// utility for job based left shifting
 	pair<double, double> test1 = sched->locSearchEvaluateJobLeftShift(1, testOption);	// utility for job based left shifting

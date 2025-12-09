@@ -105,6 +105,7 @@ public:
 	
 	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
 	std::pair<double, double> locSearchEvaluateJobLeftShift(size_t idxFirst, std::vector<std::vector<std::pair<double, double>>>& options);	// positive return value => improvement (first = job left shift (last op), second = sum of intermediate ops´ left shift) JOB BASED
+	std::pair<double, double> locSearchEvaluateJobRightShift(size_t idxJob, size_t idxStg, double time, std::vector<std::vector<std::pair<double, double>>>& options);	// idxStg + time describe the desired minimal right shift
 	std::pair<double, double> locSearchEvaluateBatchLeftShift(Batch* batch, double time, bool& possible);
 	std::pair<double, double> locSearchEvaluateBatchRightShift(Batch* batch, double time, bool& possible);
 	//std::pair<double, double> locSearchEvaluateOpsLeftShift(size_t idxJob, size_t idxStg, std::vector<std::vector<std::pair<double, double>>>& options);
@@ -120,11 +121,15 @@ public:
 	// UTILITY FUNCTIONS FOR LOCAL SEARCH
 	std::vector<std::pair<double, double>> getLeftShiftOptions(Operation* op);		   // return vector: [stage][possible improvement option from/to] Example 1: <0.0, 8.0> can be left shifted from 0 to 8 time units; Example 2
 	std::vector<std::pair<double, double>> getRightShiftOptions(Operation* op, double minDelay);
-	std::vector<double> getLeeway(Job* job);										   // gets leeway between a job´s operations´ processing (to define min left shifts for predecessors)
+	std::vector<double> getLeeway(Job* job);	// gets leeway between a job´s operations´ processing (to define min left shifts for predecessors)
+	std::vector<double> getRightSideLeeway(Job* job);
 	std::vector<std::vector<std::pair<size_t, double>>> getTcSlack(Job* job);   // (to define max left shifts constrained by maximal time lags)
 	
 	bool constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway);	// returns true if a change was applied to the options
 	bool constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<std::vector<std::pair<size_t, double>>>& tcSlack);
+	bool constrainRightShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway);	// returns true if a change was applied to the options
+	bool constrainRightShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<std::vector<std::pair<size_t, double>>>& tcSlack);
+
 	void executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<double, double>& option);									// left shift of single operation
 
 	bool isValid() const;
