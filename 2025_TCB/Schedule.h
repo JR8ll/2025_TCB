@@ -101,20 +101,30 @@ public:
 	
 	// LOCAL SEARCH JOB BASED
 	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);		// if not bestFit => firstFit
-	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
-	std::pair<double, double> locSearchEvaluateJobLeftShift(size_t idxFirst, bool& feasible);	// positive return value => improvement (first = job left shift (last op), second = sum of intermediate ops´ left shift) JOB BASED
-	double locSearchEvaluateConsolidation(size_t idxFirst, bool& feasible);						// positive return value => improvement
+	void localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);	// if not bestFit => firstFit
 	
+	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
+	std::pair<double, double> locSearchEvaluateJobLeftShift(size_t idxFirst, std::vector<std::vector<std::pair<double, double>>>& options);	// positive return value => improvement (first = job left shift (last op), second = sum of intermediate ops´ left shift) JOB BASED
+	std::pair<double, double> locSearchEvaluateBatchLeftShift(Batch* batch, double time, bool& possible);
+	std::pair<double, double> locSearchEvaluateBatchRightShift(Batch* batch, double time, bool& possible);
+	//std::pair<double, double> locSearchEvaluateOpsLeftShift(size_t idxJob, size_t idxStg, std::vector<std::vector<std::pair<double, double>>>& options);
+	//double locSearchEvaluateOpsRightShift(size_t idxJob, size_t idxStg, double delay);
+	double locSearchEvaluateOpConsolidation(size_t idxJob, size_t idxStg, bool& feasible);						// positive return value => improvement
+	
+
+
+	// LOCAL SEARCH JOB BASED EXECUTION
 	bool locSearchSwapJobs(size_t idxFirst, size_t idxSecond);
+	bool locSearchLeftShiftJob(size_t jobIdx, std::vector<std::vector<std::pair<double, double>>>& options);
 
 	// UTILITY FUNCTIONS FOR LOCAL SEARCH
 	std::vector<std::pair<double, double>> getLeftShiftOptions(Operation* op);		   // return vector: [stage][possible improvement option from/to] Example 1: <0.0, 8.0> can be left shifted from 0 to 8 time units; Example 2
+	std::vector<std::pair<double, double>> getRightShiftOptions(Operation* op, double minDelay);
 	std::vector<double> getLeeway(Job* job);										   // gets leeway between a job´s operations´ processing (to define min left shifts for predecessors)
 	std::vector<std::vector<std::pair<size_t, double>>> getTcSlack(Job* job);   // (to define max left shifts constrained by maximal time lags)
 	
 	bool constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway);	// returns true if a change was applied to the options
 	bool constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<std::vector<std::pair<size_t, double>>>& tcSlack);
-	void executeLeftShiftOptions(size_t jobIdx, std::vector<std::vector<std::pair<double, double>>>& options);		// left shift of best option for all operations of a job
 	void executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<double, double>& option);									// left shift of single operation
 
 	bool isValid() const;

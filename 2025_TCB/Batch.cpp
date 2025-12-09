@@ -69,6 +69,23 @@ bool Batch::contains(const Operation* op) const {
 }
 double Batch::getStart() const { return start; }
 double Batch::getC() const { return c; }
+double Batch::getR() const {
+	double r = 0;
+	for (size_t i = 0; i < size(); ++i) {
+		double tempR = ops[i]->getAvailability();
+		if (tempR > r) {
+			r = tempR;
+		}
+	}
+	return r;
+}
+double Batch::getW() const {
+	double w = 0;
+	for (size_t i = 0; i < size(); ++i) {
+		w += ops[i]->getW();
+	}
+	return w;
+}
 
 double Batch::getP() const {
 	double p = 0.0;

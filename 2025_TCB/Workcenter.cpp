@@ -5,6 +5,7 @@
 #include "Workcenter.h"
 #include "Functions.h"
 #include "Operation.h"
+#include "Schedule.h"
 
 using namespace std;
 using pBat = unique_ptr<Batch>;
@@ -371,6 +372,51 @@ bool Workcenter::swapOps(size_t mIdx1, size_t bIdx1, size_t jIdx1, size_t mIdx2,
 	(*machines[mIdx2])[bIdx2].addOp(temp1);
 
 	return true;;
+}
+
+bool Workcenter::moveOpDisregardingTc(Operation* op, double newStart, bool intoBatch) {
+	bool bOnlyOp = op->getBatch()->size() <= 1;
+
+	size_t currentMachine = op->getBatch()->getMachine()->getIdx();
+	size_t currentBatch = op->getBatch()->getIdx();
+	int cap = op->getBatch()->getCap();
+
+	op->getBatch()->removeOp(op);
+	if (bOnlyOp) {
+		// delete empty batch
+		(*machines[currentMachine]).removeBatch(currentBatch);
+	}
+
+	if (intoBatch) {
+		// INSERT INTO DIFFERENT BATCH
+		for (size_t m = 0; m < size(); ++m) {
+			for (size_t b = 0; b < machines[m]->size(); ++b) {
+				if ((*machines[m])[b].getStart() > newStart + TCB::precision) {
+					break;		// CONSIDER NEXT MACHINES
+				}
+				if ((*machines[m])[b].getStart() < newStart - TCB::precision) {
+					continue;	// CONSIDER LATER BATCHES
+				}
+				if ((*machines[m])[b].getF() == op->getF() && (*machines[m])[b].getAvailableCap() >= op->getS()) {
+					(*machines[m])[b].addOp(op);
+					return true;
+				}
+			}
+		}
+	} 
+	
+	// INSERT TO DIFFERENT TIME SLOT (Despite intoBatch == true, sometimes a time slot is exactly defined (option.first == option.second)
+	for (size_t m = 0; m < size(); ++m) {
+		if (newStart == machines[m]->getEarliestSlot(newStart, *op)) {
+			unique_ptr<Batch> newBatch = make_unique<Batch>(cap);
+			newBatch->addOp(op);
+			machines[m]->addBatch(move(newBatch), newStart, false);
+			return true;
+		}
+	}
+	
+	getSchedule()->saveJsonFactory("FAILURE");
+	return false;
 }
 
 bool Workcenter::localSearchLeftShift(double pWait) {

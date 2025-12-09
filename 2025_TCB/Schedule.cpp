@@ -528,8 +528,7 @@ void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 							this->saveJsonFactory("DEBUG");
 							bImproved = true;
 							break;
-						}
-						else {			// BEST FIT
+						} else {			// BEST FIT
 							bestImprovement = tempImprovement;
 							best1 = j;
 							best2 = k;
@@ -545,6 +544,44 @@ void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 			locSearchSwapJobs(best1, best2);
 			TCB::prob->filename = TCB::prob->filename + "STEP_";
 			this->saveJsonFactory("DEBUG");
+			bImproved = true;
+		}
+	}
+}
+void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
+	bool bImproved = true;
+	int nJobs = scheduledJobs.size();
+	while (bImproved) {
+		bImproved = false;
+		rule(scheduledJobs);
+		pair<double, double> bestImprovement = make_pair(0, 0);
+		double bestTwtImprovement = 0.0;
+		size_t best = 0;
+		vector<vector<pair<double, double>>> bestPossibleLeftShifts = vector<vector<pair<double, double>>>(size());
+		for (size_t j = 0; j < nJobs; ++j) {
+			if (j == 7) {
+				saveJsonFactory("preNineShift");
+				int stop = 666;
+			}
+			vector<vector<pair<double, double>>> tempPossibleLeftShifts = vector<vector<pair<double, double>>>(size());
+			pair<double, double> tempImprovement = locSearchEvaluateJobLeftShift(j, tempPossibleLeftShifts);
+			double tempTwtImprovement = tempImprovement.first * scheduledJobs[j]->getW();
+			if (tempTwtImprovement > bestTwtImprovement || (tempTwtImprovement == bestTwtImprovement && tempImprovement.second > bestImprovement.second)) {
+				if (!bestFit) {
+					locSearchLeftShiftJob(j, tempPossibleLeftShifts);
+					bImproved = true;
+					break;
+				}
+				else {
+					bestImprovement = tempImprovement;
+					bestTwtImprovement = tempTwtImprovement;
+					bestPossibleLeftShifts = tempPossibleLeftShifts;
+					best = j;
+				}
+			}
+		}
+		if (bestFit && (bestImprovement.first > 0 || bestImprovement.second > 0)) {
+			locSearchLeftShiftJob(best, bestPossibleLeftShifts);
 			bImproved = true;
 		}
 	}
@@ -577,9 +614,9 @@ double Schedule::locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, boo
 	return grossBetter - grossWorse;
 }
 
-pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, bool& feasible) {
+pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, vector<vector<pair<double, double>>>& possibleLeftShift) {
 	Job* job = scheduledJobs[idxFirst].get();
-	vector<vector<pair<double, double>>> possibleLeftShift = vector<vector<pair<double, double>>>(size());		// [stage][shift option] true => continuous value (not depending on batching)
+	possibleLeftShift = vector<vector<pair<double, double>>>(size());		// [stage][shift option] true => continuous value (not depending on batching)
 
 	// 1) at each stage check the potential for left shifting disregarding maximal time lags (time constraints) and previous stages
 	double earliest = job->getR();
@@ -606,25 +643,78 @@ pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, bo
 	return evaluation; // first = actual left shift of job (=last operation), second = secondary left shifts of intermediate operations
 }
 
-double Schedule::locSearchEvaluateConsolidation(size_t idxFirst, bool& feasible) {
-	cout << "Schedule::locSearchEvaluateConsolidation() not yet implemented." << endl;
-	if (idxFirst >= scheduledJobs.size() - 1) {
-		feasible = false;
-		return -1.0;
-	}
-	
-	Job* job1 = scheduledJobs[idxFirst].get();
+pair<double, double> Schedule::locSearchEvaluateBatchLeftShift(Batch* batch, double time, bool& possible) {
+	cout << "Schedule::locSearchEvaluateBatchLeftShift not yet implemented." << endl;
+	pair<double, double> evaluation = make_pair(0, 0);
 
-	for (size_t o = 0; o < size(); ++o) {
-		int B = getCapAtStageIdx(o);
-		if (B > 1) {
-			
+	for (size_t i = 0; i < batch->size(); ++i) {
+		Operation* op = &(*batch)[i];
+		size_t stgIdx = op->getStg() - 1;
+		vector<vector<pair<size_t, double>>> tcSlack = getTcSlack(op->getJob());
+		possible = true;
+		for (size_t tc = 0; tc < tcSlack[stgIdx].size(); ++tc) {
+			if (tcSlack[stgIdx][tc].second < time) {
+				possible = false;
+				break;
+			}
 		}
 	}
 
+	return evaluation;
+}
+
+pair<double, double> Schedule::locSearchEvaluateBatchRightShift(Batch* batch, double time, bool& possible) {
+	cout << "Schedule::locSearchEvaluateBatchRightShift not yet implemented." << endl;
+	pair<double, double> evaluation = make_pair(0, 0);
+	for (size_t i = 0; i < batch->size(); ++i) {
+		Operation* op = &(*batch)[i];
+		
 	
-	feasible = false;
-	return -1.0;
+	}
+	
+	return evaluation;
+}
+
+double Schedule::locSearchEvaluateOpConsolidation(size_t idxJob, size_t idxStg, bool& feasible) {
+	cout << "Schedule::locSearchEvaluateOpConsolidation() not yet implemented." << endl;
+	double evaluation = 0.0;
+	Job* job = scheduledJobs[idxJob].get();
+	Operation* myOp = &(*job)[idxStg];
+	Workcenter* myWc = workcenters[idxStg].get();
+	if (myWc->getCap() > 2) {
+		Batch* myBatch = myOp->getBatch();
+		Machine* myMachine = myBatch->getMachine();
+		size_t myBatchIdx = myBatch->getIdx();
+		int requiredCap = myBatch->getCap() - myBatch->getAvailableCap();
+
+		// consider consolidation of ops at the same machine
+		if (myBatchIdx < myMachine->size() - 1) {
+			Batch* succBatch = &(*myMachine)[myBatchIdx + 1];
+			if (succBatch->getF() == myOp->getF() && succBatch->getAvailableCap() >= requiredCap) {
+				bool bMovePossible = false;
+				double succBatchR = succBatch->getR();
+				double succBatchW = succBatch->getW();
+				double delayOfMyOp = max(0, succBatchR - myOp->getStart());
+				if (delayOfMyOp > 0) {
+					// CONSOLIDATION POSSIBLE (LEAVE CASE delay <= 0 TO LOCAL SEARCH OPERATION LEFT SHIFT)
+					double leftShift = succBatch->getStart() - succBatchR;
+					pair<double, double> addedTime = locSearchEvaluateBatchRightShift(myBatch, delayOfMyOp, bMovePossible);
+					if (bMovePossible) {
+						pair<double, double> reducedTime = locSearchEvaluateBatchLeftShift(succBatch, leftShift, bMovePossible);
+					}
+	
+				}
+			}
+		}
+
+		// TODO consolidate ops at different machines
+	}
+
+
+	
+
+
+	return evaluation;
 }
 
 bool Schedule::locSearchSwapJobs(size_t idxFirst, size_t idxSecond) {
@@ -647,19 +737,23 @@ bool Schedule::locSearchSwapJobs(size_t idxFirst, size_t idxSecond) {
 	}
 }
 
+bool Schedule::locSearchLeftShiftJob(size_t jobIdx, vector<vector<pair<double, double>>>& options) {
+	Job* job = scheduledJobs[jobIdx].get();
+	for (size_t o = 0; o < job->size(); ++o) {
+		executeLeftShiftOption(jobIdx, o, options[o][0]);	// first option must be largest shift
+	}
+	return true;
+}
+
 vector<pair<double, double>> Schedule::getLeftShiftOptions(Operation* op) {
 	vector<pair<double, double>> options = vector<pair<double, double>>();
 	options.push_back(make_pair(0.0, 0.0));
-	cout << "Schedule::getLeftShiftOptions() not yet implemented." << endl;
 	
 	double earliest = op->getRconsideringRawP();
 
 	int stageIdx = op->getStg() - 1;
 	int nMachines = this->getWorkcenters()[stageIdx]->size();
 	for (size_t i = 0; i < nMachines; ++i) {
-		
-		
-		
 		int nBatches = (*this->getWorkcenters()[stageIdx])[i].size();
 			// +++ options in existing batches (DISCRETE => option.first == option.second) +++
 			for (size_t j = 0; j < nBatches; ++j) {
@@ -676,7 +770,6 @@ vector<pair<double, double>> Schedule::getLeftShiftOptions(Operation* op) {
 			if((*this->getWorkcenters()[stageIdx])[i][j].getF() == op->getF() && (*this->getWorkcenters()[stageIdx])[i][j].getAvailableCap() >= op->getS()) {
 				double tempOption = op->getStart() - (*this->getWorkcenters()[stageIdx])[i][j].getStart();
 				options.push_back(make_pair(tempOption, tempOption));
-				// TODO maybe also save machine and batch indices
 			}
 		}
 
@@ -721,7 +814,7 @@ vector<pair<double, double>> Schedule::getLeftShiftOptions(Operation* op) {
 		// after last batch
 		if (nBatches > 0) {
 			if ((*this->getWorkcenters()[stageIdx])[i][nBatches - 1].getC() < op->getStart()) {
-				double gapFrom = max(earliest, (*this->getWorkcenters()[stageIdx])[i][nBatches - 1].getC() < op->getStart());
+				double gapFrom = max(earliest, (*this->getWorkcenters()[stageIdx])[i][nBatches - 1].getC());
 				double tempOptionFrom = op->getStart() - gapFrom;
 				double tempOptionTill = 0.0;
 				options.push_back(make_pair(tempOptionFrom, tempOptionTill));
@@ -734,6 +827,67 @@ vector<pair<double, double>> Schedule::getLeftShiftOptions(Operation* op) {
 		return a.first > b.first;
 		});
 	
+	return options;
+}
+
+vector<pair<double, double>> Schedule::getRightShiftOptions(Operation* op, double minDelay) {
+	double lastStartAddendum = 10;
+	vector<pair<double, double>> options = vector<pair<double, double>>();
+	double newStart = op->getStart() + minDelay;
+	int stageIdx = op->getStg() - 1;
+	int nMachines = this->getWorkcenters()[stageIdx]->size();
+	for (size_t i = 0; i < nMachines; ++i) {
+		int nBatches = (*this->getWorkcenters()[stageIdx])[i].size();
+		// +++ options in existing batches (DISCRETE => option.first == option.second) +++
+		for (size_t j = 0; j < nBatches; ++j) {
+			double currentBatchStart = (*this->getWorkcenters()[stageIdx])[i][j].getStart();
+
+			if (currentBatchStart < newStart) {
+				continue;	
+			}
+
+			if ((*this->getWorkcenters()[stageIdx])[i][j].getF() == op->getF() && (*this->getWorkcenters()[stageIdx])[i][j].getAvailableCap() >= op->getS()) {
+				double tempOption = (*this->getWorkcenters()[stageIdx])[i][j].getStart() - op->getStart();
+				options.push_back(make_pair(tempOption, tempOption));
+			}
+		}
+
+		bool bOnlyOpInBatch = op->getBatch()->size() == 1;
+
+		// +++ free time slots (CONTINUOUS => option.first <= option.second) +++
+		if (nBatches == 0) {
+			double tempOptionFrom = minDelay;
+			double tempOptionTill = minDelay + (lastStartAddendum * op->getP());	// to infinity and beyond!
+			options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+		}
+
+		for (size_t j = 0; j < nBatches; ++j) {
+			double currentBatchStart = (*this->getWorkcenters()[stageIdx])[i][j].getStart();
+			if (j == 0) {
+				// before 1st batch
+				if (newStart + op->getP() <= currentBatchStart) {
+					double tempOptionFrom = minDelay;
+					double tempOptionTill = (currentBatchStart - op->getP()) - op->getStart();
+					options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+				}
+			} else {
+				// inbetween batches
+				double gapFrom = max((*this->getWorkcenters()[stageIdx])[i][j].getC(), newStart);
+				if (gapFrom + op->getP() <= currentBatchStart) {
+					double tempOptionFrom = gapFrom - op->getStart();
+					double tempOptionTill = (currentBatchStart - op->getP()) - op->getStart();
+					options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+				}
+ 			}
+		}
+		
+		// after last batch
+		if (nBatches > 0) {
+			double tempOptionFrom = max((*this->getWorkcenters()[stageIdx])[i][nBatches-1].getC(), newStart) - op->getStart();
+			double tempOptionTill = tempOptionFrom + (lastStartAddendum * op->getP());	// to infinity and beyond!
+			options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+		}
+	}
 	return options;
 }
 vector<double> Schedule::getLeeway(Job* job) {
@@ -857,14 +1011,16 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 	}
 	return changeApplied;
 }
-void Schedule::executeLeftShiftOptions(size_t jobIdx, std::vector<std::vector<std::pair<double, double>>>& options) {
-	Job* job = scheduledJobs[jobIdx].get();
-	for (size_t o = 0; o < job->size(); ++o) {
-		executeLeftShiftOption(jobIdx, o, options[o][0]);	// first option must be largest shift
-	}
-}
+
 void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<double, double>& option) {
-	cout << "Schedule::executeLeftShiftOption(...) not yet implemented." << endl;
+	if (option.first > 0) {
+		Operation* operation = &(*scheduledJobs[jobIdx])[stgIdx];
+		bool bIntoExistingBatch = option.first == option.second;
+		double newStart = operation->getStart() - option.first;
+		if (!workcenters[stgIdx]->moveOpDisregardingTc(operation, newStart, bIntoExistingBatch)) {
+			throw(ExcSched("ERROR: Schedule::executeLeftShiftOption(...) invalid."));
+		}
+	}
 }
 
 
@@ -1080,3 +1236,4 @@ void Schedule::debugAddMachine(size_t stgIdx) {
 	unique_ptr<Machine> newMac = make_unique<Machine>((*workcenters[stgIdx])[workcenters[stgIdx]->size()-1].getId() + 1, workcenters[stgIdx]->getCap(), &(*workcenters[stgIdx]));
 	workcenters[stgIdx]->addMachine(move(newMac));
 }
+

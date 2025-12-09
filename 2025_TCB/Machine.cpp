@@ -104,7 +104,7 @@ bool Machine::addBatch(pBat batch, double start, bool checkValidity){
 	if (!bInserted) {
 		batches.push_back(move(batch));
 		batches.back()->assignToMachine(this);
-		batches.back()->setStart(start);
+		batches.back()->setStart(start, checkValidity);
 	}
 	return true;
 }

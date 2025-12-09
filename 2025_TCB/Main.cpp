@@ -72,12 +72,19 @@ int main(int argc, char* argv[]) {
 	sched->debugSetR(8, 0);
 	sched->debugAddMachine(3);
 	sched->saveJsonFactory("BEFORE");
-	pair<double, double> test0 = sched->locSearchEvaluateJobLeftShift(0, test);	// utility for job based left shifting
-	pair<double, double> test1 = sched->locSearchEvaluateJobLeftShift(1, test);	// utility for job based left shifting
-	pair<double, double> test2 = sched->locSearchEvaluateJobLeftShift(2, test);	// utility for job based left shifting
-	pair<double, double> test3 = sched->locSearchEvaluateJobLeftShift(3, test);	// utility for job based left shifting
-	pair<double, double> test4 = sched->locSearchEvaluateJobLeftShift(4, test);	// utility for job based left shifting
-	pair<double, double> test8 = sched->locSearchEvaluateJobLeftShift(8, test);	// utility for job based left shifting
+	vector<vector<pair<double, double>>> testOption = vector<vector<pair<double, double>>>();
+
+	Operation* testOp = sched->getScheduledJob(3)->getOpPtr(1);
+	vector<pair<double, double>> rShiftOptions = sched->getRightShiftOptions(testOp, 25);
+
+	pair<double, double> test0 = sched->locSearchEvaluateJobLeftShift(0, testOption);	// utility for job based left shifting
+	pair<double, double> test1 = sched->locSearchEvaluateJobLeftShift(1, testOption);	// utility for job based left shifting
+	pair<double, double> test2 = sched->locSearchEvaluateJobLeftShift(2, testOption);	// utility for job based left shifting
+	pair<double, double> test3 = sched->locSearchEvaluateJobLeftShift(3, testOption);	// utility for job based left shifting
+	pair<double, double> test4 = sched->locSearchEvaluateJobLeftShift(4, testOption);	// utility for job based left shifting
+	pair<double, double> test8 = sched->locSearchEvaluateJobLeftShift(8, testOption);	// utility for job based left shifting
+	sched->localSearchJobLeftShifting(&sortJobsByD, false);
+	sched->saveJsonFactory("AFTERLSHIFT");
 
 	//sched->localSearchJobSwapping();
 
