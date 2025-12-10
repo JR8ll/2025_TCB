@@ -149,6 +149,28 @@ void Workcenter::schedOp(Operation* op, double pWait, double inflation, bool bat
 	}
 	ensureValidity(op);
 }
+void Workcenter::schedOpDelayed(Operation* op, double startingAt) {
+	size_t bestMacIdx = -1;
+	size_t bestBatIdx = -1;
+	bool bNewBatch = true;
+	double idealStart = max(op->getEarliestStart(), startingAt);
+	double tempStart = numeric_limits<double>::max();
+
+	findBestStartNotBefore(op, bNewBatch, bestMacIdx, bestBatIdx, tempStart, idealStart);
+
+	// actually schedule operation
+	Machine* bestMac = machines[bestMacIdx].get();
+	if (!bNewBatch) {
+		Batch* bestBat = &(*bestMac)[bestBatIdx];
+		if (!bestBat->addOp(op)) throw ExcSched("Workcenter::schedOp -> op could not be added");
+	}
+	else {
+		pBat newBatch = make_unique<Batch>(bestMac->getCap());
+		newBatch->addOp(op);
+		if (!bestMac->addBatch(move(newBatch), tempStart)) throw ExcSched("Workcenter::schedOp -> batch could not be added");
+	}
+	ensureValidity(op);
+}
 void Workcenter::ensureValidity(Operation* op) {
 	bool bValid = false;
 	bool bOverlaps = true;
@@ -333,6 +355,39 @@ void Workcenter::findBestStart(Operation* op, bool& bNewBatch, size_t& bestMacId
 		// consider formation of a new batch
 		double earliestSlot = mac->getEarliestSlot(idealStart + delay, *op);
 		if (earliestSlot + (op->getP() * pWait) < tempStart) {
+			if (tempStart >= idealStart) {
+				tempStart = earliestSlot;
+				bestMacIdx = m;
+				bNewBatch = true;
+			}
+		}
+	}
+}
+void Workcenter::findBestStartNotBefore(Operation* op, bool& bNewBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double notBefore) {
+	double idealStart = max(op->getEarliestStart(), notBefore);
+	double tempStart = numeric_limits<double>::max();
+
+	// find best batch/time slot for operation
+	for (size_t m = 0; m < machines.size(); ++m) {
+		Machine* mac = machines[m].get();
+		// consider existing batches
+		for (size_t b = 0; b < mac->size(); ++b) {
+			Batch* bat = &(*mac)[b];
+			if (bat->getStart() > tempStart) break; // earlier option already found
+			if (bat->getStart() >= idealStart && bat->getF() == op->getF() && bat->getAvailableCap() >= op->getS()) {
+				if (bat->getStart() < tempStart) {
+					tempStart = bat->getStart();
+					bestMacIdx = m;
+					bestBatIdx = b;
+					bNewBatch = false;
+				}
+				break;  // later batches on this machines are not considered
+			}
+		}
+
+		// consider formation of a new batch
+		double earliestSlot = mac->getEarliestSlot(idealStart, *op);
+		if ((earliestSlot + op->getP()) < tempStart) {
 			if (tempStart >= idealStart) {
 				tempStart = earliestSlot;
 				bestMacIdx = m;

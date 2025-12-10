@@ -56,6 +56,7 @@ public:
 
 	void schedOp(Operation* op, double pWait = 0.0);
 	void schedOp(Operation* op, double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);
+	void schedOpDelayed(Operation* op, double startingAt);
 
 	Problem* getProblem() const;
 	void setProblemRef(Problem* prob);
@@ -79,9 +80,11 @@ public:
 	Operation* findInUnscheduledJobs(Operation* remoteOp) const;			// find operation in unscheduled jobs by id and stage
 
 	// LIST SCHEDULING
-	void lSchedFirstJob(double pWait = 0.0);
+	void lSchedFirstJob(double pWait = 0.0);	
 	void lSchedFirstJobInflated(double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);	// insert every operation (if it constitutes a new batch) delayed by (p * inflation)  
-	void lSchedJobs(double pWait = 0.0);																				// List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
+	void lSchedJobsStageWise(double pWait = 0.0);		// Stage based List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
+	void lSchedJobsStageWiseWithSorting(prioRule<pJob> rule, double pWait = 0.0);
+	void lSchedJobs(double pWait = 0.0);	// Job based List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	void lSchedJobs(std::vector<double> pWaitVec = { 0.0 });
 	void lSchedJobsInflated(double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);
 	void lSchedJobsWithSorting(prioRule<pJob> rule, double pWait = 0.0);												// non-parameter sorting (EDD, SPT, ...)
@@ -96,6 +99,10 @@ public:
 	void leftShiftBatches();
 
 	// LOCAL SEARCH
+	// LOCAL SEARCH BATCH BASED
+	void localSearchBatchLeftShifting();	// TODO
+	void localSearchBatchSwapping();		// TODO
+	
 	// LOCAL SEARCH OPERATION BASED
 	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		
 	

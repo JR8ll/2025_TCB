@@ -90,6 +90,14 @@ double Operation::getEarliestStart() const {
 	}
 	return earliest;
 }
+double Operation::getLatestStartConsideringTc() const {
+	double latest = DBL_MAX;
+	const vector<pair<int, double>>* tcBwd = &getTcMaxBwd();
+	for (size_t i = 0; i < tcBwd->size(); ++i) {
+		latest = min(latest, (*job)[(*tcBwd)[i].first].getStart() + (*tcBwd)[i].second);
+	}
+	return latest;
+}
 double Operation::getWait() const { return wait; }
 
 double Operation::getGATC(double avgP, double t, double kappa) const {

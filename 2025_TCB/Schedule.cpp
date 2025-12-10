@@ -144,6 +144,10 @@ void Schedule::schedOp(Operation* op, double pWait, double inflation, bool batch
 	int wcIdx = op->getWorkcenterId() - 1;
 	workcenters[wcIdx]->schedOp(op, pWait, inflation, batchinStageInflationOnly, opsWithoutTcInflationOnly);
 }
+void Schedule::schedOpDelayed(Operation* op, double startingAt) {
+	int wcIdx = op->getWorkcenterId() - 1;
+	workcenters[wcIdx]->schedOpDelayed(op, startingAt);
+}
 
 Problem* Schedule::getProblem() const {
 	return problem;
@@ -286,6 +290,7 @@ void Schedule::lSchedFirstJob(double pWait) {
 	}
 	shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
 }
+
 void Schedule::lSchedFirstJobInflated(double pWait, double inflation, bool batchinStageInflationOnly, bool opsWithoutTcInflationOnly) {
 	for (size_t op = 0; op < (*unscheduledJobs.begin())->size(); ++op) {
 		schedOp(&(**unscheduledJobs.begin())[op], pWait, inflation, batchinStageInflationOnly, opsWithoutTcInflationOnly);
@@ -293,12 +298,60 @@ void Schedule::lSchedFirstJobInflated(double pWait, double inflation, bool batch
 	}
 	shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
 }
+void Schedule::lSchedJobsStageWise(double pWait) {
+	for (size_t i = 0; i < size(); ++i) {	
+		for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+			Operation* op = &(*unscheduledJobs[j])[i];
+			int maxLookAhead = workcenters[i]->getCap() - op->getS();	// looking ahead, ops may be batched if their common start time thus is earlier than their latest start if not batched
+			int lookAheadCapRqrmt = op->getS();
+			if (!op->isScheduled()) {
+				vector<Operation*> lookingAhead = vector<Operation*>();
+				if(maxLookAhead > 0) {
+					double earliest = op->getEarliestStart();
+					double latest = min(earliest + op->getP(), op->getLatestStartConsideringTc());
+					double commonStart = earliest;
+					for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+						Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
+						if (lookAheadOp->getF() == op->getF()) {
+							if (!lookAheadOp->isScheduled()) {
+								double tempEarliest = lookAheadOp->getEarliestStart();
+								if (tempEarliest <= latest) {
+									if (workcenters[i]->getCap() >= lookAheadCapRqrmt + lookAheadOp->getS()) {
+										// CANDIDATE FOUND
+										lookAheadCapRqrmt += lookAheadOp->getS();
+										// TODO: TRY MORE SOPHISTICATED DECISIONS (e.g. based on weights or anticipated wT)
+										commonStart = max(earliest, tempEarliest);
+										lookingAhead.push_back(lookAheadOp);
+									}
+								}
+							}
+						}
+						if (lookingAhead.size() >= maxLookAhead || lookAheadCapRqrmt >= workcenters[i]->getCap()) break;
+					}
+				}	
+				schedOp(op);
+				for (size_t i = 0; i < lookingAhead.size(); ++i) {
+					schedOp(lookingAhead[i]);
+				}
+			}
+		}
+	}
+	while (!unscheduledJobs.empty()) {
+		shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
+	}
+	if (!this->isValid()) {
+		throw ExcSched("ERROR: invalid schedule after Schedule::lSchedStages.");
+	}
+}
+void Schedule::lSchedJobsStageWiseWithSorting(prioRule<pJob> rule, double pWait) {
+	rule(unscheduledJobs);
+	lSchedJobsStageWise(pWait);
+}
 void Schedule::lSchedJobs(double pWait) {
 	while(!unscheduledJobs.empty()) {
 		lSchedFirstJob(pWait);
 	}
 }
-
 void Schedule::lSchedJobs(vector<double> pWaitVec) {
 	double bestTWT = DBL_MAX; // numeric_limits<double>::max();
 	double bestWait = pWaitVec[0];
