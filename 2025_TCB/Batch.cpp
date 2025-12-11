@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <set>
 
@@ -76,6 +77,13 @@ double Batch::getR() const {
 		if (tempR > r) {
 			r = tempR;
 		}
+	}
+	return r;
+}
+double Batch::getRconsideringRawP() const {
+	double r = 0;
+	for (size_t i = 0; i < size(); ++i) {
+		r = max(r, ops[i]->getRconsideringRawP());
 	}
 	return r;
 }

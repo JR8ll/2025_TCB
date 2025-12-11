@@ -42,6 +42,7 @@ public:
 	double getC() const;
 	double getP() const;
 	double getR() const;	// largest availability of operations at this stage
+	double getRconsideringRawP() const;
 	double getW() const;	// sum of job weights
 
 	int getF() const;

@@ -69,8 +69,9 @@ int main(int argc, char* argv[]) {
 	bool test = false;
 	
 	sched->lSchedJobsStageWiseWithSorting(sortJobsDebugging, 0);
+	sched->saveJsonFactory("AFTER_STAGEWISE");
 	sched->localSearchJobLeftShifting();
-	sched->saveJsonFactory("LALALA");
+	sched->saveJsonFactory("AFTER_LEFTSHIFT");
 
 	sched->debugSetR(2, 40);
 	sched->debugSetR(8, 0);

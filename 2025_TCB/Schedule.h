@@ -101,7 +101,7 @@ public:
 	// LOCAL SEARCH
 	// LOCAL SEARCH BATCH BASED
 	void localSearchBatchLeftShifting();	// TODO
-	void localSearchBatchSwapping();		// TODO
+
 	
 	// LOCAL SEARCH OPERATION BASED
 	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		
@@ -127,6 +127,7 @@ public:
 
 	// UTILITY FUNCTIONS FOR LOCAL SEARCH
 	std::vector<std::pair<double, double>> getLeftShiftOptions(Operation* op);		   // return vector: [stage][possible improvement option from/to] Example 1: <0.0, 8.0> can be left shifted from 0 to 8 time units; Example 2
+	std::vector<std::pair<double, double>> getLeftShiftOptions(Batch* batch);
 	std::vector<std::pair<double, double>> getRightShiftOptions(Operation* op, double minDelay);
 	std::vector<double> getLeeway(Job* job);	// gets leeway between a job´s operations´ processing (to define min left shifts for predecessors)
 	std::vector<double> getRightSideLeeway(Job* job);

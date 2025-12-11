@@ -365,7 +365,7 @@ void Workcenter::findBestStart(Operation* op, bool& bNewBatch, size_t& bestMacId
 }
 void Workcenter::findBestStartNotBefore(Operation* op, bool& bNewBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double notBefore) {
 	double idealStart = max(op->getEarliestStart(), notBefore);
-	double tempStart = numeric_limits<double>::max();
+	//double tempStart = numeric_limits<double>::max();
 
 	// find best batch/time slot for operation
 	for (size_t m = 0; m < machines.size(); ++m) {
@@ -373,10 +373,10 @@ void Workcenter::findBestStartNotBefore(Operation* op, bool& bNewBatch, size_t& 
 		// consider existing batches
 		for (size_t b = 0; b < mac->size(); ++b) {
 			Batch* bat = &(*mac)[b];
-			if (bat->getStart() > tempStart) break; // earlier option already found
+			if (bat->getStart() > bestStart) break; // earlier option already found
 			if (bat->getStart() >= idealStart && bat->getF() == op->getF() && bat->getAvailableCap() >= op->getS()) {
-				if (bat->getStart() < tempStart) {
-					tempStart = bat->getStart();
+				if (bat->getStart() < bestStart) {
+					bestStart = bat->getStart();
 					bestMacIdx = m;
 					bestBatIdx = b;
 					bNewBatch = false;
@@ -387,9 +387,9 @@ void Workcenter::findBestStartNotBefore(Operation* op, bool& bNewBatch, size_t& 
 
 		// consider formation of a new batch
 		double earliestSlot = mac->getEarliestSlot(idealStart, *op);
-		if ((earliestSlot + op->getP()) < tempStart) {
-			if (tempStart >= idealStart) {
-				tempStart = earliestSlot;
+		if ((earliestSlot) < bestStart) {
+			if (bestStart >= idealStart) {
+				bestStart = earliestSlot;
 				bestMacIdx = m;
 				bNewBatch = true;
 			}

@@ -300,39 +300,73 @@ void Schedule::lSchedFirstJobInflated(double pWait, double inflation, bool batch
 }
 void Schedule::lSchedJobsStageWise(double pWait) {
 	for (size_t i = 0; i < size(); ++i) {	
+		
 		for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
 			Operation* op = &(*unscheduledJobs[j])[i];
+
+			//DEBUG
+			if (op->getId() == 5 && op->getStg() == 3) {
+				int stop = 666;
+			}
+
+
 			int maxLookAhead = workcenters[i]->getCap() - op->getS();	// looking ahead, ops may be batched if their common start time thus is earlier than their latest start if not batched
 			int lookAheadCapRqrmt = op->getS();
+			
 			if (!op->isScheduled()) {
 				vector<Operation*> lookingAhead = vector<Operation*>();
+				double earliest = op->getEarliestStart();
+				double earliestC = earliest + op->getP();
+				double latest = min(earliest + op->getP(), op->getLatestStartConsideringTc());
+				double commonStart = earliest;
+
 				if(maxLookAhead > 0) {
-					double earliest = op->getEarliestStart();
-					double latest = min(earliest + op->getP(), op->getLatestStartConsideringTc());
-					double commonStart = earliest;
+					// this operation should not wait if a full batch is ready to start at earliestC
+					bool bFullBatchWaiting = false;
+					/*int remainingCap = workcenters[i]->getCap();
 					for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
 						Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
 						if (lookAheadOp->getF() == op->getF()) {
 							if (!lookAheadOp->isScheduled()) {
 								double tempEarliest = lookAheadOp->getEarliestStart();
-								if (tempEarliest <= latest) {
-									if (workcenters[i]->getCap() >= lookAheadCapRqrmt + lookAheadOp->getS()) {
-										// CANDIDATE FOUND
-										lookAheadCapRqrmt += lookAheadOp->getS();
-										// TODO: TRY MORE SOPHISTICATED DECISIONS (e.g. based on weights or anticipated wT)
-										commonStart = max(earliest, tempEarliest);
-										lookingAhead.push_back(lookAheadOp);
-									}
+								if (tempEarliest > earliest && tempEarliest <= earliestC) {
+									remainingCap -= lookAheadOp->getS();
 								}
 							}
 						}
-						if (lookingAhead.size() >= maxLookAhead || lookAheadCapRqrmt >= workcenters[i]->getCap()) break;
+						if (remainingCap <= 0) {
+							bFullBatchWaiting = true;
+							break;
+						}
+					}*/
+
+					// look for operations worthy to wait for
+					if (!bFullBatchWaiting) {
+						for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+							Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
+							if (lookAheadOp->getF() == op->getF()) {
+								if (!lookAheadOp->isScheduled()) {
+									double tempEarliest = lookAheadOp->getEarliestStart();
+									if (tempEarliest <= latest) {
+										if (workcenters[i]->getCap() >= lookAheadCapRqrmt + lookAheadOp->getS()) {
+											// CANDIDATE FOUND
+											lookAheadCapRqrmt += lookAheadOp->getS();
+											// TODO: TRY MORE SOPHISTICATED DECISIONS (e.g. based on weights or anticipated wT)
+											commonStart = max(earliest, tempEarliest);
+											lookingAhead.push_back(lookAheadOp);
+										}
+									}
+								}
+							}
+							if (lookingAhead.size() >= maxLookAhead || lookAheadCapRqrmt >= workcenters[i]->getCap()) break;
+						}
 					}
 				}	
-				schedOp(op);
+				schedOpDelayed(op, commonStart);
 				for (size_t i = 0; i < lookingAhead.size(); ++i) {
-					schedOp(lookingAhead[i]);
+					schedOpDelayed(lookingAhead[i], commonStart);
 				}
+				saveJsonFactory("DEBUGGING_STAGEWISE");
 			}
 		}
 	}
@@ -522,6 +556,11 @@ void Schedule::leftShiftBatches() {
 	}
 }
 
+void Schedule::localSearchBatchLeftShifting() {
+	cout << "Schedule::localSearchBatchLeftShifting() not yet implemented. " << endl;
+
+}
+
 void Schedule::localSearchOpLeftShifting(prioRule<pJob> rule, double pWait) {
 	bool bImproved = true;
 	while (bImproved) {
@@ -695,7 +734,6 @@ pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, ve
 
 	return evaluation; // first = actual left shift of job (=last operation), second = secondary left shifts of intermediate operations
 }
-
 pair<double, double> Schedule::locSearchEvaluateJobRightShift(size_t idxJob, size_t idxStg, double time, std::vector<std::vector<std::pair<double, double>>>& possibleRightShifts)
 {
 	cout << "Schedule::locSearchEvaluateJobRightShift(...) not yet implemented." << endl;
@@ -916,6 +954,63 @@ vector<pair<double, double>> Schedule::getLeftShiftOptions(Operation* op) {
 		return a.first > b.first;
 		});
 	
+	return options;
+}
+vector<pair<double, double>> Schedule::getLeftShiftOptions(Batch* batch) {
+	vector<pair<double, double>> options = vector<pair<double, double>>();
+	options.push_back(make_pair(0.0, 0.0));
+	if (batch->size() == 0) {
+		return options;
+	}
+
+	double earliest = batch->getRconsideringRawP();
+	size_t myBatIdx = batch->getIdx();
+	size_t myMacIdx = batch->getMachine()->getIdx();
+	size_t myStgIdx = (*batch)[0].getStg() - 1;
+	int nMachines = this->getWorkcenters()[myStgIdx]->size();
+	for (size_t i = 0; i < nMachines; ++i) {
+		int nBatches = (*workcenters[myStgIdx])[i].size();
+		if (nBatches == 0) {
+			double tempOptionFrom = batch->getStart() - earliest;
+			double tempOptionTill = 0.0;
+			options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+		}
+
+		for (size_t j = 0; j < nBatches; ++j) {
+			if (i != myMacIdx || j != myBatIdx) {
+				double currentBatchStart = (*this->getWorkcenters()[myStgIdx])[i][j].getStart();
+				if (j == 0) {
+					// before 1st batch
+					if (earliest + batch->getP() <= currentBatchStart) {
+						double tempOptionFrom = batch->getStart() - earliest;
+						double tempOptionTill = batch->getStart() - (currentBatchStart - batch->getP());
+						options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+					}
+				}
+				else {
+					// inbetween batches
+					double gapFrom = max((*this->getWorkcenters()[myStgIdx])[i][j - 1].getC(), earliest);
+					if (gapFrom + batch->getP() <= currentBatchStart) {
+						double tempOptionFrom = batch->getStart() - gapFrom;
+						double tempOptionTill = batch->getStart() - (currentBatchStart - batch->getP());
+						if (tempOptionFrom > 0.0) {
+							options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+						}
+					}
+				}
+			}
+		}
+
+		// after last batch
+		if (nBatches > 0) {
+			if ((*this->getWorkcenters()[myStgIdx])[i][nBatches - 1].getC() < batch->getStart()) {
+				double gapFrom = max(earliest, (*this->getWorkcenters()[myStgIdx])[i][nBatches - 1].getC());
+				double tempOptionFrom = batch->getStart() - gapFrom;
+				double tempOptionTill = 0.0;
+				options.push_back(make_pair(tempOptionFrom, tempOptionTill));
+			}
+		}
+	}
 	return options;
 }
 vector<pair<double, double>> Schedule::getRightShiftOptions(Operation* op, double minDelay) {
