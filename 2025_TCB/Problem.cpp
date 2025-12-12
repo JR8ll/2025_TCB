@@ -259,6 +259,21 @@ double Problem::getG() const {
 	return G;
 }
 
+double Problem::getUpperBoundMSP() const {
+	double msp = 0.0;
+	double maxR = 0.0;
+	for (size_t i = 0; i < jobs_r.size(); ++i) {
+		for (size_t o = 0; o < stgs; ++o) {
+			msp += (*unscheduledJobs[i])[o].getP();
+		}
+		if (jobs_r[i] > maxR) {
+			maxR = jobs_r[i];
+		}
+	}
+	msp += maxR;
+	return msp;
+}
+
 Product* Problem::getProduct(size_t productIdx) {
 	if (productIdx >= products.size()) throw out_of_range("Problem::getProduct() out of range");
 	return &(products[productIdx]);

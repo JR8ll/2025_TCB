@@ -304,12 +304,6 @@ void Schedule::lSchedJobsStageWise(double pWait) {
 		for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
 			Operation* op = &(*unscheduledJobs[j])[i];
 
-			//DEBUG
-			if (op->getId() == 5 && op->getStg() == 3) {
-				int stop = 666;
-			}
-
-
 			int maxLookAhead = workcenters[i]->getCap() - op->getS();	// looking ahead, ops may be batched if their common start time thus is earlier than their latest start if not batched
 			int lookAheadCapRqrmt = op->getS();
 			
@@ -317,7 +311,7 @@ void Schedule::lSchedJobsStageWise(double pWait) {
 				vector<Operation*> lookingAhead = vector<Operation*>();
 				double earliest = op->getEarliestStart();
 				double earliestC = earliest + op->getP();
-				double latest = min(earliest + op->getP(), op->getLatestStartConsideringTc());
+				double latest = min(earliest + op->getP(), op->getLatestStartConsideringBwdTc());
 				double commonStart = earliest;
 
 				if(maxLookAhead > 0) {
@@ -380,6 +374,119 @@ void Schedule::lSchedJobsStageWise(double pWait) {
 void Schedule::lSchedJobsStageWiseWithSorting(prioRule<pJob> rule, double pWait) {
 	rule(unscheduledJobs);
 	lSchedJobsStageWise(pWait);
+}
+void Schedule::lSchedJobsStageWiseBackward(double pWait) {
+	// temporarily change all jobs´ release time to an upper bound value
+	double tZero = problem->getUpperBoundMSP();
+	for (size_t i = 0; i < unscheduledJobs.size(); ++i) {
+		unscheduledJobs[i]->setR(unscheduledJobs[i]->getR() + tZero);
+	}
+
+	for (int i = size()-1; i >= 0; --i) {
+
+
+		// NEW IDEA 12.12.2025 FROM 2nd iteration on consider operations in backwards order and schedule as late as possible (may considering lookAhead batching)
+
+		for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+			Operation* op = &(*unscheduledJobs[j])[i];
+
+			int maxLookAhead = workcenters[i]->getCap() - op->getS();	// looking ahead, ops may be batched if their common start time thus is earlier than their latest start if not batched
+			int lookAheadCapRqrmt = op->getS();
+
+			if (!op->isScheduled()) {
+				vector<Operation*> lookingAhead = vector<Operation*>();
+				double earliest = op->getEarliestStartForBackwardScheduling(); // op->getEarliestStart();
+				double earliestC = earliest + op->getP();
+				double latest = earliest + op->getP(); // , op->getLatestStartConsideringFwdTc());
+				if (op->getSucc() != nullptr) {
+					if (op->getSucc()->isScheduled()) {
+						latest = op->getSucc()->getStart() - op->getP();
+					}
+				}
+				double commonStart = earliest;
+
+				if (maxLookAhead > 0) {
+					// this operation should not wait if a full batch is ready to start at earliestC
+					bool bFullBatchWaiting = false;
+					/*int remainingCap = workcenters[i]->getCap();
+					for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+						Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
+						if (lookAheadOp->getF() == op->getF()) {
+							if (!lookAheadOp->isScheduled()) {
+								double tempEarliest = lookAheadOp->getEarliestStart();
+								if (tempEarliest > earliest && tempEarliest <= earliestC) {
+									remainingCap -= lookAheadOp->getS();
+								}
+							}
+						}
+						if (remainingCap <= 0) {
+							bFullBatchWaiting = true;
+							break;
+						}
+					}*/
+
+					// look for operations worthy to wait for
+					if (!bFullBatchWaiting) {
+						for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+							Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
+							if (lookAheadOp->getF() == op->getF()) {
+								if (!lookAheadOp->isScheduled()) {
+									double tempEarliest = lookAheadOp->getEarliestStart();
+									if (tempEarliest <= latest) {
+										if (workcenters[i]->getCap() >= lookAheadCapRqrmt + lookAheadOp->getS()) {
+											// CANDIDATE FOUND
+											lookAheadCapRqrmt += lookAheadOp->getS();
+											// TODO: TRY MORE SOPHISTICATED DECISIONS (e.g. based on weights or anticipated wT)
+											commonStart = max(earliest, tempEarliest);
+											lookingAhead.push_back(lookAheadOp);
+										}
+									}
+								}
+							}
+							if (lookingAhead.size() >= maxLookAhead || lookAheadCapRqrmt >= workcenters[i]->getCap()) break;
+						}
+					}
+				}
+				schedOpDelayed(op, commonStart);
+				for (size_t i = 0; i < lookingAhead.size(); ++i) {
+					schedOpDelayed(lookingAhead[i], commonStart);
+				}
+				saveJsonFactory("DEBUGGING_STAGEWISEBACKWARDS");
+			}
+		}
+		if (i == size() - 1) {
+			// after last schedule is scheduled, reset r
+			for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+				unscheduledJobs[j]->setR(unscheduledJobs[j]->getR() - tZero);
+			}
+		}
+		
+		//saveJsonFactory("DEBUGGING_STAGEWISEBACKWARDS");
+	}
+	while (!unscheduledJobs.empty()) {
+		shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
+	}
+
+	// set start times for all batches
+	for (size_t i = 0; i < size(); ++i) {
+		for (size_t m = 0; m < workcenters[i]->size(); ++m) {
+			for (size_t b = 0; b < (*workcenters[i])[m].size(); ++b) {
+				cout << "TODO" << endl;
+			}
+		}
+	}
+	
+
+	if (!this->isValid()) {
+		throw ExcSched("ERROR: invalid schedule after Schedule::lSchedStages.");
+	}
+
+
+	// probably left shifting local search in the end  
+}
+void Schedule::lSchedJobsStageWiseBackwardWithSorting(prioRule<pJob> rule, double pWait) {
+	rule(unscheduledJobs);
+	lSchedJobsStageWiseBackward(pWait);	
 }
 void Schedule::lSchedJobs(double pWait) {
 	while(!unscheduledJobs.empty()) {
@@ -771,22 +878,16 @@ pair<double, double> Schedule::locSearchEvaluateJobRightShift(size_t idxJob, siz
 }
 
 
-pair<double, double> Schedule::locSearchEvaluateBatchLeftShift(Batch* batch, double time, bool& possible) {
+pair<double, double> Schedule::locSearchEvaluateBatchLeftShift(Batch* batch, double time, vector<pair<double, double>>& possibleLeftShifts) {
 	cout << "Schedule::locSearchEvaluateBatchLeftShift not yet implemented." << endl;
 	pair<double, double> evaluation = make_pair(0, 0);
+	possibleLeftShifts = vector<pair<double, double>>(size());
+	
+	// 1) check the potential for left shifting disregarding maximal time lags (time constraints) and previous stages
+	possibleLeftShifts = getLeftShiftOptions(batch);
+	
+	// TODO
 
-	for (size_t i = 0; i < batch->size(); ++i) {
-		Operation* op = &(*batch)[i];
-		size_t stgIdx = op->getStg() - 1;
-		vector<vector<pair<size_t, double>>> tcSlack = getTcSlack(op->getJob());
-		possible = true;
-		for (size_t tc = 0; tc < tcSlack[stgIdx].size(); ++tc) {
-			if (tcSlack[stgIdx][tc].second < time) {
-				possible = false;
-				break;
-			}
-		}
-	}
 
 	return evaluation;
 }
@@ -827,7 +928,8 @@ double Schedule::locSearchEvaluateOpConsolidation(size_t idxJob, size_t idxStg, 
 					double leftShift = succBatch->getStart() - succBatchR;
 					pair<double, double> addedTime = locSearchEvaluateBatchRightShift(myBatch, delayOfMyOp, bMovePossible);
 					if (bMovePossible) {
-						pair<double, double> reducedTime = locSearchEvaluateBatchLeftShift(succBatch, leftShift, bMovePossible);
+						// TODO WORK IN PROGRESS
+						//pair<double, double> reducedTime = locSearchEvaluateBatchLeftShift(succBatch, leftShift, bMovePossible);
 					}
 	
 				}

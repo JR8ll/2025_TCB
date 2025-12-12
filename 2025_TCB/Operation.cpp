@@ -76,28 +76,63 @@ double Operation::getAvailability() const {
 	return pred->getAvailability() + pred->getP();	// op is available when its predecessor could be completed => end recursion 
 }
 double Operation::getEarliestStart() const {
+	
 	double earliest = getAvailability();
 	
 	const vector<pair<int, double>>& tcFwd = getTcMaxFwd();
 	for (size_t tc = 0; tc < tcFwd.size(); ++tc) {
-		Operation* tcSucc = job->getOpPtr(tcFwd[tc].first);
-		if (tcSucc->isScheduled()) {
-			double constrainedStart = tcSucc->getStart() - tcFwd[tc].second;
-			if (constrainedStart > earliest) {
-				earliest = constrainedStart;
+		if (tcFwd[tc].second < 999999) {
+			Operation* tcSucc = job->getOpPtr(tcFwd[tc].first);
+			if (tcSucc->isScheduled()) {
+				double constrainedStart = tcSucc->getStart() - tcFwd[tc].second;
+				if (constrainedStart > earliest) {
+					earliest = constrainedStart;
+				}
 			}
-		}
+		}	
 	}
 	return earliest;
 }
-double Operation::getLatestStartConsideringTc() const {
+double Operation::getEarliestStartForBackwardScheduling() const {
+	double earliest = getEarliestStart();
+	//TODO take into account overlapping time constraints, i.e. time constraint between successor and predecessors
+	Operation* succ = getSucc();
+	while(succ != nullptr) {
+		const vector<pair<int, double>>& tcBwd = getTcMaxBwd();
+		for (size_t tc = 0; tc < tcBwd.size(); ++tc) {
+			if (tcBwd[tc].second < 999999) {
+				double rawP = 0.0;
+				for (size_t pred = tcBwd[tc].first; pred < stg; ++pred) {	// raw processing time INCLUDING this operation
+					rawP += (*job)[pred].getP();
+				}
+				earliest = max(earliest, succ->getStart() - tcBwd[tc].second + rawP);
+			}
+		}
+		succ = succ->getSucc();
+	}
+	return earliest;
+}
+double Operation::getLatestStartConsideringBwdTc() const {
 	double latest = DBL_MAX;
 	const vector<pair<int, double>>* tcBwd = &getTcMaxBwd();
 	for (size_t i = 0; i < tcBwd->size(); ++i) {
-		latest = min(latest, (*job)[(*tcBwd)[i].first].getStart() + (*tcBwd)[i].second);
+		if (!(*tcBwd)[i].second >= 999999) {
+			latest = min(latest, (*job)[(*tcBwd)[i].first].getStart() + (*tcBwd)[i].second);
+		}
 	}
 	return latest;
 }
+//double Operation::getLatestStartConsideringFwdTc() const {
+//	double latest = DBL_MAX;
+//	const vector<pair<int, double>>* tcFwd = &getTcMaxFwd();
+//	for (size_t i = 0; i < tcFwd->size(); ++i) {
+//		if (!(*tcFwd)[i].second >= 999999) {
+//			latest = min(latest, (*job)[(*tcFwd)[i].first].getStart() - (*tcFwd)[i].second);
+//		}
+//	}
+//	return latest;
+//}
+
 double Operation::getWait() const { return wait; }
 
 double Operation::getGATC(double avgP, double t, double kappa) const {

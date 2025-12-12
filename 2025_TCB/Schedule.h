@@ -84,6 +84,8 @@ public:
 	void lSchedFirstJobInflated(double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);	// insert every operation (if it constitutes a new batch) delayed by (p * inflation)  
 	void lSchedJobsStageWise(double pWait = 0.0);		// Stage based List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	void lSchedJobsStageWiseWithSorting(prioRule<pJob> rule, double pWait = 0.0);
+	void lSchedJobsStageWiseBackward(double pWait = 0.0);
+	void lSchedJobsStageWiseBackwardWithSorting(prioRule<pJob> rule, double pWait = 0.0);
 	void lSchedJobs(double pWait = 0.0);	// Job based List scheduling of jobs in member "jobs" in given order, pWait = accepted waiting time (ratio of processing time) if op can be added to exising batch
 	void lSchedJobs(std::vector<double> pWaitVec = { 0.0 });
 	void lSchedJobsInflated(double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);
@@ -113,7 +115,7 @@ public:
 	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
 	std::pair<double, double> locSearchEvaluateJobLeftShift(size_t idxFirst, std::vector<std::vector<std::pair<double, double>>>& options);	// positive return value => improvement (first = job left shift (last op), second = sum of intermediate ops´ left shift) JOB BASED
 	std::pair<double, double> locSearchEvaluateJobRightShift(size_t idxJob, size_t idxStg, double time, std::vector<std::vector<std::pair<double, double>>>& options);	// idxStg + time describe the desired minimal right shift
-	std::pair<double, double> locSearchEvaluateBatchLeftShift(Batch* batch, double time, bool& possible);
+	std::pair<double, double> locSearchEvaluateBatchLeftShift(Batch* batch, double time, std::vector<std::pair<double, double>>& possibleLeftShifts);
 	std::pair<double, double> locSearchEvaluateBatchRightShift(Batch* batch, double time, bool& possible);
 	//std::pair<double, double> locSearchEvaluateOpsLeftShift(size_t idxJob, size_t idxStg, std::vector<std::vector<std::pair<double, double>>>& options);
 	//double locSearchEvaluateOpsRightShift(size_t idxJob, size_t idxStg, double delay);

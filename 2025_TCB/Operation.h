@@ -40,9 +40,10 @@ public:
 	double getW() const;
 		
 	bool isScheduled() const;
-	double getAvailability() const;				// internal release (after predecessors completion)
-	double getEarliestStart() const;			// constrained by job release, c of earlier steps, tc of later steps
-	double getLatestStartConsideringTc() const;
+	double getAvailability() const;							// internal release (after predecessors completion)
+	double getEarliestStart() const;						// constrained by job release, c of earlier steps, tc of later steps
+	double getEarliestStartForBackwardScheduling() const;	// more restrictive, takes into account overlapping tc
+	double getLatestStartConsideringBwdTc() const;
 	double getWait() const;
 
 	double getGATC(double avgP, double t, double kappa) const;

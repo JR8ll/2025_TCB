@@ -102,7 +102,8 @@ public:
 	int getN() const;
 	int getStgs() const;
 	int getF() const;
-	double getG() const;	// big integer (double actually)
+	double getG() const;				// big integer (double actually)
+	double getUpperBoundMSP() const;
 
 	Product* getProduct(size_t productIdx);
 

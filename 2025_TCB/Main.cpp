@@ -67,6 +67,8 @@ int main(int argc, char* argv[]) {
 	//cout << *sched;
 
 	bool test = false;
+
+	sched->lSchedJobsStageWiseBackwardWithSorting(sortJobsDebugging, 0);
 	
 	sched->lSchedJobsStageWiseWithSorting(sortJobsDebugging, 0);
 	sched->saveJsonFactory("AFTER_STAGEWISE");
