@@ -50,6 +50,7 @@ public:
 
 	Operation* getPred() const;
 	Operation* getSucc() const;
+	Operation* getSucc(size_t offsetStages) const;	
 
 	const std::vector<std::pair<int, double>>& getTcMaxFwd() const;
 	const std::vector<std::pair<int, double>>& getTcMaxBwd() const;

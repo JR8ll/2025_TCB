@@ -377,39 +377,142 @@ void Schedule::lSchedJobsStageWiseWithSorting(prioRule<pJob> rule, double pWait)
 }
 void Schedule::lSchedJobsStageWiseBackward(double pWait) {
 	// temporarily change all jobs´ release time to an upper bound value
-	double tZero = problem->getUpperBoundMSP();
+	/*double tZero = problem->getUpperBoundMSP();
 	for (size_t i = 0; i < unscheduledJobs.size(); ++i) {
 		unscheduledJobs[i]->setR(unscheduledJobs[i]->getR() + tZero);
-	}
+	}*/
+	
+	// +++ A) last stage: forward order at last stage, as early as possible +++
+	size_t last = size() - 1;
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		Operation* op = &(*unscheduledJobs[j])[last];
+		int maxLookAhead = workcenters[last]->getCap() - op->getS();	// looking ahead, ops may be batched if their common start time thus is earlier than their latest start if not batched
+		int lookAheadCapRqrmt = op->getS();
+		if (!op->isScheduled()) {
+			vector<Operation*> lookingAhead = vector<Operation*>();
+			double earliest = op->getEarliestStartForBackwardScheduling(); // op->getEarliestStart();
+			double earliestC = earliest + op->getP();
+			double latest = earliest + op->getP(); // , op->getLatestStartConsideringFwdTc());
+			if (op->getSucc() != nullptr) {
+				if (op->getSucc()->isScheduled()) {
+					latest = op->getSucc()->getStart() - op->getP();
+				}
+			}
+			double commonStart = earliest;
+			if (maxLookAhead > 0) {
+				// this operation should not wait if a full batch is ready to start at earliestC
+				bool bFullBatchWaiting = false;
+				/*int remainingCap = workcenters[i]->getCap();
+				for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+					Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
+					if (lookAheadOp->getF() == op->getF()) {
+						if (!lookAheadOp->isScheduled()) {
+							double tempEarliest = lookAheadOp->getEarliestStart();
+							if (tempEarliest > earliest && tempEarliest <= earliestC) {
+								remainingCap -= lookAheadOp->getS();
+							}
+						}
+					}
+					if (remainingCap <= 0) {
+						bFullBatchWaiting = true;
+						break;
+					}
+				}*/
 
-	for (int i = size()-1; i >= 0; --i) {
-
-
-		// NEW IDEA 12.12.2025 FROM 2nd iteration on consider operations in backwards order and schedule as late as possible (may considering lookAhead batching)
-
-		for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
-			Operation* op = &(*unscheduledJobs[j])[i];
-
-			int maxLookAhead = workcenters[i]->getCap() - op->getS();	// looking ahead, ops may be batched if their common start time thus is earlier than their latest start if not batched
-			int lookAheadCapRqrmt = op->getS();
-
-			if (!op->isScheduled()) {
-				vector<Operation*> lookingAhead = vector<Operation*>();
-				double earliest = op->getEarliestStartForBackwardScheduling(); // op->getEarliestStart();
-				double earliestC = earliest + op->getP();
-				double latest = earliest + op->getP(); // , op->getLatestStartConsideringFwdTc());
-				if (op->getSucc() != nullptr) {
-					if (op->getSucc()->isScheduled()) {
-						latest = op->getSucc()->getStart() - op->getP();
+				// look for operations worthy to wait for
+				if (!bFullBatchWaiting) {
+					for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+						Operation* lookAheadOp = &(*unscheduledJobs[k])[last];
+						if (lookAheadOp->getF() == op->getF()) {
+							if (!lookAheadOp->isScheduled()) {
+								double tempEarliest = lookAheadOp->getEarliestStart();
+								if (tempEarliest <= latest) {
+									if (workcenters[last]->getCap() >= lookAheadCapRqrmt + lookAheadOp->getS()) {
+										// CANDIDATE FOUND
+										lookAheadCapRqrmt += lookAheadOp->getS();
+										// TODO: TRY MORE SOPHISTICATED DECISIONS (e.g. based on weights or anticipated wT)
+										commonStart = max(earliest, tempEarliest);
+										lookingAhead.push_back(lookAheadOp);
+									}
+								}
+							}
+						}
+						if (lookingAhead.size() >= maxLookAhead || lookAheadCapRqrmt >= workcenters[last]->getCap()) break;
 					}
 				}
-				double commonStart = earliest;
+			}
+			schedOpDelayed(op, commonStart);
+			for (size_t i = 0; i < lookingAhead.size(); ++i) {
+				schedOpDelayed(lookingAhead[i], commonStart);
+			}
+			saveJsonFactory("DEBUGGING_STAGEWISEBACKWARDS");
+		}
+	}
+
+	// reset all jobs´ release time to their original values
+/*	for (size_t i = 0; i < unscheduledJobs.size(); ++i) {
+		unscheduledJobs[i]->setR(unscheduledJobs[i]->getR() - tZero);
+	}*/	
+
+	// +++ B) from 2nd-to-last to 1st stage: backward order, as late as possible +++
+	for (int i = size() - 2; i >= 0; --i) {
+		for (int j = unscheduledJobs.size() - 1; j >= 0; --j) {
+			Operation* op = &(*unscheduledJobs[j])[i];
+			int maxLookAhead = workcenters[i]->getCap() - op->getS();	// looking ahead, ops may be batched if their common start time thus is earlier than their latest start if not batched
+			int lookAheadCapRqrmt = op->getS();
+			bool bSuccessorMovable = false;
+			if (!op->isScheduled()) {
+
+				if (op->getId() == 5 && op->getStg() == 2) {
+					int stop = 666;
+				}
+
+				vector<Operation*> lookingAhead = vector<Operation*>();
+				double earliest = op->getEarliestStartForBackwardScheduling(); // op->getEarliestStart();
+				double latest = op->getSucc()->getStart() - op->getP();
+				double commonStart = latest;
+
+				double latestAtWc = workcenters[i]->findLatestAvailableTimeSlotBefore(latest, op->getP());
+				if (latestAtWc < latest) {
+					double necessaryLeftShift = latest - latestAtWc;
+					double maximalLeftShift = latest - earliest;
+					// TODO Try to postpone successors without turmoil
+					vector<pair<double, double>> possibleLeftShift = getLeftShiftOptions(op->getSucc());
+					for (size_t p = 0; p < possibleLeftShift.size(); ++p) {
+						if ((possibleLeftShift[p].first >= necessaryLeftShift && possibleLeftShift[p].second <= necessaryLeftShift) 
+							|| (possibleLeftShift[p].first == possibleLeftShift[p].second && possibleLeftShift[p].first >= necessaryLeftShift)) {
+							if (possibleLeftShift[p].second <= maximalLeftShift) {
+								// left shift successor
+								Operation* leftShiftedOp = op->getSucc();
+								size_t leftShiftOpIdx = leftShiftedOp->getIdxInBatch();
+								Batch* leftShiftBatch = leftShiftedOp->getBatch();
+								size_t leftShiftBatchIdx = leftShiftBatch->getIdx();
+								Machine* leftShiftMac = leftShiftBatch->getMachine();
+								leftShiftBatch->removeOp(leftShiftOpIdx);
+								saveJsonFactory("DEBUGGING_AFTERREMOVEBATCH");
+								if (leftShiftBatch->isEmpty()) {
+									leftShiftMac->removeBatch(leftShiftBatchIdx);
+								}
+								schedOpDelayed(leftShiftedOp, leftShiftBatch->getStart() - necessaryLeftShift);
+								saveJsonFactory("DEBUGGING_AFTERLEFTSHIFT");
+
+								// update common start
+								commonStart = latestAtWc;
+								break;
+							}
+						}
+					}
+				}
+
+				if (commonStart < earliest) {
+					int stop = 666;
+				}
 
 				if (maxLookAhead > 0) {
 					// this operation should not wait if a full batch is ready to start at earliestC
 					bool bFullBatchWaiting = false;
 					/*int remainingCap = workcenters[i]->getCap();
-					for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+					for (int k = j - 1; j >= 0; --k) {
 						Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
 						if (lookAheadOp->getF() == op->getF()) {
 							if (!lookAheadOp->isScheduled()) {
@@ -424,26 +527,40 @@ void Schedule::lSchedJobsStageWiseBackward(double pWait) {
 							break;
 						}
 					}*/
-
-					// look for operations worthy to wait for
 					if (!bFullBatchWaiting) {
-						for (size_t k = j + 1; k < unscheduledJobs.size(); ++k) {
+						for (int k = j - 1; k >= 0; --k) {
 							Operation* lookAheadOp = &(*unscheduledJobs[k])[i];
 							if (lookAheadOp->getF() == op->getF()) {
 								if (!lookAheadOp->isScheduled()) {
-									double tempEarliest = lookAheadOp->getEarliestStart();
-									if (tempEarliest <= latest) {
+									double tempLatest = lookAheadOp->getSucc()->getStart() - lookAheadOp->getP();
+
+									// if the lookAhead operation was not considered would that lead to a tc violation?
+									//bool bConsiderTemp = false;
+									//double tempStartIfNotConsidered = commonStart - op->getP();	// MISTAKE: this is on valid for single machines, TODO find more general test
+									//const vector<pair<int, double>> tempFwdTc = lookAheadOp->getTcMaxFwd();
+									//for (size_t tc = 0; tc < tempFwdTc.size(); ++tc) {
+									//	if (tempFwdTc[tc].second < 999999 && tempStartIfNotConsidered + tempFwdTc[tc].second < (*lookAheadOp->getJob())[tempFwdTc[tc].first].getStart()) {
+									//		bConsiderTemp = true;
+									//	}
+									//}
+									bool bConsiderTemp = true;
+									
+									if (bConsiderTemp && tempLatest >= earliest) {
 										if (workcenters[i]->getCap() >= lookAheadCapRqrmt + lookAheadOp->getS()) {
 											// CANDIDATE FOUND
 											lookAheadCapRqrmt += lookAheadOp->getS();
 											// TODO: TRY MORE SOPHISTICATED DECISIONS (e.g. based on weights or anticipated wT)
-											commonStart = max(earliest, tempEarliest);
+											commonStart = min(commonStart, tempLatest);
 											lookingAhead.push_back(lookAheadOp);
 										}
 									}
 								}
 							}
-							if (lookingAhead.size() >= maxLookAhead || lookAheadCapRqrmt >= workcenters[i]->getCap()) break;
+							else {
+								// stop looking for batch candidates outside of immediate successors in the sequence
+								break;
+							}
+							if (lookingAhead.size() >= maxLookAhead || lookAheadCapRqrmt >= workcenters[last]->getCap()) break;
 						}
 					}
 				}
@@ -454,28 +571,7 @@ void Schedule::lSchedJobsStageWiseBackward(double pWait) {
 				saveJsonFactory("DEBUGGING_STAGEWISEBACKWARDS");
 			}
 		}
-		if (i == size() - 1) {
-			// after last schedule is scheduled, reset r
-			for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
-				unscheduledJobs[j]->setR(unscheduledJobs[j]->getR() - tZero);
-			}
-		}
-		
-		//saveJsonFactory("DEBUGGING_STAGEWISEBACKWARDS");
 	}
-	while (!unscheduledJobs.empty()) {
-		shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
-	}
-
-	// set start times for all batches
-	for (size_t i = 0; i < size(); ++i) {
-		for (size_t m = 0; m < workcenters[i]->size(); ++m) {
-			for (size_t b = 0; b < (*workcenters[i])[m].size(); ++b) {
-				cout << "TODO" << endl;
-			}
-		}
-	}
-	
 
 	if (!this->isValid()) {
 		throw ExcSched("ERROR: invalid schedule after Schedule::lSchedStages.");
@@ -668,6 +764,179 @@ void Schedule::localSearchBatchLeftShifting() {
 
 }
 
+double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t& opIdx) {
+	cout << "Schedule::localSearchEvaluateBatchConsolidation(...) not yet implemented." << endl;
+	double change = 0.0;
+	if (idxWc < 0 || idxWc >= size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idxWc out of bounds!");
+	if (tgtMac < 0 || tgtMac >= workcenters[idxWc]->size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx1stMac out of bounds!");
+	if (srcMac < 0 || srcMac >= workcenters[idxWc]->size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx2ndMac out of bounds!");
+	if (tgtBatch < 0 || tgtBatch >= (*workcenters[idxWc])[tgtMac].size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx1stBatch out of bounds!");
+	if (srcBatch < 0 || srcBatch >= (*workcenters[idxWc])[srcMac].size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx2ndBatch out of bounds!");
+
+	Workcenter* wc = &(*workcenters[idxWc]);
+	Machine* mac1 = &(*wc)[tgtMac];
+	Machine* mac2 = &(*wc)[srcMac];
+	Batch* bat1 = &(*mac1)[tgtBatch];
+	Batch* bat2 = &(*mac2)[srcBatch];
+
+	// [JR-2025-Dec-16] Assessment of batch consolidation´s implications is too cumbersome, instead execute change to a copy of the schedule
+	//if (bat1->getStart() >= bat2->getStart() || bat1->getF() != bat2->getF()) return 0.0; // symmetry braking and disregarding of incompatible batches
+	//for (size_t j = 0; j < bat2->size(); ++j) {
+	//	Operation* op = &(*bat2)[j];
+	//	double opR = op->getAvailability();
+	//	// this move is only relevant if op can be left shifted (< current start) and it cannot simply be inserted into previous batch (otherwise an insertion/shift move would do the trick)
+	//	if (opR < bat2->getStart() && opR > bat1->getStart()) {
+	//		
+	//		if (op->getS() <= bat1->getAvailableCap()) {
+	//			double leftShiftAtThisStage = bat2->getStart() - opR;
+	//			vector<pair<Operation*, double>> rightShifts = vector <pair<Operation*, double>>();		
+	//		}
+	//		// WORK IN PROGRESS
+	//	}
+	//}
+
+	double myTWT = getTWT();
+	double bestTWT = myTWT;
+
+	for (size_t movingOpIdx = 0; movingOpIdx < bat2->size(); ++movingOpIdx) {
+		Operation* op = &(*bat2)[movingOpIdx];
+		double opR = op->getAvailability();
+		if (opR < bat2->getStart() && opR > bat1->getStart()) {	// this move is only relevant if op can be left shifted (< current start) and it cannot simply be inserted into previous batch (otherwise an insertion/shift move would do the trick)
+			if (op->getS() <= bat1->getAvailableCap()) {
+				unique_ptr<Schedule> copySched = clone();
+				copySched->_reconstruct(this);
+				if (copySched->localSearchConsolidateBatch(idxWc, tgtMac, tgtBatch, srcMac, srcBatch, movingOpIdx)) {
+					double tempTWT = copySched->getTWT();
+					if (tempTWT < bestTWT) {
+						bestTWT = tempTWT;
+						opIdx = movingOpIdx;
+					}
+				}	
+			}
+		}
+	}
+
+	return myTWT - bestTWT;
+}
+
+bool Schedule::localSearchConsolidateBatch(size_t wcIdx, size_t tgtMacIdx, size_t tgtBatchIdx, size_t srcMacIdx, size_t srcBatchIdx, size_t opIdx) {
+	Workcenter* wc = workcenters[wcIdx].get();
+	Machine* srcMac = &(*wc)[srcMacIdx];
+	Machine* tgtMac = &(*wc)[tgtMacIdx];
+	Batch* srcBat = &(*srcMac)[srcBatchIdx];
+	Batch* tgtBat = &(*tgtMac)[tgtBatchIdx];
+	Operation* op = &(*srcBat)[opIdx];
+	Job* job = op->getJob();
+
+	// right shift target batch and transfer operation to target batch
+	double rightShiftTgt = op->getAvailability() - tgtBat->getStart();
+	double currentStart = (*tgtMac)[tgtBatchIdx].getStart();
+	double originalCompletion = (*tgtMac)[tgtBatchIdx].getC();
+	(*tgtMac)[tgtBatchIdx].setStart(currentStart + rightShiftTgt, false);
+	srcBat->removeOp(opIdx);
+	if (!tgtBat->addOp(op)) {
+		return false;
+	}
+
+	saveJsonFactory("DEBUGGING_CONSOLIDATION");
+
+	// there are only right shifts at this stage if the source batch carrys only one operation!
+	if(srcBat->size() > 0) {
+		// right shifting of target Batch and successive batches at target machine
+		size_t nNumberOfBatchesAtTarget = tgtMac->size();
+		for (size_t b = tgtBatchIdx + 1; b < nNumberOfBatchesAtTarget; ++b) {
+			double rightShift = (*tgtMac)[b - 1].getC() - (*tgtMac)[b].getStart();
+			if (rightShiftTgt <= 0) break;
+			double currentStart = (*tgtMac)[b].getStart();
+			(*tgtMac)[b].setStart(currentStart + rightShiftTgt, false);	// no validity check here
+		}
+		saveJsonFactory("DEBUGGING_CONSOLIDATION_ONE");
+		// right shifting at successive stages
+		for (size_t o = (wcIdx + 1); o < size(); ++o) {
+			Workcenter* currentWc = workcenters[o].get();
+			for (size_t m = 0; m < currentWc->size(); ++m) {
+				Machine* currentMac = &(*currentWc)[m];
+				for (size_t b = 0; b < currentMac->size(); ++b) {
+					Batch* currentBat = &(*currentMac)[b];
+					if (currentBat->getStart() < originalCompletion) {
+						// if a batch was started before the left shifted batch, it cannot have been affected
+						continue;
+					}
+
+					if ((*currentBat)[0].getId() == 3 && (*currentBat)[0].getStg() == 4) {
+						int debugger = 666;
+					}
+
+					// Batches from here on may have been affected, successive batches may still be affected even if 
+
+					// TODO: instead of stupid right shifting, parallel machines should be considered
+					double rightShift = currentBat->getR() - currentBat->getStart();
+					if (b > 0) {
+						rightShift = max(rightShift, (*currentMac)[b - 1].getC() - currentBat->getStart());
+					}
+					if (rightShift > 0) {
+						double currentBatStart = currentBat->getStart();
+						currentBat->setStart(currentBatStart + rightShift, false);
+					}
+				}
+			}
+		}
+		saveJsonFactory("DEBUGGING_CONSOLIDATION_TWO");
+		int debugger = 666;
+	} else {
+		// delete srcbatch after job insertion into target
+		size_t srcBatIdx = srcBat->getIdx();
+		srcMac->removeBatch(srcBatIdx);
+		// TODO this may have enabled additional left shifts
+	}
+
+	// left shifting of the successors of the left shifted operation
+	for (size_t s = 0; s < size() - wcIdx; ++s) {
+		Operation* succOp = op->getSucc(s);
+		if (succOp != nullptr) {
+			double maxLeftShift = max(0, succOp->getStart() - succOp->getAvailability());
+			if (maxLeftShift > 0) {
+				Batch* succBatch = succOp->getBatch();
+				double originalSuccStart = succBatch->getStart();
+				Machine* succMac = succBatch->getMachine();
+				size_t tempBatIdx = succBatch->getIdx();
+				bool bOnlyOp = succBatch->size() <= 1;
+				bool bDiscreteMove;	// if true, succOp is inserted into existing batch
+				vector<pair<double, double>> possibleLeftShifts = getLeftShiftOptions(succOp);
+				for (size_t opt = 0; opt < possibleLeftShifts.size(); ++opt) {
+					if ((possibleLeftShifts[opt].first == possibleLeftShifts[opt].second && possibleLeftShifts[opt].first <= maxLeftShift + TCB::precision)
+						||(possibleLeftShifts[opt].first >= possibleLeftShifts[opt].second && possibleLeftShifts[opt].second <= maxLeftShift + TCB::precision) ) {
+						bDiscreteMove = executeLeftShiftOption(succOp, possibleLeftShifts[opt]);
+						break;
+					}
+				}
+
+				if ((bDiscreteMove && bOnlyOp) || !bDiscreteMove) {
+					// in this case left shifting succeeding batches at this machine may have become feasible
+					for (size_t b = 0; b < succMac->size(); ++b) {
+						// consider all batches starting later than original succBatch start
+						double tempStart = (*succMac)[b].getStart();
+						if (tempStart < originalSuccStart) {
+							continue;
+						}
+						double tempR = (*succMac)[b].getR();
+						double tempLeftShift = tempStart - tempR;
+						if (b > 0) {
+							tempLeftShift = min(tempLeftShift, tempStart - (*succMac)[b - 1].getC());
+						}
+						if (tempLeftShift > 0) {
+							(*succMac)[b].setStart(tempStart - tempLeftShift, false);
+						}
+					}
+				}		
+			}	
+		}
+
+	}
+	saveJsonFactory("DEBUGGING_CONSOLIDATION_THREE");
+	return isValid();
+}
+
 void Schedule::localSearchOpLeftShifting(prioRule<pJob> rule, double pWait) {
 	bool bImproved = true;
 	while (bImproved) {
@@ -758,10 +1027,6 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 		size_t best = 0;
 		vector<vector<pair<double, double>>> bestPossibleLeftShifts = vector<vector<pair<double, double>>>(size());
 		for (size_t j = 0; j < nJobs; ++j) {
-			if (j == 7) {
-				saveJsonFactory("preNineShift");
-				int stop = 666;
-			}
 			vector<vector<pair<double, double>>> tempPossibleLeftShifts = vector<vector<pair<double, double>>>(size());
 			pair<double, double> tempImprovement = locSearchEvaluateJobLeftShift(j, tempPossibleLeftShifts);
 			double tempTwtImprovement = tempImprovement.first * scheduledJobs[j]->getW();
@@ -940,12 +1205,13 @@ double Schedule::locSearchEvaluateOpConsolidation(size_t idxJob, size_t idxStg, 
 	}
 
 
+	// new plan 15.12.2025
+
 	
 
 
 	return evaluation;
 }
-
 bool Schedule::locSearchSwapJobs(size_t idxFirst, size_t idxSecond) {
 	Job* job1 = scheduledJobs[idxFirst].get();
 	Job* job2 = scheduledJobs[idxSecond].get();
@@ -965,7 +1231,6 @@ bool Schedule::locSearchSwapJobs(size_t idxFirst, size_t idxSecond) {
 		wc->swapOps(mIdx1, bIdx1, jIdx1, mIdx2, bIdx2, jIdx2);
 	}
 }
-
 bool Schedule::locSearchLeftShiftJob(size_t jobIdx, vector<vector<pair<double, double>>>& options) {
 	Job* job = scheduledJobs[jobIdx].get();
 	for (size_t o = 0; o < job->size(); ++o) {
@@ -1427,7 +1692,17 @@ void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<do
 		}
 	}
 }
-
+bool Schedule::executeLeftShiftOption(Operation* operation, std::pair<double, double>& option) {
+	bool bIntoExistingBatch;
+	if (option.first > 0) {
+		bIntoExistingBatch = option.first == option.second;
+		double newStart = operation->getStart() - option.first;
+		if (!workcenters[operation->getStg()-1]->moveOpDisregardingTc(operation, newStart, bIntoExistingBatch)) {
+			throw(ExcSched("ERROR: Schedule::executeLeftShiftOption(...) invalid."));
+		}
+	}
+	return bIntoExistingBatch;
+}
 
 bool Schedule::isValid() const {
 	// ALL OPERATIONS OF ALL JOBS ARE ASSIGNED

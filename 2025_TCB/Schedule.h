@@ -103,8 +103,9 @@ public:
 	// LOCAL SEARCH
 	// LOCAL SEARCH BATCH BASED
 	void localSearchBatchLeftShifting();	// TODO
+	double localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t& opIdx);	// tgt = target, src = source
+	bool localSearchConsolidateBatch(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t opIdx);
 
-	
 	// LOCAL SEARCH OPERATION BASED
 	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		
 	
@@ -141,6 +142,7 @@ public:
 	bool constrainRightShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<std::vector<std::pair<size_t, double>>>& tcSlack);
 
 	void executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<double, double>& option);									// left shift of single operation
+	bool executeLeftShiftOption(Operation* op, std::pair<double, double>& option);	// true: op has been inserted into existing batch, false = op has been moved, exception if infeasible
 
 	bool isValid() const;
 

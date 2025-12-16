@@ -98,11 +98,11 @@ double Operation::getEarliestStartForBackwardScheduling() const {
 	//TODO take into account overlapping time constraints, i.e. time constraint between successor and predecessors
 	Operation* succ = getSucc();
 	while(succ != nullptr) {
-		const vector<pair<int, double>>& tcBwd = getTcMaxBwd();
-		for (size_t tc = 0; tc < tcBwd.size(); ++tc) {
+		const vector<pair<int, double>>& tcBwd = succ->getTcMaxBwd();
+		for (size_t tc = 0; tc < stg-1; ++tc) {
 			if (tcBwd[tc].second < 999999) {
 				double rawP = 0.0;
-				for (size_t pred = tcBwd[tc].first; pred < stg; ++pred) {	// raw processing time INCLUDING this operation
+				for (size_t pred = tcBwd[tc].first; pred < stg-1; ++pred) {	
 					rawP += (*job)[pred].getP();
 				}
 				earliest = max(earliest, succ->getStart() - tcBwd[tc].second + rawP);
@@ -147,6 +147,14 @@ double Operation::getGATC(double avgP, double t, double kappa) const {
 
 Operation* Operation::getPred() const { return pred; }
 Operation* Operation::getSucc() const { return succ; }
+Operation* Operation::getSucc(size_t offsetStages) const {
+	Operation* successor = succ;
+	for (size_t i = 0; i < offsetStages; ++i) {
+		if (successor == nullptr) break;
+		successor = successor->getSucc();
+	}
+	return successor;
+}
 
 const std::vector<std::pair<int, double>>& Operation::getTcMaxBwd() const {
 	return job->getTcMaxBwd(stg-1);

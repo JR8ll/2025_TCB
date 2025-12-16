@@ -45,9 +45,10 @@ public:
 	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait = 0.0);
 	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait, double inflation);
 	void findBestStartNotBefore(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double notBefore);
+	double findLatestAvailableTimeSlotBefore(double latest, double duration);
 	bool locateOp(Operation* op, size_t& mIdx, size_t& batIdx, size_t& jIdx);	// true if found
 	bool swapOps(size_t mIdx1, size_t bIdx1, size_t jIdx1, size_t mIdx2, size_t bIdx2, size_t jIdx2);
-	bool moveOpDisregardingTc(Operation* op, double newStart, bool intoBatch);	// disregarding checks on tc violations
+	bool moveOpDisregardingTc(Operation* op, double newStart, bool& intoBatch);	// disregarding checks on tc violations
 
 	bool localSearchLeftShift(double pWait = 0.0);	// true if at least one operation was shifted left
 

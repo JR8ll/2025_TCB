@@ -68,12 +68,20 @@ int main(int argc, char* argv[]) {
 
 	bool test = false;
 
+	sched->lSchedJobsWithSorting(sortJobsDebugging, 0);
+	sched->saveJsonFactory("JOBWISE");
+
+	sched->localSearchConsolidateBatch(0, 0, 2, 0, 3, 0);
+
+	sched->reset();
 	sched->lSchedJobsStageWiseBackwardWithSorting(sortJobsDebugging, 0);
-	
-	sched->lSchedJobsStageWiseWithSorting(sortJobsDebugging, 0);
-	sched->saveJsonFactory("AFTER_STAGEWISE");
 	sched->localSearchJobLeftShifting();
 	sched->saveJsonFactory("AFTER_LEFTSHIFT");
+
+	sched->reset();
+	sched->lSchedJobsStageWiseWithSorting(sortJobsDebugging, 0);
+	sched->saveJsonFactory("AFTER_STAGEWISE");
+
 
 	sched->debugSetR(2, 40);
 	sched->debugSetR(8, 0);

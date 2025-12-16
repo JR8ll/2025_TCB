@@ -396,6 +396,37 @@ void Workcenter::findBestStartNotBefore(Operation* op, bool& bNewBatch, size_t& 
 		}
 	}
 }
+double Workcenter::findLatestAvailableTimeSlotBefore(double latest, double duration) {
+	double maxLatest = -1;
+	for (int m = size() - 1; m >= 0; --m) {
+		if (machines[m]->size() == 0) return latest;	// empty machine => latest is possible
+		// AFTER LAST BATCH
+		if ((*machines[m])[machines[m]->size() - 1].getC() <= latest) {
+			return latest;								// latest is possible
+		}
+		for (int b = machines[m]->size() - 2; b >= 1; --b) {
+			// INBETWEEN BATCHES
+			double tempStart = min((*machines[m])[b].getStart(), latest);
+			if ((*machines[m])[b - 1].getC() + duration <= tempStart) {	
+				// empty time slot found
+				double tempLatest = tempStart;
+				if (tempLatest > maxLatest) {
+					maxLatest = tempLatest;
+					break;	// continue with different machines
+				}
+			}
+
+		}
+		// BEFORE FIRST BATCH
+		if (maxLatest < 0) {
+			double tempLatest = (*machines[m])[0].getStart() - duration;
+			if (tempLatest >= 0) {
+				maxLatest = tempLatest;
+			}
+		}
+	}
+	return maxLatest;
+}
 bool Workcenter::locateOp(Operation* op, size_t& mIdx, size_t& batIdx, size_t& jIdx) {
 	for (size_t m = 0; m < machines.size(); ++m) {
 		for (size_t b = 0; b < (*machines[m]).size(); ++b) {
@@ -429,7 +460,7 @@ bool Workcenter::swapOps(size_t mIdx1, size_t bIdx1, size_t jIdx1, size_t mIdx2,
 	return true;;
 }
 
-bool Workcenter::moveOpDisregardingTc(Operation* op, double newStart, bool intoBatch) {
+bool Workcenter::moveOpDisregardingTc(Operation* op, double newStart, bool& intoBatch) {
 	bool bOnlyOp = op->getBatch()->size() <= 1;
 
 	size_t currentMachine = op->getBatch()->getMachine()->getIdx();
@@ -466,6 +497,7 @@ bool Workcenter::moveOpDisregardingTc(Operation* op, double newStart, bool intoB
 			unique_ptr<Batch> newBatch = make_unique<Batch>(cap);
 			newBatch->addOp(op);
 			machines[m]->addBatch(move(newBatch), newStart, false);
+			intoBatch = false;
 			return true;
 		}
 	}
