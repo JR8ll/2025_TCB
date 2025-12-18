@@ -123,7 +123,13 @@ Machine* Batch::getMachine() const {
 
 void Batch::setStart(double newStart, bool checkvalidity) {
 	start = newStart;
-	setC(newStart + getP(), checkvalidity);
+	try {
+		setC(newStart + getP(), checkvalidity);
+	}
+	catch (ExcSched e) {
+		throw e;
+	}
+	
 }
 void Batch::setC(double newC, bool checkvalidity) {
 	if (checkvalidity) {
@@ -142,6 +148,26 @@ void Batch::setCap(int newCap) {
 	int requiredCap = cap - getAvailableCap();
 	if (requiredCap > newCap) throw ExcSched("Batch::setCap() infeasible");
 	cap = newCap;
+}
+
+bool Batch::rightShiftFixedBatchFormationFixedMachineAssigment(double time) {
+	cout << "Batch::rightShiftFixedBatchFormationFixedMachineAssigment(...) not yet implemented." << endl;
+	if (time > 0) {
+		double timeShift = time;
+		size_t batchIdx = getIdx();
+		for (size_t b = batchIdx; b < machine->size(); ++b) {
+			double leeway = 0;
+			if (b < machine->size() - 1) {
+				double leeway = (*machine)[b + 1].getStart() - (*machine)[b].getC();
+			}
+			(*machine)[b].setStart((*machine)[b].getStart() + timeShift, false);
+			timeShift -= leeway;
+			if (timeShift < 0) break;	// succeeding batch do not need to be shifted
+		}
+		// TODO IN PROGRESS (time constraints must be check
+		
+	}
+	return false;
 }
 
 void Batch::assignToMachine(Machine* processor) { machine = processor; };

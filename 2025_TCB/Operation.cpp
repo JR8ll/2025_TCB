@@ -219,7 +219,7 @@ bool Operation::repairOverlaps() {
 						int mIdx = succBatch->getMachine()->getIdx();
 						int bIdx = succBatch->getIdx();
 						int jIdx = succ->getIdxInBatch();
-						wcSucc->rightShift(mIdx, bIdx, jIdx, batch->getC());
+						wcSucc->rightShiftOp(mIdx, bIdx, jIdx, batch->getC());
 					}
 				}
 			}
@@ -228,11 +228,6 @@ bool Operation::repairOverlaps() {
 	return bRepaired;	
 }
 bool Operation::repairTimeConstraints() {
-
-	if (getId() == 10) {
-		int debug = 666;
-	}
-
 	bool bRepaired = false;
 	const vector<pair<int, double>>& tcMax = getTcMaxBwd();
 	if (batch != nullptr) {
@@ -242,11 +237,6 @@ bool Operation::repairTimeConstraints() {
 			if (predOp != nullptr) {
 				if (predOp->isScheduled()) {
 					Batch* predBatch = predOp->getBatch();
-
-					if (predBatch == nullptr) {
-						int debug = 666;
-					}
-
 					if (predBatch->getStart() < batch->getStart() - tcMax[i].second - TCB::precision) {
 						// time constraint is violated
 						double newStartForPred = batch->getStart() - tcMax[i].second;
@@ -255,7 +245,7 @@ bool Operation::repairTimeConstraints() {
 							int mIdx = predBatch->getMachine()->getIdx();
 							int bIdx = predBatch->getIdx();
 							int jIdx = predOp->getIdxInBatch();
-							wc->rightShift(mIdx, bIdx, jIdx, newStartForPred);
+							wc->rightShiftOp(mIdx, bIdx, jIdx, newStartForPred);
 							bRepaired = true;
 						}
 						else {
@@ -265,6 +255,59 @@ bool Operation::repairTimeConstraints() {
 				}	
 			}
 		}
+	}
+	return bRepaired;
+}
+
+bool Operation::repairOverlapsFixedBatchFormation() {
+	bool bRepaired = false;
+	if (batch != nullptr) {
+		if (succ != nullptr) {
+			if (succ->isScheduled()) {
+				Batch* succBatch = succ->getBatch();
+				if (succBatch != nullptr) {
+					if (batch->getC() > succBatch->getStart() + TCB::precision) {
+						Workcenter* wcSucc = succBatch->getMachine()->getWorkcenter();
+						int mIdx = succBatch->getMachine()->getIdx();
+						int bIdx = succBatch->getIdx();
+						wcSucc->rightShiftBatch(mIdx, bIdx, batch->getC(), true);	// if necessary push right succeding batches
+						bRepaired = true;
+					}
+				}
+			}
+		}
+	}
+	return bRepaired;
+}
+
+bool Operation::repairTimeConstraintsFixedBatchFormation() {
+	bool bRepaired = false;
+	const vector<pair<int, double>>& tcMax = getTcMaxBwd();
+	if (batch != nullptr) {
+		for (size_t i = 0; i < tcMax.size(); ++i) {
+			size_t predIdx = tcMax[i].first;
+			Operation* predOp = &(*job)[predIdx];
+			if (predOp != nullptr) {
+				if (predOp->isScheduled()) {
+					Batch* predBatch = predOp->getBatch();
+					if (predBatch->getStart() < batch->getStart() - tcMax[i].second - TCB::precision) {
+						// time constraint is violated
+						double newStartForPred = batch->getStart() - tcMax[i].second;
+						Workcenter* wc = predBatch->getMachine()->getWorkcenter();
+						if (wc != nullptr) {
+							int mIdx = predBatch->getMachine()->getIdx();
+							int bIdx = predBatch->getIdx();
+							wc->rightShiftBatch(mIdx, bIdx, newStartForPred);
+							bRepaired = true;
+						}
+						else {
+							throw(ExcSched("Operation::repairTimeConstraint() missing workcenter reference"));
+						}
+					}
+				}
+			}
+		}
+	// TODO WORK IN PROGRESS
 	}
 	return bRepaired;
 }

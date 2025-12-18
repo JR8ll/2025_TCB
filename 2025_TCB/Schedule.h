@@ -101,18 +101,14 @@ public:
 	void leftShiftBatches();
 
 	// LOCAL SEARCH
-	// LOCAL SEARCH BATCH BASED
-	void localSearchBatchLeftShifting();	// TODO
-	double localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t& opIdx);	// tgt = target, src = source
-	bool localSearchConsolidateBatch(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t opIdx);
-
-	// LOCAL SEARCH OPERATION BASED
-	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		
+	// ACTUAL LOCAL SEARCH PROCEDURES
+	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);						// if not bestFit => firstFit
+	void localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);					// if not bestFit => firstFit
+	void localSearchBatchLeftShifting();																		// TODO
+	void localSearchBatchConsolidation(bool bestFit);															// if not bestFit => firstFit
+	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		// LOCAL SEARCH OPERATION BASED (ALMOST USELESS)	
 	
-	// LOCAL SEARCH JOB BASED
-	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);		// if not bestFit => firstFit
-	void localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);	// if not bestFit => firstFit
-	
+	// LOCAL SEARCH EVALUATION AND UTILTIES
 	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
 	std::pair<double, double> locSearchEvaluateJobLeftShift(size_t idxFirst, std::vector<std::vector<std::pair<double, double>>>& options);	// positive return value => improvement (first = job left shift (last op), second = sum of intermediate ops´ left shift) JOB BASED
 	std::pair<double, double> locSearchEvaluateJobRightShift(size_t idxJob, size_t idxStg, double time, std::vector<std::vector<std::pair<double, double>>>& options);	// idxStg + time describe the desired minimal right shift
@@ -121,8 +117,9 @@ public:
 	//std::pair<double, double> locSearchEvaluateOpsLeftShift(size_t idxJob, size_t idxStg, std::vector<std::vector<std::pair<double, double>>>& options);
 	//double locSearchEvaluateOpsRightShift(size_t idxJob, size_t idxStg, double delay);
 	double locSearchEvaluateOpConsolidation(size_t idxJob, size_t idxStg, bool& feasible);						// positive return value => improvement
-	
+	double localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t& opIdx);	// tgt = target, src = source
 
+	bool localSearchConsolidateBatch(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t opIdx);
 
 	// LOCAL SEARCH JOB BASED EXECUTION
 	bool locSearchSwapJobs(size_t idxFirst, size_t idxSecond);
@@ -150,7 +147,7 @@ public:
 	double getMinMSP(size_t stgIdx) const;							// smallest makespan of the machines at stage (workcenter)
 
 	void saveJson(std::string solver = "N/A");
-	void saveJsonFactory(std::string solver = "N/A");				// format complying zui5_gantt viewer application
+	void saveJsonFactory(std::string solver = "N/A") const;				// format complying zui5_gantt viewer application
 
 
 	// DEBUGGING TOOLS (MAY LEAD TO INFEASIBLE SOLUTIONS)

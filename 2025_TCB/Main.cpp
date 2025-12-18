@@ -71,7 +71,10 @@ int main(int argc, char* argv[]) {
 	sched->lSchedJobsWithSorting(sortJobsDebugging, 0);
 	sched->saveJsonFactory("JOBWISE");
 
-	sched->localSearchConsolidateBatch(0, 0, 2, 0, 3, 0);
+	sched->localSearchBatchConsolidation(false);
+	sched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");
+	
+	//sched->localSearchConsolidateBatch(0, 0, 2, 0, 3, 0);
 
 	sched->reset();
 	sched->lSchedJobsStageWiseBackwardWithSorting(sortJobsDebugging, 0);

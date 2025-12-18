@@ -55,6 +55,7 @@ public:
 	void setStart(double newStart, bool checkValidity = true);
 	void setC(double newC, bool checkvalidity = true);
 	void setCap(int newCap);
+	bool rightShiftFixedBatchFormationFixedMachineAssigment(double time);	// this move will keep all batch formations + machine assignments and enforce only backwards tc by right shifting predecessors in turn
 
 	void assignToMachine(Machine* processor);
 

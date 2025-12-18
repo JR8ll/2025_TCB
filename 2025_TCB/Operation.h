@@ -69,6 +69,8 @@ public:
 	void assignToBatch(Batch* batch);
 	bool repairOverlaps();													// true, if an overlap was found and repaired
 	bool repairTimeConstraints();											// true, if a tc violation was found and repaired
+	bool repairOverlapsFixedBatchFormation();								// true, if an overlap was found and repaired
+	bool repairTimeConstraintsFixedBatchFormation();						// true, if a tc violation was found and repaired
 
 	double getTWT() const;
 

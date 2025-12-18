@@ -182,6 +182,17 @@ void Workcenter::ensureValidity(Operation* op) {
 	}
 }
 
+void Workcenter::ensureValidityFixedBatchFormation(Operation* op) {
+	bool bValid = false;
+	bool bOverlaps = true;
+	bool bTcViolations = true;
+	while (!bValid) {
+		bOverlaps = op->repairOverlapsFixedBatchFormation();
+		bTcViolations = op->repairTimeConstraintsFixedBatchFormation();
+		bValid = !bOverlaps && !bTcViolations;
+	}
+}
+
 bool Workcenter::leftShift(size_t mIdx, size_t bIdx, size_t jIdx, double pWait) {
 	Operation* op = &(*machines[mIdx])[bIdx][jIdx];
 	Batch* bat = op->getBatch();
@@ -255,7 +266,7 @@ bool Workcenter::leftShift(size_t mIdx, size_t bIdx, double pWait) {
 	moveBatch(bat, bestMacIdx, bestSlot);
 	return true;
 }
-void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait) {
+void Workcenter::rightShiftOp(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait) {
 	Machine* mac = machines[mIdx].get();
 	Batch* bat = &(*mac)[bIdx];
 	Operation* op = &(*bat)[jIdx];
@@ -295,6 +306,38 @@ void Workcenter::rightShift(size_t mIdx, size_t bIdx, size_t jIdx, double from, 
 	}
 
 	ensureValidity(op);
+}
+void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pushingSuccessors) {
+	Machine* mac = machines[mIdx].get();
+	Batch* bat = &(*mac)[bIdx];
+
+	double earliestStart = bat->getR();
+	double newStart = max(from, earliestStart);
+
+	size_t bestMacIdx = 0;
+	double bestStart = DBL_MAX;
+	if (pushingSuccessors) {
+		bestStart = newStart;
+	}
+	
+	findBestStartNotBefore(bat, bestMacIdx, bestStart, from);
+
+	if (bestStart > from && pushingSuccessors) {
+		// pushing successors
+		size_t myBatIdx = bat->getIdx();
+		bat->setStart(from, false);
+		if (myBatIdx < mac->size() - 1) {
+			Batch* succBat = &(*mac)[myBatIdx + 1];
+			if (bat->getC() > succBat->getStart()) {
+				// RECURSION
+				rightShiftBatch(mIdx, myBatIdx + 1, bat->getC(), pushingSuccessors);
+			}
+		} 
+		
+	}
+	else {
+		moveBatch(bat, bestMacIdx, bestStart);
+	}
 }
 void Workcenter::findBestStart(Operation* op, bool& bNewBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& tempStart, double pWait) {
 	double idealStart = op->getEarliestStart();
@@ -394,6 +437,22 @@ void Workcenter::findBestStartNotBefore(Operation* op, bool& bNewBatch, size_t& 
 				bNewBatch = true;
 			}
 		}
+	}
+}
+void Workcenter::findBestStartNotBefore(Batch* batch, size_t& bestMacIdx, double& tempStart, double notBefore) {
+	tempStart = DBL_MAX;
+	for (size_t m = 0; m < machines.size(); ++m) {
+		Machine* mac = machines[m].get();
+		if (mac->size() == 0) {
+			bestMacIdx = m;
+			tempStart = notBefore;
+			return;
+		}
+		double earliestSlot = mac->getEarliestSlot(tempStart, (*batch)[0]);
+		if (earliestSlot < tempStart) {
+			tempStart = earliestSlot;
+			bestMacIdx = m;
+		}	
 	}
 }
 double Workcenter::findLatestAvailableTimeSlotBefore(double latest, double duration) {
