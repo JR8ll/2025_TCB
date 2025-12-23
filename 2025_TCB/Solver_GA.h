@@ -1,6 +1,7 @@
 #pragma once
 
-#include<vector>
+
+#include <vector>
 #include "Functions.h"
 
 class Schedule;

@@ -977,6 +977,52 @@ void Schedule::localSearchOpLeftShifting(prioRule<pJob> rule, double pWait) {
 		}
 	}
 }
+void Schedule::perturbRandomJobSwap() {
+	uniform_int_distribution<> distrib(0, scheduledJobs.size()-1);
+	int j = distrib(TCB::rng);
+	int k = j;
+	while (j == k || scheduledJobs[j]->getF() != scheduledJobs[k]->getF()) {
+		k = distrib(TCB::rng);
+	}
+	locSearchSwapJobs(j, k);
+}
+void Schedule::perturbRandomRightShifting(){
+	// 1) randomly choose batch at first stage (TODO: maybe also consider laters stages)
+	int wcIdx = 0;	
+	uniform_int_distribution<> mDistrib(0, workcenters[0]->size() - 1);
+	int mIdx = mDistrib(TCB::rng);
+	Machine* machine = &(*workcenters[0])[mIdx];
+	uniform_int_distribution<> bDistrib(0, machine->size() - 1);
+	int bIdx = bDistrib(TCB::rng);
+
+	// 2) define duration of right-shift: equivalent to a randomly chosen product´s processing time
+	uniform_int_distribution<> pDistrib(0, problem->getF() - 1);
+	int productIdx = pDistrib(TCB::rng);
+	double rightShiftAmount = problem->getProduct(productIdx)->getP(wcIdx);
+
+	// 3) Actually right-shift
+	double tempRightShift = rightShiftAmount;
+	for (int b = bIdx; b < machine->size(); ++b) {
+		Batch* batch = &(*machine)[b];
+		batch->setStart(batch->getStart() + tempRightShift, false);
+		if (b < machine->size() - 1) {
+			tempRightShift = min(tempRightShift, max(batch->getC() - (*machine)[b+1].getStart(), 0));
+		}
+	}
+
+
+	// 4) ensure validity for all shifted operations
+	for (int b = machine->size() - 1; b >= bIdx; --b) {
+		Batch* batch = &(*machine)[b];
+		for (size_t op = 0; op < batch->size(); ++op) {
+			Operation* operation = &(*batch)[op];
+			workcenters[0]->ensureValidityFixedBatchFormation(operation);
+		}
+	}
+
+	if (!isValid()) throw ExcSched("ERROR in Schedule::perturbRandomRightShifting()");
+
+}
 void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 	int debug = 0;
 	this->saveJsonFactory("BEFORE");

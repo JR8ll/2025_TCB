@@ -9,6 +9,6 @@ private:
 	Sched_params* schedParams;
 public:
 	Solver_ILS(Sched_params& schedParams);
-	double solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);
+	double solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, int multiStarts, double pWait = 0.0);
 };
 

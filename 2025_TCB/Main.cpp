@@ -66,15 +66,25 @@ int main(int argc, char* argv[]) {
 	//sched->localSearchLeftShifting();	// Operation based leftShifting (too narrowly constrained to work properly)
 	//cout << *sched;
 
-	bool test = false;
+
+	//DEBUGGING 
+
 
 	sched->lSchedJobsWithSorting(sortJobsDebugging, 0);
-	sched->saveJsonFactory("JOBWISE");
+	sched->saveJsonFactory("BEFORE_PERT");
+	sched->perturbRandomJobSwap();
+	sched->saveJsonFactory("AFTER_RND_SWAP");
+	sched->perturbRandomRightShifting();
+	sched->saveJsonFactory("AFTER_RND_RIGHTSHIFT");
+
+	bool test = false;
+	
+	/*sched->saveJsonFactory("JOBWISE");
 
 	sched->localSearchBatchConsolidation(false);
 	sched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");
 	
-	//sched->localSearchConsolidateBatch(0, 0, 2, 0, 3, 0);
+	sched->localSearchConsolidateBatch(0, 0, 2, 0, 3, 0);
 
 	sched->reset();
 	sched->lSchedJobsStageWiseBackwardWithSorting(sortJobsDebugging, 0);
@@ -96,16 +106,10 @@ int main(int argc, char* argv[]) {
 	vector<pair<double, double>> rShiftOptions = sched->getRightShiftOptions(testOp, 25);
 	pair<double, double> testR0 = sched->locSearchEvaluateJobRightShift(3, 1, 25, testOption);
 
-	pair<double, double> test0 = sched->locSearchEvaluateJobLeftShift(0, testOption);	// utility for job based left shifting
-	pair<double, double> test1 = sched->locSearchEvaluateJobLeftShift(1, testOption);	// utility for job based left shifting
-	pair<double, double> test2 = sched->locSearchEvaluateJobLeftShift(2, testOption);	// utility for job based left shifting
-	pair<double, double> test3 = sched->locSearchEvaluateJobLeftShift(3, testOption);	// utility for job based left shifting
-	pair<double, double> test4 = sched->locSearchEvaluateJobLeftShift(4, testOption);	// utility for job based left shifting
-	pair<double, double> test8 = sched->locSearchEvaluateJobLeftShift(8, testOption);	// utility for job based left shifting
 	sched->localSearchJobLeftShifting(&sortJobsByD, false);
 	sched->saveJsonFactory("AFTERLSHIFT");
-
-	//sched->localSearchJobSwapping();
+	sched->localSearchJobSwapping();
+	*/
 
 	// SOLVE
 	switch (iSolver) {
@@ -155,7 +159,7 @@ int main(int argc, char* argv[]) {
 		{
 			Solver_ILS ils = Solver_ILS(schedParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
-			ils.solveILS(*sched.get(), init, sortJobsByD, iTilimSeconds);
+			ils.solveILS(*sched.get(), init, sortJobsRandomly, 1, iTilimSeconds);	// 4th parameter = 1 means no multistart
 		}
 		break;
 	case ALG_ITMILPLSHIFT: 

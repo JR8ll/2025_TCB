@@ -105,9 +105,12 @@ public:
 	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);						// if not bestFit => firstFit
 	void localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);					// if not bestFit => firstFit
 	void localSearchBatchLeftShifting();																		// TODO
-	void localSearchBatchConsolidation(bool bestFit);															// if not bestFit => firstFit
+	void localSearchBatchConsolidation(bool bestFit = true);													// if not bestFit => firstFit
 	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		// LOCAL SEARCH OPERATION BASED (ALMOST USELESS)	
 	
+	void perturbRandomJobSwap();
+	void perturbRandomRightShifting();
+
 	// LOCAL SEARCH EVALUATION AND UTILTIES
 	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement
 	std::pair<double, double> locSearchEvaluateJobLeftShift(size_t idxFirst, std::vector<std::vector<std::pair<double, double>>>& options);	// positive return value => improvement (first = job left shift (last op), second = sum of intermediate ops´ left shift) JOB BASED

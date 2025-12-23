@@ -159,6 +159,9 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 	}
 }
 
+void sortJobsRandomly(std::vector<pJob>& jobs) {
+	shuffle(jobs.begin(), jobs.end(), TCB::rng);
+}
 void sortJobsByC(std::vector<pJob>& jobs) {
 	sort(jobs.begin(), jobs.end(), compJobsByC);
 }

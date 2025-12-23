@@ -49,11 +49,11 @@ public:
 void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams);
 void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams);
 
-
+void sortJobsRandomly(std::vector<pJob>& jobs);		
 void sortJobsByC(std::vector<pJob>& jobs);									// by completion (to be called on scheduled jobs)
 void sortJobsByStart(std::vector<pJob>& jobs);								// by start	(to be called on scheduled jobs)
 void sortJobsByWaitingTimeDecr(std::vector<pJob>& jobs);					// by waiting time (to be called on scheduled jobs)
-void sortJobsByD(std::vector<pJob>& jobs);									// by due date
+void sortJobsByD(std::vector<pJob>& jobs);									// by due date			
 void sortJobsByR(std::vector<pJob>& jobs);									// by release time
 void sortJobsByGATC(std::vector<pJob>& jobs, double t, double kappa);		// by global ATC
 void sortJobsByRK(std::vector<pJob>& jobs, const std::vector<double>& chr);	// by random keys 
