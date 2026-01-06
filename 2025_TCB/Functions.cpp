@@ -9,12 +9,13 @@
 
 #include "Functions.h"
 #include "Solver_GA.h"
+#include "Solver_ILS.h"
 #include "Solver_MILP.h"
 #include "Problem.h"
 
 using namespace std;
 
-void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams) {
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams, ILS_params& ilsParams) {
 	// argv[1] filename of problem instance to be solved
 	if (argc > 1) {
 		TCB::prob->loadFromDat(argv[1]);
@@ -93,6 +94,24 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 	} else {
 		string warning = string("DECOMPMILP parameters filename not provided (default parameters initialized.)");
 		decompParams = Solver_MILP::getDefaultParams();
+		TCB::logger.Log(Warning, warning);
+	}
+
+	if (argc > 9) {
+		if (iSolver == ALG_ILS) {
+			try {
+				loadILSParams(ilsParams, argv[9]);
+			}
+			catch (...) {
+				string warning = string("ILS parameters file not found: ") + string(argv[9]) + string(" (default parameters initialized.)");
+				ilsParams = Solver_ILS::getDefaultParams();
+				TCB::logger.Log(Warning, warning);
+			}
+		}
+	}
+	else {
+		string warning = string("DECOMPMILP parameters filename not provided (default parameters initialized.)");
+		ilsParams = Solver_ILS::getDefaultParams();
 		TCB::logger.Log(Warning, warning);
 	}
 }
@@ -330,6 +349,22 @@ void loadDecompParams(DECOMPMILP_params& decompParams, string filename) {
 		else if (key == "cplexTilim") iss >> decompParams.cplexTilim;
 		else if (key == "method") iss >> decompParams.method;
 		else if (key == "initPrioRule") iss >> decompParams.initPrioRule;
+	}
+	input.close();
+}
+void loadILSParams(ILS_params& ilsParams, string filename) {
+	ifstream input(filename);
+	string line;
+	if (!input) throw ExcSched("loadILSParams file not found");
+
+	while (getline(input, line)) {
+		istringstream iss(line);
+		string key;
+		getline(iss, key, ':');
+		if (key == "nStarts") iss >> ilsParams.nStarts;
+		else if (key == "nPerturbationSteps") iss >> ilsParams.nPerturbationSteps;
+		else if (key == "applyBestFit") iss >> ilsParams.applyBestFit;										// 0 (false) or 1 (true)
+		else if (key == "randomizedLocalSearchSequence") iss >> ilsParams.randomizedLocalSearchSequence;	// 0 (false) or 1 (true)	
 	}
 	input.close();
 }

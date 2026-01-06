@@ -14,6 +14,7 @@ static const int ALG_ILS = 5;
 static const int ALG_ITMILPLSHIFT = 6;		// iterated MILP solving with final left-shifting local search improvement
 
 struct GA_params;
+struct ILS_params;
 struct DECOMPMILP_params;
 
 class Problem;
@@ -46,7 +47,7 @@ public:
 	const std::string& getMessage() const { return message; }
 };
 
-void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams);
+void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams, ILS_params& ilsParams);
 void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams);
 
 void sortJobsRandomly(std::vector<pJob>& jobs);		
@@ -73,6 +74,7 @@ double getAvgP(const std::vector<pJob>& unscheduledJobs);
 void loadSchedParams(Sched_params& schedParams, std::string filename);
 void loadGaParams(GA_params& gaParams, std::string filename);
 void loadDecompParams(DECOMPMILP_params& decompParams, std::string filename);
+void loadILSParams(ILS_params& ilsParams, std::string filename);
 Sched_params getDefaultParams();
 
 double getObjectiveTWT(const Schedule* sched);

@@ -1036,7 +1036,11 @@ void Schedule::perturbRandomJobRightShifting() {
 	int opIdx = opDistrib(TCB::rng);
 	Operation* movingOp = &(*batch)[opIdx];
 
-	double newStart = movingOp->getStart() + movingOp->getP();
+	uniform_int_distribution<> productDistrib(0, problem->getF());
+	int productIdx = productDistrib(TCB::rng);
+	double minDelay = problem->getProduct(productIdx)->getP(0);	// right-shift by the amount of a randomly chosen product´s processing time (to facilitate an operation of such product to fill in the gap during next local search)
+
+	double newStart = movingOp->getStart() + minDelay;
 	batch->removeOp(opIdx);
 	if (batch->isEmpty()) {
 		machine->removeBatch(bIdx);
@@ -1833,8 +1837,6 @@ void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<do
 		double newStart = operation->getStart() - option.first;
 
 		if (!workcenters[stgIdx]->moveOpDisregardingTc(operation, newStart, bIntoExistingBatch)) {
-			cout << "Error while trying to move op" << operation->getId() << "." << operation->getStg() << " to " << newStart << "." << endl;
-			saveJsonFactory("EXECUTELEFTSHIFT_ERROR");
 			throw(ExcSched("ERROR: Schedule::executeLeftShiftOption(...) invalid."));
 		}
 	}

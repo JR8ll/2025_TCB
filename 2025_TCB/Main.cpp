@@ -26,6 +26,7 @@ mt19937 TCB::rng = mt19937(123456789);
 // argv[6] filename of scheduling parameters
 // argv[7] filename of ga parameters
 // argv[8] filename of decompMILP parameters
+// argv[9] filename of ILS parameters
 
 int main(int argc, char* argv[]) {
 
@@ -45,7 +46,8 @@ int main(int argc, char* argv[]) {
 	Sched_params schedParams = Sched_params();
 	GA_params gaParams = GA_params();
 	DECOMPMILP_params decompParams = DECOMPMILP_params();
-	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, schedParams, gaParams, decompParams);
+	ILS_params ilsParams = ILS_params();
+	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, schedParams, gaParams, decompParams, ilsParams);
 
 	// PREPARE 
 	pSched sched = TCB::prob->getSchedule();
@@ -163,9 +165,9 @@ int main(int argc, char* argv[]) {
 	case ALG_ILS:
 		solverName = "ILS";
 		{
-			Solver_ILS ils = Solver_ILS(schedParams);
+			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
-			ils.solveILS(*sched.get(), init, sortJobsRandomly, 1, iTilimSeconds);	// 4th parameter = 1 means no multistart
+			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);	// 4th parameter = 1 means no multistart
 		}
 		break;
 	case ALG_ITMILPLSHIFT: 
