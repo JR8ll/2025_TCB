@@ -981,12 +981,12 @@ void Schedule::perturbRandomJobSwap() {
 	uniform_int_distribution<> distrib(0, scheduledJobs.size()-1);
 	int j = distrib(TCB::rng);
 	int k = j;
-	while (j == k || scheduledJobs[j]->getF() != scheduledJobs[k]->getF()) {
+	while (j == k || scheduledJobs[j]->getF() != scheduledJobs[k]->getF() || scheduledJobs[j]->getStart() < scheduledJobs[k]->getR() || scheduledJobs[k]->getStart() < scheduledJobs[j]->getR()) {
 		k = distrib(TCB::rng);
 	}
 	locSearchSwapJobs(j, k);
 }
-void Schedule::perturbRandomRightShifting(){
+void Schedule::perturbRandomBatchRightShifting(){
 	// 1) randomly choose batch at first stage (TODO: maybe also consider laters stages)
 	int wcIdx = 0;	
 	uniform_int_distribution<> mDistrib(0, workcenters[0]->size() - 1);
@@ -1022,6 +1022,26 @@ void Schedule::perturbRandomRightShifting(){
 
 	if (!isValid()) throw ExcSched("ERROR in Schedule::perturbRandomRightShifting()");
 
+}
+void Schedule::perturbRandomJobRightShifting() {
+	// 1) randomly choose batch and job at first stage
+	int wcIdx = 0;
+	uniform_int_distribution<> mDistrib(0, workcenters[0]->size() - 1);
+	int mIdx = mDistrib(TCB::rng);
+	Machine* machine = &(*workcenters[0])[mIdx];
+	uniform_int_distribution<> bDistrib(0, machine->size() - 1);
+	int bIdx = bDistrib(TCB::rng);
+	Batch* batch = &(*machine)[bIdx];
+	uniform_int_distribution<> opDistrib(0, batch->size() - 1);
+	int opIdx = opDistrib(TCB::rng);
+	Operation* movingOp = &(*batch)[opIdx];
+
+	double newStart = movingOp->getStart() + movingOp->getP();
+	batch->removeOp(opIdx);
+	if (batch->isEmpty()) {
+		machine->removeBatch(bIdx);
+	}
+	schedOpDelayed(movingOp, newStart);
 }
 void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 	int debug = 0;
@@ -1209,6 +1229,8 @@ pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, ve
 		possibleLeftShift[o] = this->getLeftShiftOptions(job->getOpPtr(o));
 	}
 
+	
+
 	// 2) remove mutually exclusive options 	
 	vector<double> currentLeeway = getLeeway(job);	// as of now, how much time between end and start of succeeding operations? => if job[i] is left shifted by t, then job[i-1] must be left shifted by at least max((t - leeway[i]), 0)
 	vector<vector<pair<size_t, double>>> currentTcSlack = getTcSlack(job);
@@ -1349,6 +1371,7 @@ bool Schedule::locSearchSwapJobs(size_t idxFirst, size_t idxSecond) {
 		if (!wc->locateOp(op1, mIdx1, bIdx1, jIdx1) || !wc->locateOp(op2, mIdx2, bIdx2, jIdx2)) {
 			return false;
 		}
+
 		wc->swapOps(mIdx1, bIdx1, jIdx1, mIdx2, bIdx2, jIdx2);
 	}
 }
@@ -1808,7 +1831,10 @@ void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<do
 		Operation* operation = &(*scheduledJobs[jobIdx])[stgIdx];
 		bool bIntoExistingBatch = option.first == option.second;
 		double newStart = operation->getStart() - option.first;
+
 		if (!workcenters[stgIdx]->moveOpDisregardingTc(operation, newStart, bIntoExistingBatch)) {
+			cout << "Error while trying to move op" << operation->getId() << "." << operation->getStg() << " to " << newStart << "." << endl;
+			saveJsonFactory("EXECUTELEFTSHIFT_ERROR");
 			throw(ExcSched("ERROR: Schedule::executeLeftShiftOption(...) invalid."));
 		}
 	}

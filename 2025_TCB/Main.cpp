@@ -74,8 +74,14 @@ int main(int argc, char* argv[]) {
 	sched->saveJsonFactory("BEFORE_PERT");
 	sched->perturbRandomJobSwap();
 	sched->saveJsonFactory("AFTER_RND_SWAP");
-	sched->perturbRandomRightShifting();
-	sched->saveJsonFactory("AFTER_RND_RIGHTSHIFT");
+	sched->perturbRandomJobRightShifting();
+	sched->perturbRandomJobRightShifting();
+	sched->perturbRandomJobRightShifting();
+	sched->localSearchBatchConsolidation();
+	sched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");
+	sched->localSearchJobLeftShifting();
+	sched->saveJsonFactory("AFTER_JOBLEFTSHIFTING");
+	
 
 	bool test = false;
 	

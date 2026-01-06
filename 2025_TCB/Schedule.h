@@ -109,7 +109,8 @@ public:
 	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		// LOCAL SEARCH OPERATION BASED (ALMOST USELESS)	
 	
 	void perturbRandomJobSwap();
-	void perturbRandomRightShifting();
+	void perturbRandomBatchRightShifting();		
+	void perturbRandomJobRightShifting();		
 
 	// LOCAL SEARCH EVALUATION AND UTILTIES
 	double locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible);			// positive return value => improvement

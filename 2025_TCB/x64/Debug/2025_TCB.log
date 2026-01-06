@@ -1,4 +1,9 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
+  Workcenter.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Workcenter.cpp(460): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Workcenter.cpp(466): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
   Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -13,19 +18,23 @@ Schedule.cpp(981): warning C4267: 'argument' : conversion from 'size_t' to 'int'
 Schedule.cpp(992): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(995): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(1015): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1030): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1076): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1370): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1372): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1458): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1460): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1512): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1514): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1604): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1605): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1704): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1705): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1938): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-Schedule.cpp(2028): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1354): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
+Schedule.cpp(1029): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1032): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1035): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1050): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1096): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1393): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1395): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1481): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1483): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1535): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1537): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1627): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1628): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1727): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1728): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1964): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(2054): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+  Generating Code...
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1377): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

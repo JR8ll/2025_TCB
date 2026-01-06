@@ -59,7 +59,7 @@ const std::vector<pBat>& Machine::getBatches() const {
 double Machine::getEarliestSlot(double from, const Operation& op) const {
 	double slot = max(r, from);
 	for (size_t b = 0; b < batches.size(); ++b) {
-		if ((slot + op.getP()) <= batches[b]->getStart()
+		if ((slot + op.getP()) <= batches[b]->getStart() + TCB::precision
 			|| batches[b]->size() == 1 && (*batches[b])[0].getId() == op.getId()) {	// [JR-2025-Jul-15] case: overlapping with self
 			if (b < batches.size() - 1) {
 				if (slot + op.getP() <= batches[b + 1]->getStart()) {
