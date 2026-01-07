@@ -62,7 +62,7 @@ double Machine::getEarliestSlot(double from, const Operation& op) const {
 		if ((slot + op.getP()) <= batches[b]->getStart() + TCB::precision
 			|| batches[b]->size() == 1 && (*batches[b])[0].getId() == op.getId()) {	// [JR-2025-Jul-15] case: overlapping with self
 			if (b < batches.size() - 1) {
-				if (slot + op.getP() <= batches[b + 1]->getStart()) {
+				if (slot + op.getP() <= batches[b + 1]->getStart() + TCB::precision) {
 					return slot;
 				}
 			}

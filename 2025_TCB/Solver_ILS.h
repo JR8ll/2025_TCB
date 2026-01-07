@@ -9,7 +9,8 @@ struct ILS_params {
 	int nPerturbationSteps;				// number of perturbations steps between two local search phases 
 	bool applyBestFit;					// true: local search follows greedy/best fit strategy, false: local search follows first-fit strategy			
 	bool randomizedLocalSearchSequence;
-	int iterations;						// REPORTING: number of generations processed 
+	int multiStartIterations;			// REPORTING: number of new initializations (MULTI-START)
+	std::vector<int> ilsIterations;		// REPORTING: number of iterations (local search + perturbation)
 };
 
 class Solver_ILS {

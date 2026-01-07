@@ -552,7 +552,7 @@ bool Workcenter::moveOpDisregardingTc(Operation* op, double newStart, bool& into
 	
 	// INSERT TO DIFFERENT TIME SLOT (Despite intoBatch == true, sometimes a time slot is exactly defined (option.first == option.second)
 	for (size_t m = 0; m < size(); ++m) {
-		if (newStart == machines[m]->getEarliestSlot(newStart, *op)) {
+		if (newStart <= machines[m]->getEarliestSlot(newStart, *op) + TCB::precision && newStart >= machines[m]->getEarliestSlot(newStart, *op) - TCB::precision) {
 			unique_ptr<Batch> newBatch = make_unique<Batch>(cap);
 			newBatch->addOp(op);
 			machines[m]->addBatch(move(newBatch), newStart, false);

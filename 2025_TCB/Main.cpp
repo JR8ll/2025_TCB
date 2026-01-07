@@ -58,34 +58,23 @@ int main(int argc, char* argv[]) {
 	chrono::time_point<chrono::high_resolution_clock> stop;
 
 
-	// DEBUGGING 2025-Apr-07
-	// sort jobs 3 5 6 9 7 1 10 8 4 2
-	//sched->sortUnscheduled(sortJobsDebugging);	// DEBUGGING change sortUnscheduled
-	// solve with list-sched
-	//sched->lSchedJobsInflated(0.0, 0.25, true, false);
-	//sched->lSchedJobs(0.0);
-	//cout << *sched;
-	//sched->localSearchLeftShifting();	// Operation based leftShifting (too narrowly constrained to work properly)
-	//cout << *sched;
-
-
 	//DEBUGGING 
 
 
-	sched->lSchedJobsWithSorting(sortJobsDebugging, 0);
-	sched->saveJsonFactory("BEFORE_PERT");
-	sched->perturbRandomJobSwap();
-	sched->saveJsonFactory("AFTER_RND_SWAP");
-	sched->perturbRandomJobRightShifting();
-	sched->perturbRandomJobRightShifting();
-	sched->perturbRandomJobRightShifting();
-	sched->localSearchBatchConsolidation();
-	sched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");
-	sched->localSearchJobLeftShifting();
-	sched->saveJsonFactory("AFTER_JOBLEFTSHIFTING");
-	
+	//sched->lSchedJobsWithSorting(sortJobsDebugging, 0);
+	//sched->saveJsonFactory("BEFORE_PERT");
+	//sched->perturbRandomJobSwap();
+	//sched->saveJsonFactory("AFTER_RND_SWAP");
+	//sched->perturbRandomJobRightShifting();
+	//sched->perturbRandomJobRightShifting();
+	//sched->perturbRandomJobRightShifting();
+	//sched->localSearchBatchConsolidation();
+	//sched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");
+	//sched->localSearchJobLeftShifting();
+	//sched->saveJsonFactory("AFTER_JOBLEFTSHIFTING");
+	//
 
-	bool test = false;
+	//bool test = false;
 	
 	/*sched->saveJsonFactory("JOBWISE");
 
@@ -167,7 +156,7 @@ int main(int argc, char* argv[]) {
 		{
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
-			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);	// 4th parameter = 1 means no multistart
+			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);	
 		}
 		break;
 	case ALG_ITMILPLSHIFT: 

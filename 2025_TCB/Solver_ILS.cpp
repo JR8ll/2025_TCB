@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iostream>
 
 #include "Solver_ILS.h"
 #include "Schedule.h"
@@ -11,7 +12,6 @@ Solver_ILS::Solver_ILS(Sched_params& schedParams, ILS_params& params) {
 }
 
 double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait) {
-    // TODO ILS PARAMETERS (BESTFIT/FIRSTFIT, JOBSORTINGORDER, etc.)
     auto start = chrono::high_resolution_clock::now();
     chrono::seconds usedTime;
     chrono::time_point<chrono::high_resolution_clock> stop;
@@ -19,28 +19,25 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
     double bestTWT = DBL_MAX;
     unique_ptr<Schedule> bestSched = sched.clone();
     
-    // TODO: ILS
-    int iterationCounter = 0;
-    do {
+    params->multiStartIterations = 0;
+    
+    do {// MULTISTART-LOOP
         // INITIALIZE
         unique_ptr<Schedule> tempSched = sched.clone();
         (tempSched.get()->*init)(rule, *schedParams);
-        do {
+        params->ilsIterations.push_back(0);
+        do {// ILS LOOP
             // LOCAL SEARCH
-            tempSched->saveJsonFactory("BEFORE_LOCAL_SEARCH");   // DEBUGGING
             tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);      
-            tempSched->saveJsonFactory("AFTER_JOBLEFTSHIFTING");   // DEBUGGING
             tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
-            tempSched->saveJsonFactory("AFTER_JOBSWAPPING");   // DEBUGGING
             tempSched->localSearchBatchConsolidation(params->applyBestFit);
-            tempSched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");   // DEBUGGING
 
             double tempTWT = tempSched->getTWT();
             if (tempTWT < bestTWT) {
                 bestTWT = tempTWT;
                 bestSched = tempSched->clone();
             }
-            // TODO: PERTURBATION
+            // PERTURBATION
             uniform_real_distribution<> perturbDistrib(0, 1);
             for (size_t i = 0; i < params->nPerturbationSteps; ++i) {
                 double perturbChoice = perturbDistrib(TCB::rng);
@@ -52,14 +49,14 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
                 }
             }
 
-            ++iterationCounter;
+            ++params->ilsIterations[params->multiStartIterations];
             stop = chrono::high_resolution_clock::now();
             usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
-        } while (usedTime.count() < (double)iTilimSeconds / (double)params->nStarts);   // MULTISTART
+        } while (usedTime.count() < ((double)iTilimSeconds / (double)params->nStarts) * (params->multiStartIterations + 1));   // MULTISTART
         stop = chrono::high_resolution_clock::now();
         usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+        ++params->multiStartIterations;
     } while (usedTime.count() < iTilimSeconds); 
-
 
     return bestTWT;
 }
@@ -70,5 +67,7 @@ ILS_params Solver_ILS::getDefaultParams() {
     ilsParams.nPerturbationSteps = 5;
     ilsParams.applyBestFit = true;
     ilsParams.randomizedLocalSearchSequence = false;
+    ilsParams.multiStartIterations = 0;
+    ilsParams.ilsIterations = vector<int>();
     return ilsParams;
 }

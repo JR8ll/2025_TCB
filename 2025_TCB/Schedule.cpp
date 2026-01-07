@@ -751,13 +751,13 @@ void Schedule::leftShiftBatches() {
 			for (size_t i = 0; i < workcenters[wc]->size(); ++i) {
 				for (size_t b = 0; b < (*workcenters[wc])[i].size(); ++b) {
 					if (workcenters[wc]->leftShift(i, b)) {
+						cout << "Running leftShiftBatches()... " << endl;
 						cout << *this << endl;
 						bImproved = true;
 					}
 				}
 			}
 		}
-		
 	}
 }
 
@@ -799,6 +799,17 @@ double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtM
 	double myTWT = getTWT();
 	double bestTWT = myTWT;
 
+	// DEBUGGING
+	cout << "THIS (before) machine sizes: ";
+	for (int i = 0; i < workcenters.size(); ++i) {
+		for (int j = 0; j < workcenters[i]->size(); ++j) {
+			cout << (*workcenters[i])[j].size() << " ";
+		}
+	}
+	cout << endl;
+
+
+
 	for (size_t movingOpIdx = 0; movingOpIdx < bat2->size(); ++movingOpIdx) {
 		Operation* op = &(*bat2)[movingOpIdx];
 		double opR = op->getAvailability();
@@ -812,9 +823,20 @@ double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtM
 						opIdx = movingOpIdx;
 					}
 				}	
+				int debugger = 666;
 			}
 		}
 	}
+
+
+	// DEBUGGING
+	cout << "THIS (after) machine sizes: ";
+	for (int i = 0; i < workcenters.size(); ++i) {
+		for (int j = 0; j < workcenters[i]->size(); ++j) {
+			cout << (*workcenters[i])[j].size() << " ";
+		}
+	}
+	cout << endl;
 
 	return myTWT - bestTWT;
 }
@@ -827,6 +849,15 @@ bool Schedule::localSearchConsolidateBatch(size_t wcIdx, size_t tgtMacIdx, size_
 	Batch* tgtBat = &(*tgtMac)[tgtBatchIdx];
 	Operation* op = &(*srcBat)[opIdx];
 	Job* job = op->getJob();
+
+	// DEBUGGING
+	cout << "THIS (before consolidate Batches) machine sizes: ";
+	for (int i = 0; i < workcenters.size(); ++i) {
+		for (int j = 0; j < workcenters[i]->size(); ++j) {
+			cout << (*workcenters[i])[j].size() << " ";
+		}
+	}
+	cout << endl;
 
 	// right shift target batch and transfer operation to target batch
 	double rightShiftTgt = op->getAvailability() - tgtBat->getStart();
@@ -943,6 +974,15 @@ bool Schedule::localSearchConsolidateBatch(size_t wcIdx, size_t tgtMacIdx, size_
 	}
 
 	//saveJsonFactory("DEBUGGING_CONSOLIDATION_THREE");
+
+	// DEBUGGING
+	cout << "THIS (after consolidate Batches) machine sizes: ";
+	for (int i = 0; i < workcenters.size(); ++i) {
+		for (int j = 0; j < workcenters[i]->size(); ++j) {
+			cout << (*workcenters[i])[j].size() << " ";
+		}
+	}
+	cout << endl;
 	return isValid();
 }
 
@@ -979,10 +1019,14 @@ void Schedule::localSearchOpLeftShifting(prioRule<pJob> rule, double pWait) {
 }
 void Schedule::perturbRandomJobSwap() {
 	uniform_int_distribution<> distrib(0, scheduledJobs.size()-1);
+	int max = 1000;
+	int i = 0;
 	int j = distrib(TCB::rng);
-	int k = j;
-	while (j == k || scheduledJobs[j]->getF() != scheduledJobs[k]->getF() || scheduledJobs[j]->getStart() < scheduledJobs[k]->getR() || scheduledJobs[k]->getStart() < scheduledJobs[j]->getR()) {
+	int k = distrib(TCB::rng);
+	while (i < max && (j == k || scheduledJobs[j]->getF() != scheduledJobs[k]->getF() || scheduledJobs[j]->getStart() < scheduledJobs[k]->getR() || scheduledJobs[k]->getStart() < scheduledJobs[j]->getR())) {
+		j = distrib(TCB::rng);
 		k = distrib(TCB::rng);
+		++i;
 	}
 	locSearchSwapJobs(j, k);
 }
@@ -1036,7 +1080,7 @@ void Schedule::perturbRandomJobRightShifting() {
 	int opIdx = opDistrib(TCB::rng);
 	Operation* movingOp = &(*batch)[opIdx];
 
-	uniform_int_distribution<> productDistrib(0, problem->getF());
+	uniform_int_distribution<> productDistrib(0, problem->getF()-1);
 	int productIdx = productDistrib(TCB::rng);
 	double minDelay = problem->getProduct(productIdx)->getP(0);	// right-shift by the amount of a randomly chosen product´s processing time (to facilitate an operation of such product to fill in the gap during next local search)
 
@@ -1143,29 +1187,22 @@ void Schedule::localSearchBatchConsolidation(bool bestFit) {
 			Workcenter* workcenter = &(*workcenters[o]);
 			for (size_t m = 0; m < workcenter->size(); ++m) {
 				Machine* machine = &(*workcenter)[m];
-				for (size_t b = 0; b < machine->size() - 1; ++b) {
+
+				for (int b = 0; (b + 1) < machine->size(); ++b) {		// beware of trap: ->size() returns size_t, so ->size() - 1 would become a big value for ->size() == 0 !!!
 						Batch* batch = &(*machine)[b];
 						Batch* succB = &(*machine)[b + 1];	
 
-						if (o == 0 && m == 0 && b == 2) {
-							int debugger = 666;
+						if (machine->size() < 2) {
+							int debugger = 666;	// this should never happen!?
 						}
-
 						if (batch->getF() == succB->getF()) {
 							for (size_t op = 0; op < succB->size(); ++op) {
 								double tempImprovement = localSearchEvaluateBatchConsolidation(o, m, b, m, b+1, op);
-								
-								// DEBUGGIN
-								if (tempImprovement < bestImprovement) {
-									int debugger = 666;
-								}
 								
 								if (tempImprovement > bestImprovement) {
 									if (!bestFit) {
 										// FIRST FIT => execute if improvement > 0
 										localSearchConsolidateBatch(o, m, b, m, b+1, op);	
-										cout << "Schedule::localSearchBatchConsolidation() [FF] consolidate at stage (all idx) " << o << " M" << m << " - B" << b << " with OP" << op << " from suceeding batch. " << endl;// DEBUGGING
-										saveJsonFactory("LS_BATCHCONSOLIDATION_AFTERFF"); // DEBUGGING
 										bImproving = true;
 										break;
 									} else {
@@ -1179,6 +1216,8 @@ void Schedule::localSearchBatchConsolidation(bool bestFit) {
 								}
 							}
 						}
+						
+						
 						if (bImproving) break;
 					}
 					if (bImproving) break;				
@@ -1189,8 +1228,6 @@ void Schedule::localSearchBatchConsolidation(bool bestFit) {
 		if (bestFit && bestImprovement > 0) {
 			// BEST FIT => execute best move if improvement > 0
 			localSearchConsolidateBatch(bestWc, bestM, bestB, bestM, bestB+1, bestOp);
-			cout << "Schedule::localSearchBatchConsolidation() [BF] consolidate at stage (all idx) " << bestWc << " M" << bestM << " - B" << bestB << " with OP" << bestOp << " from succeeding batch. " << endl;// DEBUGGING
-			saveJsonFactory("LS_BATCHCONSOLIDATION_AFTERBF"); // DEBUGGING
 			bImproving = true;
 		}
 	}
@@ -1245,7 +1282,14 @@ pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, ve
 		possibleTcViolations = constrainLeftShiftOptionsFromTimeConstraints(possibleLeftShift, currentTcSlack);
 	} while (possibleOverlaps || possibleTcViolations);
 
-	// 3) evaluate best options
+	// 3) check if there are suitable options (at least zero option) at all stages
+	for (size_t i = 0; i < possibleLeftShift.size(); ++i) {
+		if (possibleLeftShift[i].size() == 0) {
+			return make_pair(-1, 0);
+		}
+	}
+
+	// 4) evaluate best options
 	pair<double, double> evaluation = make_pair(possibleLeftShift[possibleLeftShift.size()-1][0].first, 0);	
 	for (size_t i = 0; i < (possibleLeftShift.size() - 1); ++i) {
 		evaluation.second += possibleLeftShift[i][0].first;
@@ -1676,7 +1720,7 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 			double optTill = options[o][opt].second;
 
 			// 1) reduce discrete options if infeasible
-			if (optFrom == optTill) {
+			if (optFrom <= optTill + TCB::precision && optFrom >= optTill - TCB::precision) {
 				bool allFeasible = true;
 				bool tempFeasible = false;
 				if (tcSlack[o].size() < 1) { 
@@ -1836,7 +1880,9 @@ void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<do
 		bool bIntoExistingBatch = option.first == option.second;
 		double newStart = operation->getStart() - option.first;
 
+		saveJsonFactory("execulteLeftShiftOptionPreError");
 		if (!workcenters[stgIdx]->moveOpDisregardingTc(operation, newStart, bIntoExistingBatch)) {
+			saveJsonFactory("execulteLeftShiftOptionPostError");
 			throw(ExcSched("ERROR: Schedule::executeLeftShiftOption(...) invalid."));
 		}
 	}
@@ -1859,6 +1905,7 @@ bool Schedule::isValid() const {
 		for (size_t o = 0; o < (*problem)[j].size(); ++o) {
 			if (!contains(&(*problem)[j][o])) {
 				TCB::logger.Log(Error, "missing operation " + to_string((*problem)[j][o].getId()) + "." + to_string((*problem)[j][o].getStg()));
+				cout << "Schedule::isValid() NOT ALL OPERATIONS OF ALL JOBS ARE ASSIGNED" << endl;
 				cout << *this;
 				return false;
 			}
@@ -1870,6 +1917,7 @@ bool Schedule::isValid() const {
 		for (size_t m = 0; m < (*workcenters[wc]).size(); ++m) {
 			if ((*workcenters[wc])[m].hasOverlaps()) {
 				TCB::logger.Log(Error, "overlapping processing of batches at machine " + to_string(workcenters[wc]->getId()) + "." + to_string((*workcenters[wc])[m].getId()));
+				cout << "Schedule::isValid() OVERLAPPING PROCESSING ON ANY MACHINE" << endl;
 				cout << *this;
 				return false;
 			}
@@ -1883,12 +1931,14 @@ bool Schedule::isValid() const {
 				for (size_t o = 0; o < (*workcenters[wc])[m][b].size(); ++o) {
 					if (!(*workcenters[wc])[m][b][o].checkProcessingOrder()) {
 						TCB::logger.Log(Error, "Processing order violated");
+						cout << "Schedule::isValid() AN OPERATION IS STARTED BEFORE ITS ROUTE PREDECESSOR IS COMPLETED" << endl;
 						cout << *this;
 						saveJsonFactory("ProcessingOrderViolation");
 						return false;
 					}
 					if (!(*workcenters[wc])[m][b][o].checkTimeConstraints()) {
 						TCB::logger.Log(Error, "Time constraint violated");
+						cout << "Schedule::isValid() TIME CONSTRAINTS ARE VIOLATED" << endl;
 						cout << *this;
 						return false;
 					}
