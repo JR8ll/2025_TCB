@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <ctime>
 #include <iomanip>
+#include <numeric>
 #include <string>
 #include <Windows.h>
 #include <fstream>
@@ -115,7 +116,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 		TCB::logger.Log(Warning, warning);
 	}
 }
-void writeSolutions(Schedule* solution, int solverType, string solverName, string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams) {
+void writeSolutions(Schedule* solution, int solverType, string solverName, string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams, ILS_params* ilsParams) {
 	bool success = CreateDirectory(L".\\results", NULL);
 	string fullPath = ".\\results\\TCB_results.csv";
 	ifstream checkFile(fullPath);
@@ -126,7 +127,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 	if (file.is_open()) {
 		if (!fileExists) {
 			// headings
-			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "miscReporting\t" << "CreatedOn" << endl;
+			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "ILS_params\t" << "miscReporting\t" << "CreatedOn" << endl;
 		}
 		
 		double objectiveValue = 999999;	// invalid
@@ -140,6 +141,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		ostringstream schedParamsString;
 		ostringstream gaParamsString;
 		ostringstream decompParamsString;
+		ostringstream ilsParamsString;
 		if (schedParams != nullptr) {
 			schedParamsString << "kap{" << schedParams->kappaLow << "/" << schedParams->kappaHigh << "/" << schedParams->kappaStep << "}pW{" << schedParams->pWaitLow << "/" << schedParams->pWaitHigh << "/" << schedParams->pWaitStep << "}";
 		} else {
@@ -155,7 +157,19 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		} else {
 			decompParamsString << "n/a";
 		}
-		file << schedParamsString.str() << "\t" << gaParamsString.str() << "\t" << decompParamsString.str() << "\t";
+		if (ilsParams != nullptr) {
+			int meanIlsIterations = 0;
+			if (!ilsParams->ilsIterations.empty()) {
+				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
+				double avg = static_cast<double>(sum) / ilsParams->ilsIterations.size();
+				meanIlsIterations = static_cast<int>(round(avg));
+			}
+			ilsParamsString << ilsParams->multiStartIterations << "|" << meanIlsIterations << "|" << ilsParams->nPerturbationSteps << "|" << (ilsParams->applyBestFit ? "bestFit" : "firstFit");
+		}
+		else {
+			ilsParamsString << "n/a";
+		}
+		file << schedParamsString.str() << "\t" << gaParamsString.str() << "\t" << decompParamsString.str() << "\t" << ilsParamsString.str() << "\t";
 		time_t now = time(nullptr);
 		tm* localTime = localtime(&now);
 		ostringstream dateString;

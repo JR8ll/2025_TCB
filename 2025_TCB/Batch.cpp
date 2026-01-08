@@ -130,7 +130,7 @@ void Batch::setStart(double newStart, bool checkvalidity) {
 	}
 	catch (ExcSched e) {
 		// DEBUGGING
-		cout << "ERROR: could not change batch start to " << newStart << " (Batch with op " << ops[0]->getId() << "." << ops[0]->getStg() << endl;
+		cout << "ERROR: could not change batch start to " << newStart << " (Batch with op " << ops[0]->getId() << "." << ops[0]->getStg() <<  endl;
 		machine->getWorkcenter()->getSchedule()->saveJsonFactory("ERROR_BATCH_SETSTART");
 		throw e;
 	}
@@ -144,6 +144,7 @@ void Batch::setC(double newC, bool checkvalidity) {
 
 			double test3 = ops[op]->getEarliestStart() + ops[op]->getP() - TCB::precision;
 			if (ops[op]->getEarliestStart() + ops[op]->getP() - TCB::precision > newC) {
+				machine->getWorkcenter()->getSchedule()->saveJsonFactory("BATCH_SETC_INFEASIBLE");
 				throw ExcSched("Batch::setC() infeasible");
 			}
 		}

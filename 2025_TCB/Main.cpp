@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
 				sched->sortUnscheduled(sortJobsByRK, bestChromosome);
 				Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
 				cplex.solveDecompJobBasedMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim);
-				sched->saveJson("BRKGA2MILP");
+				sched->saveJsonFactory("BRKGA2MILP");
 			}
 		}
 		break;
@@ -156,7 +156,8 @@ int main(int argc, char* argv[]) {
 		{
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
-			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);	
+			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);
+			
 		}
 		break;
 	case ALG_ITMILPLSHIFT: 
@@ -178,7 +179,7 @@ int main(int argc, char* argv[]) {
 	usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
 
 	// RESULT SUMMARY (FILE OUTPUT)
-	writeSolutions(sched.get(), iSolver, solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams);	
+	writeSolutions(sched.get(), iSolver, solverName, objectiveName, iTilimSeconds, usedTime.count(), &schedParams, &gaParams, &decompParams, &ilsParams);	
 	sched->saveJsonFactory(solverName);
 
 	// CONSOLE OUTPUT

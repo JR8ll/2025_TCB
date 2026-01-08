@@ -28,7 +28,8 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
         params->ilsIterations.push_back(0);
         do {// ILS LOOP
             // LOCAL SEARCH
-            tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);      
+            //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+            tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);    
             tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
             tempSched->localSearchBatchConsolidation(params->applyBestFit);
 
@@ -56,8 +57,9 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
         stop = chrono::high_resolution_clock::now();
         usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
         ++params->multiStartIterations;
-    } while (usedTime.count() < iTilimSeconds); 
+    } while (usedTime.count() < iTilimSeconds);
 
+    sched._reconstruct(bestSched.get());
     return bestTWT;
 }
 

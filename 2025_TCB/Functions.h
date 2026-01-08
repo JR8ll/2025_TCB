@@ -48,7 +48,7 @@ public:
 };
 
 void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams, ILS_params& ilsParams);
-void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams);
+void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams, ILS_params* ilsParams);
 
 void sortJobsRandomly(std::vector<pJob>& jobs);		
 void sortJobsByC(std::vector<pJob>& jobs);									// by completion (to be called on scheduled jobs)

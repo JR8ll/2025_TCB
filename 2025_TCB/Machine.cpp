@@ -140,7 +140,7 @@ void Machine::moveBatch(Batch* batch, double newStart) {
 	bool bToTheEnd = false;
 
 	for (auto it = batches.begin(); it != batches.end(); ++it) {
-		if ((newStart + batch->getP()) <= it->get()->getStart() || 
+		if ((newStart + batch->getP()) <= it->get()->getStart() + TCB::precision || 
 			(it->get() == batch && newStart < it->get()->getStart() && newStart + batch->getP() > it->get()->getStart())) {
 			if (it != batches.begin()) {
 				if ((it - 1)->get()->getC() <= newStart + TCB::precision || (it - 1)->get() == batch) {
@@ -157,7 +157,7 @@ void Machine::moveBatch(Batch* batch, double newStart) {
 		}
 		else {
 			if (it == (batches.end() - 1)) {
-				if (it->get()->getC() <= newStart ||
+				if (it->get()->getC() - TCB::precision <= newStart ||
 					it->get() == batch) {	// [JR-2025-Jul-15] case: overlapping with self
 					toIdx = it - batches.begin();
 					bGapFound = true;
