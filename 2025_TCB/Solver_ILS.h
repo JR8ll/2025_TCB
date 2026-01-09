@@ -11,6 +11,7 @@ struct ILS_params {
 	bool randomizedLocalSearchSequence;
 	int multiStartIterations;			// REPORTING: number of new initializations (MULTI-START)
 	std::vector<int> ilsIterations;		// REPORTING: number of iterations (local search + perturbation)
+	int bestAfterSeconds;				// REPORTING: best solution found after ... seconds
 };
 
 class Solver_ILS {

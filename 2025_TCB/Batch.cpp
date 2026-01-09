@@ -61,6 +61,7 @@ size_t Batch::findOp(const Operation* op) const {
 	for (size_t j = 0; j < size(); ++j) {
 		if (ops[j] == op) return j;
 	}
+	TCB::logger.Log(Error, "Exception thrown in Batch::findOp(...)");
 	throw ExcSched("Batch::findOp() Operation not found");
 }
 bool Batch::isEmpty() const { return ops.empty(); }
@@ -129,9 +130,7 @@ void Batch::setStart(double newStart, bool checkvalidity) {
 		setC(newStart + getP(), checkvalidity);
 	}
 	catch (ExcSched e) {
-		// DEBUGGING
-		cout << "ERROR: could not change batch start to " << newStart << " (Batch with op " << ops[0]->getId() << "." << ops[0]->getStg() <<  endl;
-		machine->getWorkcenter()->getSchedule()->saveJsonFactory("ERROR_BATCH_SETSTART");
+		TCB::logger.Log(Error, "Exception caught and thrown in Batch::setStart(...)");
 		throw e;
 	}
 	
@@ -144,7 +143,7 @@ void Batch::setC(double newC, bool checkvalidity) {
 
 			double test3 = ops[op]->getEarliestStart() + ops[op]->getP() - TCB::precision;
 			if (ops[op]->getEarliestStart() + ops[op]->getP() - TCB::precision > newC) {
-				machine->getWorkcenter()->getSchedule()->saveJsonFactory("BATCH_SETC_INFEASIBLE");
+				TCB::logger.Log(Error, "Exception thrown in Batch::setC(...)");
 				throw ExcSched("Batch::setC() infeasible");
 			}
 		}
@@ -154,7 +153,10 @@ void Batch::setC(double newC, bool checkvalidity) {
 
 void Batch::setCap(int newCap) {
 	int requiredCap = cap - getAvailableCap();
-	if (requiredCap > newCap) throw ExcSched("Batch::setCap() infeasible");
+	if (requiredCap > newCap)  {
+		TCB::logger.Log(Error, "Exception thrown in Batch::setCap(...)");
+		throw ExcSched("Batch::setCap() infeasible");
+	}
 	cap = newCap;
 }
 

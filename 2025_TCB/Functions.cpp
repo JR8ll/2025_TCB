@@ -181,7 +181,11 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		}
 		else if (solverType == ALG_LISTSCHEDATC || solverType == ALG_ITMILPLSHIFT) {
 			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
-		} else {
+		}
+		else if (solverType == ALG_ILS) {
+			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "\t";
+		} 
+		else {
 			file << "n/a\t";
 		}
 
@@ -216,7 +220,10 @@ void sortJobsByGATC(vector<pJob>& jobs, double t, double kappa) {
 }
 
 void sortJobsByRK(vector<pJob>& unscheduledJobs, const vector<double>& chr) {
-	if (unscheduledJobs.size() != chr.size()) throw ExcSched("sortJobsByRK error different sizes of jobs and chromosome");
+	if (unscheduledJobs.size() != chr.size()) {
+		TCB::logger.Log(Error, "Exception thrown in Function sortJobsByRK(...)");
+		throw ExcSched("sortJobsByRK error different sizes of jobs and chromosome");
+	}
 
 	vector<pJob> sortedJobs = vector<pJob>(chr.size());
 	vector<pair<double, size_t>> ranking(chr.size());
@@ -315,7 +322,10 @@ double getAvgP(const vector<pJob>& unscheduledJobs) {
 void loadSchedParams(Sched_params& schedParams, std::string filename) {
 	ifstream input(filename);
 	string line;
-	if (!input) throw ExcSched("loadSchedParams file not found");
+	if (!input) {
+		TCB::logger.Log(Error, "Exception thrown in Function loadSchedParams(...) - file not found");
+		throw ExcSched("loadSchedParams file not found");
+	}
 	while (getline(input, line)) {
 		istringstream iss(line);
 		string key;
@@ -332,7 +342,10 @@ void loadSchedParams(Sched_params& schedParams, std::string filename) {
 void loadGaParams(GA_params& gaParams, string filename) {
 	ifstream input(filename);
 	string line;
-	if (!input) throw ExcSched("loadGaParams file not found");
+	if (!input) {
+		TCB::logger.Log(Error, "Exception thrown in Function loadGaParams(...) - file not found");
+		throw ExcSched("loadGaParams file not found");
+	}
 	while (getline(input, line)) {
 		istringstream iss(line);
 		string key;
@@ -349,7 +362,10 @@ void loadGaParams(GA_params& gaParams, string filename) {
 void loadDecompParams(DECOMPMILP_params& decompParams, string filename) {
 	ifstream input(filename);
 	string line;
-	if (!input) throw ExcSched("loadDecompParams file not found");
+	if (!input) {
+		TCB::logger.Log(Error, "Exception thrown in Function loadDecompParams(...) - file not found");
+		throw ExcSched("loadDecompParams file not found");
+	}
 
 	double low = -1;
 	double high = -1;
@@ -369,7 +385,10 @@ void loadDecompParams(DECOMPMILP_params& decompParams, string filename) {
 void loadILSParams(ILS_params& ilsParams, string filename) {
 	ifstream input(filename);
 	string line;
-	if (!input) throw ExcSched("loadILSParams file not found");
+	if (!input) {
+		TCB::logger.Log(Error, "Exception thrown in Function loadILSParams(...) - file not found");
+		throw ExcSched("loadILSParams file not found");
+	}
 
 	while (getline(input, line)) {
 		istringstream iss(line);

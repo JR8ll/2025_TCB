@@ -37,6 +37,7 @@ size_t Workcenter::findMachine(const Machine* mac) const {
 	for (size_t m = 0; m < size(); ++m) {
 		if (machines[m].get() == mac) return m;
 	}
+	TCB::logger.Log(Error, "Exception thrown in Workcenter::findMachine(...)");
 	throw ExcSched("Workcenter::findMachine() Machine not found");
 }
 
@@ -103,11 +104,17 @@ void Workcenter::schedOp(Operation* op, double pWait) {
 	Machine* bestMac = machines[bestMacIdx].get();
 	if (!bNewBatch) {
 		Batch* bestBat = &(*bestMac)[bestBatIdx];
-		if(!bestBat->addOp(op)) throw ExcSched("Workcenter::schedOp -> op could not be added");
+		if (!bestBat->addOp(op)) {
+			TCB::logger.Log(Error, "Exception thrown in Workcenter::schedOp(...) - op could not be added");
+			throw ExcSched("Workcenter::schedOp -> op could not be added");
+		}
 	} else {
 		pBat newBatch = make_unique<Batch>(bestMac->getCap());
 		newBatch->addOp(op);
-		if(!bestMac->addBatch(move(newBatch), tempStart)) throw ExcSched("Workcenter::schedOp -> batch could not be added");
+		if (!bestMac->addBatch(move(newBatch), tempStart)) {
+			TCB::logger.Log(Error, "Exception thrown in Workcenter::schedOp(...) - batch could not be added");
+			throw ExcSched("Workcenter::schedOp -> batch could not be added");
+		}
 	}
 	ensureValidity(op);
 }
@@ -140,12 +147,18 @@ void Workcenter::schedOp(Operation* op, double pWait, double inflation, bool bat
 	Machine* bestMac = machines[bestMacIdx].get();
 	if (!bNewBatch) {
 		Batch* bestBat = &(*bestMac)[bestBatIdx];
-		if (!bestBat->addOp(op)) throw ExcSched("Workcenter::schedOp -> op could not be added");
+		if (!bestBat->addOp(op)) {
+			TCB::logger.Log(Error, "Exception thrown in Workcenter::schedOp(...) with inflation - op could not be added");
+			throw ExcSched("Workcenter::schedOp -> op could not be added");
+		} 
 	}
 	else {
 		pBat newBatch = make_unique<Batch>(bestMac->getCap());
 		newBatch->addOp(op);
-		if (!bestMac->addBatch(move(newBatch), tempStart)) throw ExcSched("Workcenter::schedOp -> batch could not be added");
+		if (!bestMac->addBatch(move(newBatch), tempStart)) {
+			TCB::logger.Log(Error, "Exception thrown in Workcenter::schedOp(...) with inflation - batch could not be added");
+			throw ExcSched("Workcenter::schedOp -> batch could not be added");
+		}
 	}
 	ensureValidity(op);
 }
@@ -162,12 +175,18 @@ void Workcenter::schedOpDelayed(Operation* op, double startingAt) {
 	Machine* bestMac = machines[bestMacIdx].get();
 	if (!bNewBatch) {
 		Batch* bestBat = &(*bestMac)[bestBatIdx];
-		if (!bestBat->addOp(op)) throw ExcSched("Workcenter::schedOp -> op could not be added");
+		if (!bestBat->addOp(op)) {
+			TCB::logger.Log(Error, "Exception thrown in Workcenter::schedOpDelayed(...) - op could not be added");
+			throw ExcSched("Workcenter::schedOp -> op could not be added");
+		}
 	}
 	else {
 		pBat newBatch = make_unique<Batch>(bestMac->getCap());
 		newBatch->addOp(op);
-		if (!bestMac->addBatch(move(newBatch), tempStart)) throw ExcSched("Workcenter::schedOp -> batch could not be added");
+		if (!bestMac->addBatch(move(newBatch), tempStart)) {
+			TCB::logger.Log(Error, "Exception thrown in Workcenter::schedOpDelayed(...) - batch could not be added");
+			throw ExcSched("Workcenter::schedOp -> batch could not be added");
+		}
 	}
 	ensureValidity(op);
 }
@@ -560,8 +579,7 @@ bool Workcenter::moveOpDisregardingTc(Operation* op, double newStart, bool& into
 			return true;
 		}
 	}
-	
-	getSchedule()->saveJsonFactory("FAILURE");
+
 	return false;
 }
 

@@ -71,7 +71,10 @@ void Schedule::_reconstruct(const Schedule* orig) {
 					if (localOp == nullptr) {
 						localOp = findInUnscheduledJobs(remoteOp);
 					}
-					if (localOp == nullptr) throw ExcSched("Schedule::_reconstruct() operation not found");
+					if (localOp == nullptr) {
+						TCB::logger.Log(Error, "Exception thrown in Schedule::_reconstruct(...)");
+						throw ExcSched("Schedule::_reconstruct() operation not found");
+					}
 					(*this)[wc][m][b].addOp(localOp);
 				}
 			}
@@ -254,8 +257,7 @@ int Schedule::getNumberOfScheduledJobs() const {
 	return scheduledJobs.size();
 }
 
-const Job* Schedule::getScheduledJob(size_t idx) const
-{
+const Job* Schedule::getScheduledJob(size_t idx) const {
 	if (idx >= scheduledJobs.size()) throw out_of_range("Schedule::getScheduledJob() out of range");
 	return scheduledJobs[idx].get();
 }
@@ -367,6 +369,7 @@ void Schedule::lSchedJobsStageWise(double pWait) {
 		shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
 	}
 	if (!this->isValid()) {
+		TCB::logger.Log(Error, "Exception thrown in Schedule::lSchedJobsStageWise(...)");
 		throw ExcSched("ERROR: invalid schedule after Schedule::lSchedStages.");
 	}
 }
@@ -569,6 +572,7 @@ void Schedule::lSchedJobsStageWiseBackward(double pWait) {
 	}
 
 	if (!this->isValid()) {
+		TCB::logger.Log(Error, "Exception thrown in Schedule::lSchedStages(...)");
 		throw ExcSched("ERROR: invalid schedule after Schedule::lSchedStages.");
 	}
 
@@ -758,11 +762,11 @@ void Schedule::localSearchBatchLeftShifting() {
 
 double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtMac, size_t tgtBatch, size_t srcMac, size_t srcBatch, size_t& opIdx) {
 	double change = 0.0;
-	if (idxWc < 0 || idxWc >= size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idxWc out of bounds!");
-	if (tgtMac < 0 || tgtMac >= workcenters[idxWc]->size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx1stMac out of bounds!");
-	if (srcMac < 0 || srcMac >= workcenters[idxWc]->size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx2ndMac out of bounds!");
-	if (tgtBatch < 0 || tgtBatch >= (*workcenters[idxWc])[tgtMac].size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx1stBatch out of bounds!");
-	if (srcBatch < 0 || srcBatch >= (*workcenters[idxWc])[srcMac].size()) throw ExcSched("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx2ndBatch out of bounds!");
+	if (idxWc < 0 || idxWc >= size()) throw out_of_range("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idxWc out of bounds!");
+	if (tgtMac < 0 || tgtMac >= workcenters[idxWc]->size()) throw out_of_range("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx1stMac out of bounds!");
+	if (srcMac < 0 || srcMac >= workcenters[idxWc]->size()) throw out_of_range("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx2ndMac out of bounds!");
+	if (tgtBatch < 0 || tgtBatch >= (*workcenters[idxWc])[tgtMac].size()) throw out_of_range("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx1stBatch out of bounds!");
+	if (srcBatch < 0 || srcBatch >= (*workcenters[idxWc])[srcMac].size()) throw out_of_range("ERROR: Schedule::localSearchEvaluateBatchConsolidation(...) idx2ndBatch out of bounds!");
 
 	Workcenter* wc = &(*workcenters[idxWc]);
 	Machine* mac1 = &(*wc)[tgtMac];
@@ -1011,7 +1015,10 @@ void Schedule::perturbRandomBatchRightShifting(){
 		}
 	}
 
-	if (!isValid()) throw ExcSched("ERROR in Schedule::perturbRandomRightShifting()");
+	if (!isValid()) {
+		TCB::logger.Log(Error, "Exception thrown in Schedule::perturbRandomRightShifting()");
+		throw ExcSched("ERROR in Schedule::perturbRandomRightShifting()");
+	}
 
 }
 void Schedule::perturbRandomJobRightShifting() {
@@ -1110,11 +1117,6 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 		}
 		if (bestFit && (bestImprovement.first > 0 || bestImprovement.second > 0)) {
 			locSearchLeftShiftJob(best, bestPossibleLeftShifts);
-			if (!isValid()) {
-				int test1 = scheduledJobs[best]->getId();	// check bestPossibleLeftShifts
-				saveJsonFactory("INVALID_LEFTSHIFT");
-				int debugger = 666;
-			}
 			bImproved = true;
 		}
 	}
@@ -1826,6 +1828,7 @@ void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<do
 		double newStart = operation->getStart() - option.first;
 
 		if (!workcenters[stgIdx]->moveOpDisregardingTc(operation, newStart, bIntoExistingBatch)) {
+			TCB::logger.Log(Error, "Exception thrown in Schedule::executeLeftShiftOption(...)");
 			throw(ExcSched("ERROR: Schedule::executeLeftShiftOption(...) invalid."));
 		}
 	}
@@ -1836,6 +1839,7 @@ bool Schedule::executeLeftShiftOption(Operation* operation, std::pair<double, do
 		bIntoExistingBatch = option.first == option.second;
 		double newStart = operation->getStart() - option.first;
 		if (!workcenters[operation->getStg()-1]->moveOpDisregardingTc(operation, newStart, bIntoExistingBatch)) {
+			TCB::logger.Log(Error, "Exception thrown in Schedule::executeLeftShiftOption(...)");
 			throw(ExcSched("ERROR: Schedule::executeLeftShiftOption(...) invalid."));
 		}
 	}

@@ -20,7 +20,7 @@ mt19937 TCB::rng = mt19937(123456789);
 
 // argv[1] filename of problem instance to be solved
 // argv[2] seed for pseudo random-number generator
-// argv[3] int describing the solving method to be used: 1: Decomposition-MILP, 2: List Scheduling, 3: BRKGA, 4: BRKGA + final Decomposition-MILP with best sorting order (see constants in Functions.h)
+// argv[3] int describing the solving method to be used: 1: Decomposition-MILP, 2: List Scheduling, 3: BRKGA, 4: BRKGA + final Decomposition-MILP with best sorting order (see constants in Functions.h), 5: ILS
 // argv[4] time limit in seconds
 // argv[5] console output on(=1)/off(=0)
 // argv[6] filename of scheduling parameters
@@ -56,7 +56,6 @@ int main(int argc, char* argv[]) {
 	auto start = chrono::high_resolution_clock::now();
 	chrono::seconds usedTime;
 	chrono::time_point<chrono::high_resolution_clock> stop;
-
 
 	//DEBUGGING 
 
@@ -183,8 +182,8 @@ int main(int argc, char* argv[]) {
 	sched->saveJsonFactory(solverName);
 
 	// CONSOLE OUTPUT
+	cout << "Solved " << TCB::prob->filename << " using " << solverName << " in " << usedTime.count() << " seconds with TWT = " << sched->getTWT() << "." << endl;
 	if (bConsole) {
-		cout << "Solved using " << solverName << " in " << " seconds with TWT = " << sched->getTWT() << "." << endl;
 		cout << *sched;
 	}
 

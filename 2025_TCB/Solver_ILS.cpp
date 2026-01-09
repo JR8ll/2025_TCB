@@ -30,11 +30,11 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
         do {// ILS LOOP
             // LOCAL SEARCH
             
-            // DEBUGGING
-            cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
-            if (params->ilsIterations[params->multiStartIterations] + 1 == 42) {
+           // DEBUGGING
+           cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+           /* if (params->multiStartIterations + 1 == 8 && params->ilsIterations[params->multiStartIterations] + 1 == 393) {
                 int debugger = 666;
-            }
+            }*/
             
             
             tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);    
@@ -45,6 +45,9 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             if (tempTWT < bestTWT) {
                 bestTWT = tempTWT;
                 bestSched = tempSched->clone();
+                stop = chrono::high_resolution_clock::now();
+                usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+                params->bestAfterSeconds = usedTime.count();
             }
             // PERTURBATION
             uniform_real_distribution<> perturbDistrib(0, 1);

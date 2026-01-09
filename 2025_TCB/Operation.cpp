@@ -168,6 +168,7 @@ void Operation::setWait(double wt) { wait = wt; }
 void Operation::computeWaitingTimeFromStart(double start) {
 	double earliest = getEarliestStart();
 	if (earliest - TCB::precision > start) {
+		TCB::logger.Log(Error, "Exception thrown in Operation::computeWaitingTimeFromStart(...) - negative waiting time");
 		throw ExcSched("Negative waiting time");
 	}
 	wait = max(0.0, start - earliest);	// could be zero only by marginal value (precision)
@@ -250,6 +251,7 @@ bool Operation::repairTimeConstraints() {
 							bRepaired = true;
 						}
 						else {
+							TCB::logger.Log(Error, "Exception thrown in Operation::repairTimeConstraint() - missing workcenter reference");
 							throw(ExcSched("Operation::repairTimeConstraint() missing workcenter reference"));
 						}
 					}
@@ -271,7 +273,7 @@ bool Operation::repairOverlapsFixedBatchFormation() {
 						Workcenter* wcSucc = succBatch->getMachine()->getWorkcenter();
 						int mIdx = succBatch->getMachine()->getIdx();
 						int bIdx = succBatch->getIdx();
-						wcSucc->rightShiftBatch(mIdx, bIdx, batch->getC(), true);	// if necessary push right succeding batches
+						wcSucc->rightShiftBatch(mIdx, bIdx, batch->getC(), true, false);	// if necessary push right succeding batches	// [JR-2026-Jan-09] checkValidity == false
 						bRepaired = true;
 					}
 				}
@@ -301,17 +303,11 @@ bool Operation::repairTimeConstraintsFixedBatchFormation() {
 							int mIdx = predBatch->getMachine()->getIdx();
 							int bIdx = predBatch->getIdx();
 
-							// DEBUGGING
-							if (newStartForPred > 193.8 && newStartForPred < 193.9 && mIdx == 0 && bIdx == 7) {
-								wc->getSchedule()->saveJsonFactory("DEBUGGING");
-								int debugger = 666;
-							}
-
-
 							wc->rightShiftBatch(mIdx, bIdx, newStartForPred, true, false);		// [JR-2026-Jan-09] checkValidity == false
 							bRepaired = true;
 						}
 						else {
+							TCB::logger.Log(Error, "Exception thrown in Operation::repairTimeConstraintsFixedBatchFormation() - missing workcenter reference");
 							throw(ExcSched("Operation::repairTimeConstraint() missing workcenter reference"));
 						}
 					}

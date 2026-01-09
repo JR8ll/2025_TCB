@@ -32,6 +32,7 @@ size_t Machine::findBatch(const Batch* bat) const {
 	for (size_t b = 0; b < size(); ++b) {
 		if (batches[b].get() == bat) return b;
 	}
+	TCB::logger.Log(Error, "Excpetion thrown in Machine::findBatch(...)");
 	throw ExcSched("Machine::findBatch() Batch not found");
 }
 
@@ -167,7 +168,11 @@ void Machine::moveBatch(Batch* batch, double newStart, bool checkValidity) {
 		}
 	}
 
-	if (!bGapFound) throw ExcSched("Machine::moveBatch(... newStart) no available time slot");
+	if (!bGapFound) { 
+		TCB::logger.Log(Error, "Exception thrown in Machine::moveBatch(...) - no available time slot");
+		throw ExcSched("Machine::moveBatch(... newStart) no available time slot");
+	}
+		
 
 	if (fromIdx != toIdx) {
 		pBat movingBatch = removeBatch(fromIdx);
