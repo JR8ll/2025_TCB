@@ -1026,7 +1026,11 @@ void Schedule::perturbRandomJobRightShifting() {
 	int wcIdx = 0;
 	uniform_int_distribution<> mDistrib(0, workcenters[0]->size() - 1);
 	int mIdx = mDistrib(TCB::rng);
-	Machine* machine = &(*workcenters[0])[mIdx];
+	Machine* machine = &(*workcenters[0])[mIdx];	// machines may be empty!
+	while (machine->size() == 0) {
+		mIdx = mDistrib(TCB::rng);
+		machine = &(*workcenters[0])[mIdx];
+	}
 	uniform_int_distribution<> bDistrib(0, machine->size() - 1);
 	int bIdx = bDistrib(TCB::rng);
 	Batch* batch = &(*machine)[bIdx];
@@ -1228,15 +1232,15 @@ pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, ve
 	bool possibleTcViolations = false;
 	do {
 		possibleOverlaps = constrainLeftShiftOptionsFromOverlaps(possibleLeftShift, currentLeeway);
-		possibleTcViolations = constrainLeftShiftOptionsFromTimeConstraints(possibleLeftShift, currentTcSlack);
-	} while (possibleOverlaps || possibleTcViolations);
-
-	// 3) check if there are suitable options (at least zero option) at all stages
-	for (size_t i = 0; i < possibleLeftShift.size(); ++i) {
-		if (possibleLeftShift[i].size() == 0) {
+		if (possibleLeftShift[0].empty()) {
 			return make_pair(-1, 0);
 		}
-	}
+		possibleTcViolations = constrainLeftShiftOptionsFromTimeConstraints(possibleLeftShift, currentTcSlack);
+		if (possibleLeftShift[0].empty()) {
+			return make_pair(-1, 0);
+		}
+	} while (possibleOverlaps || possibleTcViolations);
+
 
 	// 4) evaluate best options
 	pair<double, double> evaluation = make_pair(possibleLeftShift[possibleLeftShift.size()-1][0].first, 0);	
@@ -1638,6 +1642,12 @@ bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std
 				if (!feasible) {
 					changeApplied = true;
 					options[o].erase(options[o].begin() + opt);
+					if (options[o].empty()) {	// if not even the zero shift option is available for an operation, then no shifts are feasible
+						for (size_t i = 0; i < options.size(); ++i) {
+							options[i].clear();
+						}
+						return true;
+					}
 				}
 			} else if (optFrom > optTill - TCB::precision) {
 				// 2) reduce continuous options if necessary
@@ -1650,6 +1660,12 @@ bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std
 					changeApplied = true;
 					if (maxLeftShift < options[o][opt].second) {
 						options[o].erase(options[o].begin() + opt);
+						if (options[o].empty()) {	// if not even the zero shift option is available for an operation, then no shifts are feasible
+							for (size_t i = 0; i < options.size(); ++i) {
+								options[i].clear();
+							}
+							return true;
+						}
 					} else {
 						options[o][opt].first = maxLeftShift;
 					}
@@ -1690,6 +1706,12 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 				if (!allFeasible) {
 					changeApplied = true;
 					options[o].erase(options[o].begin() + opt);
+					if (options[o].empty()) {	// if not even the zero shift option is available for an operation, then no shifts are feasible
+						for (size_t i = 0; i < options.size(); ++i) {
+							options[i].clear();
+						}
+						return true;
+					}
 				}
 			}
 
@@ -1705,6 +1727,12 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 						changeApplied = true;
 						if (maxLeftShift < options[o][opt].second) {
 							options[o].erase(options[o].begin() + opt);
+							if (options[o].empty()) {	// if not even the zero shift option is available for an operation, then no shifts are feasible
+								for (size_t i = 0; i < options.size(); ++i) {
+									options[i].clear();
+								}
+								return true;
+							}
 						} else {
 							options[o][opt].first = maxLeftShift;
 						}

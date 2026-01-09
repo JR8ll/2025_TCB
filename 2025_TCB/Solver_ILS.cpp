@@ -31,8 +31,9 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             // LOCAL SEARCH
             
            // DEBUGGING
-           cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
-           /* if (params->multiStartIterations + 1 == 8 && params->ilsIterations[params->multiStartIterations] + 1 == 393) {
+           //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+           //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
+           /*if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 340) {
                 int debugger = 666;
             }*/
             
