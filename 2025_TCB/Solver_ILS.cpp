@@ -37,9 +37,11 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
                 int debugger = 666;
             }*/
             
-            
+            //cout << "ILS LS JOB SHIFT" << endl;
             tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);    
+            //cout << "ILS LS JOB SWAP" << endl;
             tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
+            //cout << "ILS LS BATCH CON" << endl;
             tempSched->localSearchBatchConsolidation(params->applyBestFit);
 
             double tempTWT = tempSched->getTWT();
@@ -55,10 +57,12 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             for (size_t i = 0; i < params->nPerturbationSteps; ++i) {
                 double perturbChoice = perturbDistrib(TCB::rng);
                 if (perturbChoice < 0.5) {
+                    //cout << "ILS Perturbation JOB SWAP" << endl;
                     tempSched->perturbRandomJobSwap();
                 }
                 else {
-                    tempSched->perturbRandomJobRightShifting();
+                    //cout << "ILS Perturbation JOB SHIFT" << endl;
+                    tempSched->perturbRandomJobRightShifting();  
                 }
             }
 

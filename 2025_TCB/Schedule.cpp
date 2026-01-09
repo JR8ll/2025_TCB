@@ -1092,6 +1092,8 @@ void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 	}
 }
 void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
+	int maxConsecutiveInnerStageImprovement = scheduledJobs.size();	// to avoid infinite loop (there may be infinite shifts improving completion of inner operations only (w/o effect on TWT)
+	int nConsecutiveInnerStageImprovement = 0;
 	bool bImproved = true;
 	int nJobs = scheduledJobs.size();
 	while (bImproved) {
@@ -1106,9 +1108,16 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 			pair<double, double> tempImprovement = locSearchEvaluateJobLeftShift(j, tempPossibleLeftShifts);
 			double tempTwtImprovement = tempImprovement.first * scheduledJobs[j]->getW();
 			if (tempTwtImprovement > bestTwtImprovement || (tempTwtImprovement == bestTwtImprovement && tempImprovement.second > bestImprovement.second)) {
+				if (tempTwtImprovement <= 0) {
+					++nConsecutiveInnerStageImprovement;
+				} else {
+					nConsecutiveInnerStageImprovement = 0;
+				}
 				if (!bestFit) {
 					locSearchLeftShiftJob(j, tempPossibleLeftShifts);
-					bImproved = true;
+					if (nConsecutiveInnerStageImprovement < maxConsecutiveInnerStageImprovement) {
+						bImproved = true;
+					}
 					break;
 				}
 				else {
@@ -1121,7 +1130,9 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 		}
 		if (bestFit && (bestImprovement.first > 0 || bestImprovement.second > 0)) {
 			locSearchLeftShiftJob(best, bestPossibleLeftShifts);
-			bImproved = true;
+			if (nConsecutiveInnerStageImprovement < maxConsecutiveInnerStageImprovement) {
+				bImproved = true;
+			}
 		}
 	}
 }
