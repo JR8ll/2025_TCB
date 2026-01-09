@@ -25,10 +25,18 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
         // INITIALIZE
         unique_ptr<Schedule> tempSched = sched.clone();
         (tempSched.get()->*init)(rule, *schedParams);
+
         params->ilsIterations.push_back(0);
         do {// ILS LOOP
             // LOCAL SEARCH
-            //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+            
+            // DEBUGGING
+            cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+            if (params->ilsIterations[params->multiStartIterations] + 1 == 42) {
+                int debugger = 666;
+            }
+            
+            
             tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);    
             tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
             tempSched->localSearchBatchConsolidation(params->applyBestFit);

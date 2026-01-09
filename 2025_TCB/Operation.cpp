@@ -6,6 +6,7 @@
 #include "Functions.h"
 #include "Job.h"
 #include "Machine.h"
+#include "Schedule.h"
 #include "Workcenter.h"
 
 using namespace std;
@@ -292,12 +293,22 @@ bool Operation::repairTimeConstraintsFixedBatchFormation() {
 					Batch* predBatch = predOp->getBatch();
 					if (predBatch->getStart() < batch->getStart() - tcMax[i].second - TCB::precision) {
 						// time constraint is violated
-						double newStartForPred = batch->getStart() - tcMax[i].second;
+
+						double predAvailability = predBatch->getR();										// [JR-2026-Jan-09] pred->getAvailability changed to predBatch->getR()
+						double newStartForPred = max(batch->getStart() - tcMax[i].second, predAvailability);	// [JR-2026-Jan-09] added max(.., getEarliestStart())
 						Workcenter* wc = predBatch->getMachine()->getWorkcenter();
 						if (wc != nullptr) {
 							int mIdx = predBatch->getMachine()->getIdx();
 							int bIdx = predBatch->getIdx();
-							wc->rightShiftBatch(mIdx, bIdx, newStartForPred);
+
+							// DEBUGGING
+							if (newStartForPred > 193.8 && newStartForPred < 193.9 && mIdx == 0 && bIdx == 7) {
+								wc->getSchedule()->saveJsonFactory("DEBUGGING");
+								int debugger = 666;
+							}
+
+
+							wc->rightShiftBatch(mIdx, bIdx, newStartForPred, true, false);		// [JR-2026-Jan-09] checkValidity == false
 							bRepaired = true;
 						}
 						else {

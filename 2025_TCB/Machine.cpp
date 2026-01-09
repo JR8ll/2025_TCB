@@ -132,7 +132,7 @@ void Machine::removeAllBatches() {
 	batches.clear();
 }
 
-void Machine::moveBatch(Batch* batch, double newStart) {
+void Machine::moveBatch(Batch* batch, double newStart, bool checkValidity) {
 	size_t fromIdx = batch->getIdx();
 	size_t toIdx = 0;
 
@@ -174,15 +174,15 @@ void Machine::moveBatch(Batch* batch, double newStart) {
 		if (fromIdx < toIdx && !bToTheEnd) {
 			batches.insert(batches.begin() + toIdx - 1, move(movingBatch));
 			batches[toIdx-1]->assignToMachine(this);
-			batches[toIdx-1]->setStart(newStart);
+			batches[toIdx-1]->setStart(newStart, checkValidity);
 		}
 		else {
 			batches.insert(batches.begin() + toIdx, move(movingBatch));
 			batches.back()->assignToMachine(this);
-			batches[toIdx]->setStart(newStart);
+			batches[toIdx]->setStart(newStart, checkValidity);
 		}
 	} else {
-		batches[toIdx]->setStart(newStart);
+		batches[toIdx]->setStart(newStart, checkValidity);
 	}
 }
 

@@ -46,7 +46,7 @@ public:
 
 	pBat removeBatch(size_t idx);
 	void removeAllBatches();
-	void moveBatch(Batch* batch, double newStart);	// move to specific time
+	void moveBatch(Batch* batch, double newStart, bool checkValidity = true);	// move to specific time
 
 	void assignToWorkcenter(Workcenter* wc);
 

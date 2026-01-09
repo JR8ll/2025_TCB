@@ -307,7 +307,7 @@ void Workcenter::rightShiftOp(size_t mIdx, size_t bIdx, size_t jIdx, double from
 
 	ensureValidity(op);
 }
-void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pushingSuccessors) {
+void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pushingSuccessors, bool checkValidity) {
 	Machine* mac = machines[mIdx].get();
 	Batch* bat = &(*mac)[bIdx];
 
@@ -330,13 +330,13 @@ void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pus
 			Batch* succBat = &(*mac)[myBatIdx + 1];
 			if (bat->getC() > succBat->getStart()) {
 				// RECURSION
-				rightShiftBatch(mIdx, myBatIdx + 1, bat->getC(), pushingSuccessors);
+				rightShiftBatch(mIdx, myBatIdx + 1, bat->getC(), pushingSuccessors, checkValidity);
 			}
 		} 
 		
 	}
 	else {
-		moveBatch(bat, bestMacIdx, bestStart);
+		moveBatch(bat, bestMacIdx, bestStart, checkValidity);
 	}
 }
 void Workcenter::findBestStart(Operation* op, bool& bNewBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& tempStart, double pWait) {
@@ -448,7 +448,7 @@ void Workcenter::findBestStartNotBefore(Batch* batch, size_t& bestMacIdx, double
 			tempStart = notBefore;
 			return;
 		}
-		double earliestSlot = mac->getEarliestSlot(tempStart, (*batch)[0]);
+		double earliestSlot = mac->getEarliestSlot(notBefore, (*batch)[0]);
 		if (earliestSlot < tempStart) {
 			tempStart = earliestSlot;
 			bestMacIdx = m;
@@ -587,15 +587,15 @@ bool Workcenter::localSearchLeftShift(double pWait) {
 	return false;
 }
 
-void Workcenter::moveBatch(Batch* batch, size_t tgtMac, double newStart) {
+void Workcenter::moveBatch(Batch* batch, size_t tgtMac, double newStart, bool checkValidity) {
 	size_t batIdx = batch->getIdx();
 	size_t macIdx = batch->getMachine()->getIdx();
 	if (tgtMac == macIdx) {
 		// same machine
-		return machines[tgtMac]->moveBatch(move(batch), newStart);
+		return machines[tgtMac]->moveBatch(move(batch), newStart, checkValidity);
 	}
 	// different machine
-	machines[tgtMac]->addBatch(move(machines[macIdx]->getBatch(batIdx)), newStart);
+	machines[tgtMac]->addBatch(move(machines[macIdx]->getBatch(batIdx)), newStart, checkValidity);
 	machines[macIdx]->eraseNullptr(batIdx);
 }
 

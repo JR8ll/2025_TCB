@@ -43,7 +43,7 @@ public:
 	bool leftShift(size_t mIdx, size_t bIdx, size_t jIdx, double pWait = 0.0);	// true if left-shift was performed
 	bool leftShift(size_t mIdx, size_t bIdx, double pWait = 0.0);				// true if left-shift was performed
 	void rightShiftOp(size_t mIdx, size_t bIdx, size_t jIdx, double from, double pWait = 0.0);	// indices identify op to be right-shifted, from is the new earliest starting time
-	void rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pushingSuccessors = true);	// if pushing successors the batch may always be moved on its machine, if necessary pushing right its successors
+	void rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pushingSuccessors = true, bool checkValidity = true);	// if pushing successors the batch may always be moved on its machine, if necessary pushing right its successors
 	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait = 0.0);
 	void findBestStart(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double pWait, double inflation);
 	void findBestStartNotBefore(Operation* op, bool& newBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& bestStart, double notBefore);
@@ -55,7 +55,7 @@ public:
 
 	bool localSearchLeftShift(double pWait = 0.0);	// true if at least one operation was shifted left
 
-	void moveBatch(Batch* batch, size_t tgtMac, double newStart);
+	void moveBatch(Batch* batch, size_t tgtMac, double newStart, bool checkValidity = true);
 
 	void updateWaitingTimes();
 
