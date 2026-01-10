@@ -806,7 +806,6 @@ double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtM
 						opIdx = movingOpIdx;
 					}
 				}	
-				int debugger = 666;
 			}
 		}
 	}
@@ -1096,7 +1095,18 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 	int nConsecutiveInnerStageImprovement = 0;
 	bool bImproved = true;
 	int nJobs = scheduledJobs.size();
+	
 	while (bImproved) {
+
+		// DEBUGGING
+		if (!isValid()) {
+			//saveJsonFactory("INVALID");
+			int debugger = 666;
+		}
+		else {
+			//saveJsonFactory("VALID");
+		}
+
 		bImproved = false;
 		rule(scheduledJobs);
 		pair<double, double> bestImprovement = make_pair(0, 0);
@@ -1135,6 +1145,11 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 			}
 		}
 	}
+
+	// DEBUGGING
+	if (!isValid()) {
+		int debugger = 666;
+	}
 }
 void Schedule::localSearchBatchConsolidation(bool bestFit) {
 	bool bImproving = true;
@@ -1155,9 +1170,14 @@ void Schedule::localSearchBatchConsolidation(bool bestFit) {
 						Batch* batch = &(*machine)[b];
 						Batch* succB = &(*machine)[b + 1];	
 
+						// DEBUGGING
 						if (machine->size() < 2) {
 							int debugger = 666;	// this should never happen!?
 						}
+						if (o == 1 && m == 0 && b == 1) {
+							int debugger = 666;
+						}
+
 						if (batch->getF() == succB->getF()) {
 							for (size_t op = 0; op < succB->size(); ++op) {
 								size_t opIdx = op;	// by value
@@ -1727,26 +1747,31 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 			}
 
 			// 2) reduce continuous options if necessary
-			if (optFrom > optTill) {
-				double maxLeftShift = 0;
+			if (optFrom > optTill) {	
+				double minMaxLeftShift = DBL_MAX;	// the minimum of the maximal feasible left shifts of all stages	[JR-2026-Jan-10]
 				for (size_t tc = 0; tc < tcSlack[o].size(); ++tc) {
+					double maxLeftShift = 0;			// the maximal feasible left shift bound by one successing stage [JR-2026-Jan-10] moved this down into the for(tc<tcSlack[o])-loop
 					size_t succO = tcSlack[o][tc].first;
 					for (size_t succOpt = 0; succOpt < options[succO].size(); ++succOpt) {
-						maxLeftShift = max(maxLeftShift, options[succO][succOpt].first + tcSlack[o][tc].second);
+						maxLeftShift = max(maxLeftShift, options[succO][succOpt].first + tcSlack[o][tc].second);	// the max possible option remains
 					}
-					if (maxLeftShift < options[o][opt].first) {
-						changeApplied = true;
-						if (maxLeftShift < options[o][opt].second) {
-							options[o].erase(options[o].begin() + opt);
-							if (options[o].empty()) {	// if not even the zero shift option is available for an operation, then no shifts are feasible
-								for (size_t i = 0; i < options.size(); ++i) {
-									options[i].clear();
-								}
-								return true;
+
+					if (maxLeftShift < minMaxLeftShift) {				// [JR-2026-Jan-10] consider the minimum of the maximal feasible shifts
+						minMaxLeftShift = maxLeftShift;
+					}
+				}
+				if (minMaxLeftShift < options[o][opt].first) {			// [JR-2026-Jan-10] moved this block out of the for(tc < tcSlack[o])-block
+					changeApplied = true;
+					if (minMaxLeftShift < options[o][opt].second) {		// [JR-2026-Jan-10] changed maxLeftShift to minMaxLeftShift
+						options[o].erase(options[o].begin() + opt);
+						if (options[o].empty()) {	// if not even the zero shift option is available for an operation, then no shifts are feasible
+							for (size_t i = 0; i < options.size(); ++i) {
+								options[i].clear();
 							}
-						} else {
-							options[o][opt].first = maxLeftShift;
+							return true;
 						}
+					} else {
+						options[o][opt].first = minMaxLeftShift;		// [JR-2026-Jan-10] changed maxLeftShift to minMaxLeftShift
 					}
 				}
 			}

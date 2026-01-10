@@ -31,14 +31,22 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             // LOCAL SEARCH
             
            // DEBUGGING
-           //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
-           //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
-           /*if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 340) {
-                int debugger = 666;
-            }*/
+           cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+           TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
+           if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 20) {
+               //tempSched->saveJsonFactory("DEBUGGING");
+               int debugger = 666;
+                
+            }
+           if (!tempSched->isValid()) {
+               int debugger = 666;
+           }
             
             //cout << "ILS LS JOB SHIFT" << endl;
-            tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);    
+            tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit); 
+            if (!tempSched->isValid()) {
+                int debugger = 666;
+            }
             //cout << "ILS LS JOB SWAP" << endl;
             tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
             //cout << "ILS LS BATCH CON" << endl;
