@@ -40,7 +40,7 @@ public:
 
 	void _reconstruct(const Schedule* orig); 
 
-	size_t size() const;	// number of workcenters
+	int size() const;	// number of workcenters
 	size_t getN() const;	// number of jobs considered
 
 	bool contains(Operation* op) const;				// searches workcenters/machines/batches/operations (not scheduledJobs vector)
@@ -102,10 +102,10 @@ public:
 
 	// LOCAL SEARCH
 	// ACTUAL LOCAL SEARCH PROCEDURES
-	void localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);						// if not bestFit => firstFit
-	void localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);					// if not bestFit => firstFit
+	bool localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);						// if not bestFit => firstFit
+	bool localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);					// if not bestFit => firstFit
+	bool localSearchBatchConsolidation(bool bestFit = true);													// if not bestFit => firstFit
 	void localSearchBatchLeftShifting();																		// TODO
-	void localSearchBatchConsolidation(bool bestFit = true);													// if not bestFit => firstFit
 	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		// LOCAL SEARCH OPERATION BASED (ALMOST USELESS)	
 	
 	void perturbRandomJobSwap();

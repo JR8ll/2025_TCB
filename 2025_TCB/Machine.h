@@ -27,7 +27,7 @@ public:
 
 	pBat getBatch(size_t idx);
 
-	size_t size() const;
+	int size() const;
 	size_t findBatch(const Batch* bat) const;	// returns index of bat
 
 	int getId() const;

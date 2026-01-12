@@ -525,7 +525,7 @@ void Problem::loadFromDat(string filename) {
 	// instantiate entities Jobs + Ops including time constraints
 	for (size_t j = 0; j < n; ++j) {
 		unscheduledJobs.push_back(unique_ptr<Job>(new Job((j + 1), jobs_s[j], &(products)[jobs_f[j] - 1], jobs_r[j], jobs_d[j], jobs_w[j])));
-		for (size_t o = 0; o < products[jobs_f[j]-1].size(); ++o) {
+		for (size_t o = 0; o < products[jobs_f[j] - 1].size(); ++o) {
 			auto newOp = make_unique<Operation>(unscheduledJobs[j].get(), static_cast<int>(o + 1));
 			unscheduledJobs[j]->addOp(move(newOp));
 		}

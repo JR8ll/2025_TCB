@@ -33,7 +33,7 @@ public:
 
 
 	size_t getIdx() const;	// index in its machine
-	size_t size() const;
+	int size() const;
 	size_t findOp(const Operation* op) const;	// returns index of operation 
 	bool isEmpty() const;
 	bool contains(const Operation* op) const;			

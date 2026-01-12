@@ -35,7 +35,7 @@ unique_ptr<Batch> Batch::clone() const {
 
 bool Batch::operator==(const Batch& other) const
 {
-	if(ops.size() != other.size()) return false;
+	if (ops.size() != other.size()) return false;
 
 	multiset<int> idsThis;
 	multiset<int> idsOther;
@@ -56,7 +56,7 @@ size_t Batch::getIdx() const {
 	return machine->findBatch(this);
 }
 
-size_t Batch::size() const { return ops.size(); }
+int Batch::size() const { return ops.size(); }
 size_t Batch::findOp(const Operation* op) const {
 	for (size_t j = 0; j < size(); ++j) {
 		if (ops[j] == op) return j;

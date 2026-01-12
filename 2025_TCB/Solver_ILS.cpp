@@ -31,26 +31,22 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             // LOCAL SEARCH
             
            // DEBUGGING
-           cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
-           TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
-           if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 20) {
-               //tempSched->saveJsonFactory("DEBUGGING");
-               int debugger = 666;
-                
-            }
-           if (!tempSched->isValid()) {
-               int debugger = 666;
-           }
+           //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+           //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
+           //if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 304703) {
+           //     tempSched->saveJsonFactory("DEBUGGING");
+           //     int debugger = 666;
+           // }
             
-            //cout << "ILS LS JOB SHIFT" << endl;
-            tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit); 
-            if (!tempSched->isValid()) {
-                int debugger = 666;
-            }
-            //cout << "ILS LS JOB SWAP" << endl;
-            tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
-            //cout << "ILS LS BATCH CON" << endl;
-            tempSched->localSearchBatchConsolidation(params->applyBestFit);
+            // [JR-2026-Jan-12] wrapped local search in do-while-loop
+            bool bLeftShiftApplied = false;
+            bool bJobSwapApplied = false;
+            bool bBatchConsolidationApplied = false;
+            do {
+                bLeftShiftApplied = tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit); 
+                bJobSwapApplied = tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
+                bBatchConsolidationApplied = tempSched->localSearchBatchConsolidation(params->applyBestFit);
+            } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
 
             double tempTWT = tempSched->getTWT();
             if (tempTWT < bestTWT) {

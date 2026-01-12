@@ -31,7 +31,7 @@ unique_ptr<Workcenter> Workcenter::clone(Schedule* newSchedule) const {
 	return newWc;
 }
 
-size_t Workcenter::size() const { return machines.size(); }
+int Workcenter::size() const { return machines.size(); }
 
 size_t Workcenter::findMachine(const Machine* mac) const {
 	for (size_t m = 0; m < size(); ++m) {

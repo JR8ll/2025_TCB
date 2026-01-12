@@ -89,7 +89,7 @@ void Schedule::_reconstruct(const Schedule* orig) {
 	}
 }
 
-size_t Schedule::size() const { return workcenters.size();  }
+int Schedule::size() const { return workcenters.size();  }
 size_t Schedule::getN() const { return unscheduledJobs.size(); }
 
 bool Schedule::contains(Operation* op) const {
@@ -368,10 +368,10 @@ void Schedule::lSchedJobsStageWise(double pWait) {
 	while (!unscheduledJobs.empty()) {
 		shiftJobFromVecToVec(unscheduledJobs, scheduledJobs, 0);
 	}
-	if (!this->isValid()) {
+	/*if (!this->isValid()) {
 		TCB::logger.Log(Error, "Exception thrown in Schedule::lSchedJobsStageWise(...)");
 		throw ExcSched("ERROR: invalid schedule after Schedule::lSchedStages.");
-	}
+	}*/
 }
 void Schedule::lSchedJobsStageWiseWithSorting(prioRule<pJob> rule, double pWait) {
 	rule(unscheduledJobs);
@@ -571,10 +571,10 @@ void Schedule::lSchedJobsStageWiseBackward(double pWait) {
 		}
 	}
 
-	if (!this->isValid()) {
+	/*if (!this->isValid()) {
 		TCB::logger.Log(Error, "Exception thrown in Schedule::lSchedStages(...)");
 		throw ExcSched("ERROR: invalid schedule after Schedule::lSchedStages.");
-	}
+	}*/
 
 
 	// probably left shifting local search in the end  
@@ -838,9 +838,9 @@ bool Schedule::localSearchConsolidateBatch(size_t wcIdx, size_t tgtMacIdx, size_
 		size_t nNumberOfBatchesAtTarget = tgtMac->size();
 		for (size_t b = tgtBatchIdx + 1; b < nNumberOfBatchesAtTarget; ++b) {
 			double rightShiftOp = (*tgtMac)[b - 1].getC() - (*tgtMac)[b].getStart();
-			if (rightShiftTgt <= 0) break;
+			if (rightShiftOp <= 0) break;																// [JR-2026-Jan-12] changed rightShiftTgt to rightShiftOp
 			double currentStart = (*tgtMac)[b].getStart();
-			(*tgtMac)[b].setStart(currentStart + rightShiftTgt, false);	// no validity check here
+			(*tgtMac)[b].setStart(currentStart + rightShiftOp, false);	// no validity check here		// [JR-2026-Jan-12] changed rightShiftTgt to rightShiftOp
 		}
 
 		// right shifting at successive stages
@@ -1014,10 +1014,10 @@ void Schedule::perturbRandomBatchRightShifting(){
 		}
 	}
 
-	if (!isValid()) {
-		TCB::logger.Log(Error, "Exception thrown in Schedule::perturbRandomRightShifting()");
-		throw ExcSched("ERROR in Schedule::perturbRandomRightShifting()");
-	}
+	//if (!isValid()) {
+	//	TCB::logger.Log(Error, "Exception thrown in Schedule::perturbRandomRightShifting()");
+	//	throw ExcSched("ERROR in Schedule::perturbRandomRightShifting()");
+	//}
 
 }
 void Schedule::perturbRandomJobRightShifting() {
@@ -1048,7 +1048,8 @@ void Schedule::perturbRandomJobRightShifting() {
 	}
 	schedOpDelayed(movingOp, newStart);
 }
-void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
+bool Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
+	bool bImprovedOnce = false;
 	int debug = 0;
 	bool bImproved = true;
 	int nJobs = scheduledJobs.size();
@@ -1069,7 +1070,7 @@ void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 					if (swapFeasible && tempImprovement > bestImprovement) {
 						if (!bestFit) { // FIRST FIT
 							locSearchSwapJobs(j, k);
-
+							bImprovedOnce = true;
 							bImproved = true;
 							break;
 						} else {			// BEST FIT
@@ -1086,27 +1087,20 @@ void Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 		}
 		if (bestFit && bestImprovement > 0) {
 			locSearchSwapJobs(best1, best2);
+			bImprovedOnce = true;
 			bImproved = true;
 		}
 	}
+	return bImprovedOnce;
 }
-void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
+bool Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit) {
 	int maxConsecutiveInnerStageImprovement = scheduledJobs.size();	// to avoid infinite loop (there may be infinite shifts improving completion of inner operations only (w/o effect on TWT)
 	int nConsecutiveInnerStageImprovement = 0;
 	bool bImproved = true;
+	bool bImprovedOnce = false;
 	int nJobs = scheduledJobs.size();
 	
 	while (bImproved) {
-
-		// DEBUGGING
-		if (!isValid()) {
-			//saveJsonFactory("INVALID");
-			int debugger = 666;
-		}
-		else {
-			//saveJsonFactory("VALID");
-		}
-
 		bImproved = false;
 		rule(scheduledJobs);
 		pair<double, double> bestImprovement = make_pair(0, 0);
@@ -1126,6 +1120,7 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 				if (!bestFit) {
 					locSearchLeftShiftJob(j, tempPossibleLeftShifts);
 					if (nConsecutiveInnerStageImprovement < maxConsecutiveInnerStageImprovement) {
+						bImprovedOnce = true;
 						bImproved = true;
 					}
 					break;
@@ -1141,18 +1136,16 @@ void Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, bool bestFit){
 		if (bestFit && (bestImprovement.first > 0 || bestImprovement.second > 0)) {
 			locSearchLeftShiftJob(best, bestPossibleLeftShifts);
 			if (nConsecutiveInnerStageImprovement < maxConsecutiveInnerStageImprovement) {
+				bImprovedOnce = true;
 				bImproved = true;
 			}
 		}
 	}
-
-	// DEBUGGING
-	if (!isValid()) {
-		int debugger = 666;
-	}
+	return bImprovedOnce;
 }
-void Schedule::localSearchBatchConsolidation(bool bestFit) {
+bool Schedule::localSearchBatchConsolidation(bool bestFit) {
 	bool bImproving = true;
+	bool bImprovedOnce = false;
 	while (bImproving) {
 		bImproving = false;
 		double bestImprovement = 0.0;
@@ -1170,14 +1163,6 @@ void Schedule::localSearchBatchConsolidation(bool bestFit) {
 						Batch* batch = &(*machine)[b];
 						Batch* succB = &(*machine)[b + 1];	
 
-						// DEBUGGING
-						if (machine->size() < 2) {
-							int debugger = 666;	// this should never happen!?
-						}
-						if (o == 1 && m == 0 && b == 1) {
-							int debugger = 666;
-						}
-
 						if (batch->getF() == succB->getF()) {
 							for (size_t op = 0; op < succB->size(); ++op) {
 								size_t opIdx = op;	// by value
@@ -1187,6 +1172,7 @@ void Schedule::localSearchBatchConsolidation(bool bestFit) {
 									if (!bestFit) {
 										// FIRST FIT => execute if improvement > 0
 										localSearchConsolidateBatch(o, m, b, m, b+1, opIdx);
+										bImprovedOnce = true;
 										bImproving = true;
 										break;
 									} else {
@@ -1212,9 +1198,11 @@ void Schedule::localSearchBatchConsolidation(bool bestFit) {
 		if (bestFit && bestImprovement > 0) {
 			// BEST FIT => execute best move if improvement > 0
 			localSearchConsolidateBatch(bestWc, bestM, bestB, bestM, bestB+1, bestOp);
+			bImprovedOnce = true;
 			bImproving = true;
 		}
 	}
+	return bImprovedOnce;
 }
 
 double Schedule::locSearchEvaluateJobSwap(size_t idxFirst, size_t idxSecond, bool& feasible) {
@@ -1274,7 +1262,7 @@ pair<double, double> Schedule::locSearchEvaluateJobLeftShift(size_t idxFirst, ve
 
 
 	// 4) evaluate best options
-	pair<double, double> evaluation = make_pair(possibleLeftShift[possibleLeftShift.size()-1][0].first, 0);	
+	pair<double, double> evaluation = make_pair(possibleLeftShift[possibleLeftShift.size() - 1][0].first, 0);
 	for (size_t i = 0; i < (possibleLeftShift.size() - 1); ++i) {
 		evaluation.second += possibleLeftShift[i][0].first;
 	}
@@ -1443,7 +1431,7 @@ vector<pair<double, double>> Schedule::getLeftShiftOptions(Operation* op) {
 			}
 		}
 
-		bool bOnlyOpInBatch = op->getBatch()->size() == 1;
+			bool bOnlyOpInBatch = op->getBatch()->size() == 1;
 
 		// +++ free time slots (CONTINUOUS => option.first <= option.second) +++
 		if (nBatches == 0) {
@@ -1717,7 +1705,7 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 			if (optFrom <= optTill + TCB::precision && optFrom >= optTill - TCB::precision) {
 				bool allFeasible = true;
 				bool tempFeasible = false;
-				if (tcSlack[o].size() < 1) { 
+				if (tcSlack[o].size() < 1) {
 					tempFeasible = true;
 				}
 				for (size_t tc = 0; tc < tcSlack[o].size(); ++tc) {
@@ -2115,7 +2103,7 @@ void Schedule::debugSetR(size_t scheduledJobIdx, double newR) {
 	scheduledJobs[scheduledJobIdx]->setR(newR);
 }
 void Schedule::debugAddMachine(size_t stgIdx) {
-	unique_ptr<Machine> newMac = make_unique<Machine>((*workcenters[stgIdx])[workcenters[stgIdx]->size()-1].getId() + 1, workcenters[stgIdx]->getCap(), &(*workcenters[stgIdx]));
+	unique_ptr<Machine> newMac = make_unique<Machine>((*workcenters[stgIdx])[workcenters[stgIdx]->size() - 1].getId() + 1, workcenters[stgIdx]->getCap(), &(*workcenters[stgIdx]));
 	workcenters[stgIdx]->addMachine(move(newMac));
 }
 

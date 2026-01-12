@@ -24,7 +24,7 @@ public:
 
 	std::unique_ptr<Workcenter> clone(Schedule* newSchedule) const;
 
-	size_t size() const;
+	int size() const;
 	size_t findMachine(const Machine* mac) const;	// returns index of mac
 	
 	int getId() const;

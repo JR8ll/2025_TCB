@@ -26,7 +26,7 @@ pBat Machine::getBatch(size_t idx) {
 	return move(batches[idx]);
 }
 
-size_t Machine::size() const { return batches.size(); }
+int Machine::size() const { return batches.size(); }
 
 size_t Machine::findBatch(const Batch* bat) const {
 	for (size_t b = 0; b < size(); ++b) {
