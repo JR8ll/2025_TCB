@@ -1,8 +1,0 @@
-Problem	Solver	Seed	Objective	ObjectiveValue	TimeLimit	TimeUsed	SchedParams	GA_params	MILPCP_params	ILS_params	miscReporting	CreatedOn
-ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_2.dat	ILS	26010901	TWT	741.716129	60	60	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	1|10483|3|bestFit	bestSolutionAfterSec=33	2026-01-09 15:46:05
-ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_2.dat	ILS	26010901	TWT	737.802684	600	600	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	1|90508|3|bestFit	bestSolutionAfterSec=380	2026-01-09 15:56:25
-ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_2.dat	ILS	26010901	TWT	737.802684	3600	3600	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	1|552645|3|bestFit	bestSolutionAfterSec=689	2026-01-09 16:58:09
-ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_1_man1.dat	ILS	26010901	TWT	575.901313	60	60	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	1|21703|3|bestFit	bestSolutionAfterSec=27	2026-01-10 16:39:48
-exp/ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_27.dat	ILS	26010901	TWT	558.022288	60	60	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	3|3027|3|firstFit	bestSolutionAfterSec=21	2026-01-11 10:09:08
-exp/ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_27.dat	ILS	26011001	TWT	550.518266	600	600	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	3|29137|3|firstFit	bestSolutionAfterSec=324	2026-01-11 10:19:42
-exp/ProbI_EURO_exact_F2m4n10tcSc1tcFF1.50_27.dat	ILS	26011001	TWT	545.952891	7200	7200	kap{0.1/5/0.1}pW{0.1/0.9/0.1}	0|0|0|0|0|0	0|0|0|0	3|332783|3|firstFit	bestSolutionAfterSec=5583	2026-01-11 12:20:27
