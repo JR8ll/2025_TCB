@@ -32,18 +32,18 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             
            // DEBUGGING
            //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
-           //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
-           //if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 304703) {
-           //     tempSched->saveJsonFactory("DEBUGGING");
-           //     int debugger = 666;
-           // }
+           /*TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
+           if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 291) {
+                tempSched->saveJsonFactory("DEBUGGING");
+                int debugger = 666;
+            }*/
             
             // [JR-2026-Jan-12] wrapped local search in do-while-loop
             bool bLeftShiftApplied = false;
             bool bJobSwapApplied = false;
             bool bBatchConsolidationApplied = false;
-            do {
-                bLeftShiftApplied = tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit); 
+            do {  
+                bLeftShiftApplied = tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);
                 bJobSwapApplied = tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
                 bBatchConsolidationApplied = tempSched->localSearchBatchConsolidation(params->applyBestFit);
             } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
@@ -61,11 +61,9 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             for (size_t i = 0; i < params->nPerturbationSteps; ++i) {
                 double perturbChoice = perturbDistrib(TCB::rng);
                 if (perturbChoice < 0.5) {
-                    //cout << "ILS Perturbation JOB SWAP" << endl;
                     tempSched->perturbRandomJobSwap();
                 }
                 else {
-                    //cout << "ILS Perturbation JOB SHIFT" << endl;
                     tempSched->perturbRandomJobRightShifting();  
                 }
             }

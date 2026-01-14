@@ -290,19 +290,22 @@ bool Operation::repairTimeConstraintsFixedBatchFormation() {
 		for (size_t i = 0; i < tcMax.size(); ++i) {
 			size_t predIdx = tcMax[i].first;
 			Operation* predOp = &(*job)[predIdx];
+			if (predOp->getId() == 40 && predOp->getStg() == 1) {
+				int debugger = 666;
+			}
+
 			if (predOp != nullptr) {
 				if (predOp->isScheduled()) {
 					Batch* predBatch = predOp->getBatch();
 					if (predBatch->getStart() < batch->getStart() - tcMax[i].second - TCB::precision) {
 						// time constraint is violated
 
-						double predAvailability = predBatch->getR();										// [JR-2026-Jan-09] pred->getAvailability changed to predBatch->getR()
+						double predAvailability = predBatch->getR();											// [JR-2026-Jan-09] pred->getAvailability changed to predBatch->getR()
 						double newStartForPred = max(batch->getStart() - tcMax[i].second, predAvailability);	// [JR-2026-Jan-09] added max(.., getEarliestStart())
 						Workcenter* wc = predBatch->getMachine()->getWorkcenter();
 						if (wc != nullptr) {
 							int mIdx = predBatch->getMachine()->getIdx();
 							int bIdx = predBatch->getIdx();
-
 							wc->rightShiftBatch(mIdx, bIdx, newStartForPred, true, false);		// [JR-2026-Jan-09] checkValidity == false
 							bRepaired = true;
 						}

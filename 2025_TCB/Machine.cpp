@@ -5,6 +5,7 @@
 #include "Machine.h"
 #include "Batch.h"
 #include "Functions.h"
+#include "Schedule.h"
 #include "Workcenter.h"
 
 using namespace std;
@@ -32,7 +33,7 @@ size_t Machine::findBatch(const Batch* bat) const {
 	for (size_t b = 0; b < size(); ++b) {
 		if (batches[b].get() == bat) return b;
 	}
-	TCB::logger.Log(Error, "Excpetion thrown in Machine::findBatch(...)");
+	TCB::logger.Log(Error, "Exception thrown in Machine::findBatch(...)");
 	throw ExcSched("Machine::findBatch() Batch not found");
 }
 
@@ -183,7 +184,7 @@ void Machine::moveBatch(Batch* batch, double newStart, bool checkValidity) {
 		}
 		else {
 			batches.insert(batches.begin() + toIdx, move(movingBatch));
-			batches.back()->assignToMachine(this);
+			batches[toIdx]->assignToMachine(this);							// [JR-2026-Jan-14] change batches->back() to batches[toIdx]
 			batches[toIdx]->setStart(newStart, checkValidity);
 		}
 	} else {

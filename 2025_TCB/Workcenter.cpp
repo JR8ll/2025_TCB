@@ -202,6 +202,12 @@ void Workcenter::ensureValidity(Operation* op) {
 }
 
 void Workcenter::ensureValidityFixedBatchFormation(Operation* op) {
+
+	// DEBUGGING
+	if (op->getId() == 49 && op->getStg() == 3) {
+		int debugger = 666;
+	}
+
 	bool bValid = false;
 	bool bOverlaps = true;
 	bool bTcViolations = true;
@@ -327,6 +333,7 @@ void Workcenter::rightShiftOp(size_t mIdx, size_t bIdx, size_t jIdx, double from
 	ensureValidity(op);
 }
 void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pushingSuccessors, bool checkValidity) {
+
 	Machine* mac = machines[mIdx].get();
 	Batch* bat = &(*mac)[bIdx];
 
@@ -341,10 +348,15 @@ void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pus
 	
 	findBestStartNotBefore(bat, bestMacIdx, bestStart, from);
 
-	if (bestStart > from && pushingSuccessors) {
+							
+	// push right at same machine
+	if (bestStart > from - TCB::precision && bestStart < from + TCB::precision) {
+		// pushing successors is not necessary because the ideal position is available at another machine
+		moveBatch(bat, bestMacIdx, bestStart, checkValidity);
+	} else if (pushingSuccessors) {		
 		// pushing successors
 		size_t myBatIdx = bat->getIdx();
-		bat->setStart(from, false);
+		bat->setStart(from, false);		
 		if (myBatIdx < mac->size() - 1) {
 			Batch* succBat = &(*mac)[myBatIdx + 1];
 			if (bat->getC() > succBat->getStart()) {
@@ -352,10 +364,8 @@ void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pus
 				rightShiftBatch(mIdx, myBatIdx + 1, bat->getC(), pushingSuccessors, checkValidity);
 			}
 		} 
-		
-	}
-	else {
-		moveBatch(bat, bestMacIdx, bestStart, checkValidity);
+	} else {
+		moveBatch(bat, mIdx, from, checkValidity);
 	}
 }
 void Workcenter::findBestStart(Operation* op, bool& bNewBatch, size_t& bestMacIdx, size_t& bestBatIdx, double& tempStart, double pWait) {

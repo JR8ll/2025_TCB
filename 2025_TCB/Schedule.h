@@ -157,4 +157,5 @@ public:
 	// DEBUGGING TOOLS (MAY LEAD TO INFEASIBLE SOLUTIONS)
 	void debugSetR(size_t scheduledJobIdx, double newR);			// change r of a scheduled job
 	void debugAddMachine(size_t stgIdx);							// add an empty machine
+	void debugAllBatchesNotEmptyAndWithMachineReference();			// check if every batch has a reference to its machine
 };

@@ -600,7 +600,7 @@ void Schedule::lSchedJobs(vector<double> pWaitVec) {
 			bestWait = pWaitVec[w];
 		}
 	}
-	TCB::logger.Log(Info, "List Scheduling with best pWait " + to_string(bestWait));
+	//TCB::logger.Log(Info, "List Scheduling with best pWait " + to_string(bestWait));
 	lSchedJobs(bestWait);
 }
 void Schedule::lSchedJobsInflated(double pWait, double inflation, bool batchinStageInflationOnly, bool opsWithoutTcInflationOnly) {
@@ -661,7 +661,7 @@ double Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, const vector<do
 		reset();
 	}
 	lSchedJobsWithSorting(rule, bestKappa, pWait);
-	TCB::logger.Log(Info, "Found a schedule with best kappa value = " + to_string(bestKappa));
+	//TCB::logger.Log(Info, "Found a schedule with best kappa value = " + to_string(bestKappa));
 	return bestKappa;
 }
 
@@ -799,6 +799,13 @@ double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtM
 		if (opR < bat2->getStart() && opR > bat1->getStart()) {	// this move is only relevant if op can be left shifted (< current start) and it cannot simply be inserted into previous batch (otherwise an insertion/shift move would do the trick)
 			if (op->getS() <= bat1->getAvailableCap()) {
 				unique_ptr<Schedule> copySched = clone();
+				
+				// DEBUGGING
+				if (idxWc == 6 && tgtMac == 2 && tgtBatch == 7 && srcMac == 2 && srcBatch == 8 && movingOpIdx == 1) {
+					int debugger = 666;
+				}
+
+
 				if (copySched->localSearchConsolidateBatch(idxWc, tgtMac, tgtBatch, srcMac, srcBatch, movingOpIdx)) {
 					double tempTWT = copySched->getTWT();
 					if (tempTWT < bestTWT) {
@@ -1185,8 +1192,7 @@ bool Schedule::localSearchBatchConsolidation(bool bestFit) {
 									}
 								}
 							}
-						}
-						
+						}	
 						
 						if (bImproving) break;
 					}
@@ -1903,7 +1909,7 @@ bool Schedule::isValid() const {
 	for (size_t j = 0; j < problem->getN(); ++j) {
 		for (size_t o = 0; o < (*problem)[j].size(); ++o) {
 			if (!contains(&(*problem)[j][o])) {
-				TCB::logger.Log(Error, "missing operation " + to_string((*problem)[j][o].getId()) + "." + to_string((*problem)[j][o].getStg()));
+				//TCB::logger.Log(Error, "missing operation " + to_string((*problem)[j][o].getId()) + "." + to_string((*problem)[j][o].getStg()));
 				return false;
 			}
 		}
@@ -1913,7 +1919,7 @@ bool Schedule::isValid() const {
 	for (size_t wc = 0; wc < size(); ++wc) {
 		for (size_t m = 0; m < (*workcenters[wc]).size(); ++m) {
 			if ((*workcenters[wc])[m].hasOverlaps()) {
-				TCB::logger.Log(Error, "overlapping processing of batches at machine " + to_string(workcenters[wc]->getId()) + "." + to_string((*workcenters[wc])[m].getId()));
+				//TCB::logger.Log(Error, "overlapping processing of batches at machine " + to_string(workcenters[wc]->getId()) + "." + to_string((*workcenters[wc])[m].getId()));
 				return false;
 			}
 		}
@@ -1925,11 +1931,11 @@ bool Schedule::isValid() const {
 			for (size_t b = 0; b < (*workcenters[wc])[m].size(); ++b) {
 				for (size_t o = 0; o < (*workcenters[wc])[m][b].size(); ++o) {
 					if (!(*workcenters[wc])[m][b][o].checkProcessingOrder()) {
-						TCB::logger.Log(Error, "Processing order violated");
+						//TCB::logger.Log(Error, "Processing order violated");
 						return false;
 					}
 					if (!(*workcenters[wc])[m][b][o].checkTimeConstraints()) {
-						TCB::logger.Log(Error, "Time constraint violated");
+						//TCB::logger.Log(Error, "Time constraint violated");
 						return false;
 					}
 				}
@@ -2105,5 +2111,25 @@ void Schedule::debugSetR(size_t scheduledJobIdx, double newR) {
 void Schedule::debugAddMachine(size_t stgIdx) {
 	unique_ptr<Machine> newMac = make_unique<Machine>((*workcenters[stgIdx])[workcenters[stgIdx]->size() - 1].getId() + 1, workcenters[stgIdx]->getCap(), &(*workcenters[stgIdx]));
 	workcenters[stgIdx]->addMachine(move(newMac));
+}
+
+void Schedule::debugAllBatchesNotEmptyAndWithMachineReference() {
+	for (size_t wcIdx = 0; wcIdx < size(); ++wcIdx) {
+		Workcenter* wc = workcenters[wcIdx].get();
+		for (size_t mIdx = 0; mIdx < wc->size(); ++mIdx) {
+			Machine* mac = &(*wc)[mIdx];
+			for (size_t bIdx = 0; bIdx < mac->size(); ++bIdx) {
+				if ((*mac)[bIdx].size() <= 0) {
+					cout << "Batch at stage " << (wcIdx + 1) << ", M" << (mIdx + 1) << " is empty!" << endl;
+					throw ExcSched("EMPTY BATCH");
+				}
+
+				if ((*mac)[bIdx].getMachine() == nullptr) {					
+					cout << "Stage " << (wcIdx + 1) << ", M" << (mIdx + 1) << ", Batch " << (bIdx + 1) << ": no machine reference!" << endl;
+					throw ExcSched("MISSING MACHINE REFERENCE");
+				}
+			}
+		}
+	}
 }
 
