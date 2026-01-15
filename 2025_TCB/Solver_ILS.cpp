@@ -32,8 +32,8 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             
            // DEBUGGING
            //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
-           /*TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
-           if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 291) {
+           //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
+           /*if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 5) {
                 tempSched->saveJsonFactory("DEBUGGING");
                 int debugger = 666;
             }*/

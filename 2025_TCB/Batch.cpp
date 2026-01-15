@@ -133,7 +133,6 @@ void Batch::setStart(double newStart, bool checkvalidity) {
 		TCB::logger.Log(Error, "Exception caught and thrown in Batch::setStart(...)");
 		throw e;
 	}
-	
 }
 void Batch::setC(double newC, bool checkvalidity) {
 	if (checkvalidity) {

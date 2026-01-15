@@ -1,8 +1,4 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Workcenter.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Workcenter.cpp(34): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Solver_ILS.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -15,43 +11,16 @@ Schedule.cpp(119): warning C4267: 'argument' : conversion from 'size_t' to 'int'
 Schedule.cpp(128): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(257): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(460): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(978): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1062): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1104): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1108): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1653): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1654): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1780): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1781): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(2012): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-Schedule.cpp(2102): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-  Operation.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Operation.cpp(120): warning C4804: '>=' : unsafe use of type 'bool' in operation
-Operation.cpp(221): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(222): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(223): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(247): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(248): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(249): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(274): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(275): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(307): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(308): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-  Machine.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Machine.cpp(30): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(971): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1055): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1097): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1101): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1647): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1648): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1774): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1775): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(2006): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(2096): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
   Generating Code...
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1403): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
-  Skipping... (no relevant changes detected)
-  Solver_MILP.cpp
-  Solver_GA.cpp
-  Solver_CP.cpp
-  Problem.cpp
-  Main.cpp
-  GaDecoder.cpp
-  Functions.cpp
-  Batch.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1397): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

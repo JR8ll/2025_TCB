@@ -147,10 +147,18 @@ double Operation::getGATC(double avgP, double t, double kappa) const {
 }
 
 Operation* Operation::getPred() const { return pred; }
+Operation* Operation::getPred(size_t offsetStages) const {
+	Operation* predecessor = pred;
+	for (size_t i = 0; i < offsetStages - 1; ++i) {
+		if (predecessor == nullptr) break;
+		predecessor = predecessor->getPred();
+	}
+	return predecessor;
+}
 Operation* Operation::getSucc() const { return succ; }
 Operation* Operation::getSucc(size_t offsetStages) const {
 	Operation* successor = succ;
-	for (size_t i = 0; i < offsetStages; ++i) {
+	for (size_t i = 0; i < offsetStages; ++i) {	// [JR-2026-Jan-15] potetial error: this must probably be "i < offsetStages - 1"
 		if (successor == nullptr) break;
 		successor = successor->getSucc();
 	}
@@ -191,16 +199,20 @@ bool Operation::checkProcessingOrder() const {
 
 bool Operation::checkTimeConstraints() const {
 	const vector<pair<int, double>>& tc = job->getTcMaxBwd(stg-1);
-	for (size_t t = 0; t < tc.size(); ++t) {
+	for (size_t t = 0; t < (stg - 1); ++t) {	// [JR-2026-Jan-15] change condition from "< tc.size()" to "< (stg-1)"
 		if (tc[t].second != 999999) {
 			int steps = (stg-1) - tc[t].first;
-			Operation* tcPred = pred;
-			for (size_t step = 1; step < steps; ++step) {
-				tcPred = pred->getPred();
+			if (steps > 0) {
+				Operation* tcPred = getPred(steps);
+				/*Operation* tcPred = pred;
+				for (size_t step = 1; step < steps; ++step) {		
+					tcPred = pred->getPred();
+				}*/
+				if (tcPred->getStart() + tc[t].second + TCB::precision < getStart()) {
+					return false;
+				}
 			}
-			if (tcPred->getStart() + tc[t].second + TCB::precision < getStart()) {
-				return false;
-			}
+			
 		}
 	}
 	return true;

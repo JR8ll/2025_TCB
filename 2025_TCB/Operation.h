@@ -49,6 +49,7 @@ public:
 	double getGATC(double avgP, double t, double kappa) const;
 
 	Operation* getPred() const;
+	Operation* getPred(size_t offsetStages) const;
 	Operation* getSucc() const;
 	Operation* getSucc(size_t offsetStages) const;	
 
