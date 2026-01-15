@@ -30,3 +30,16 @@
 *.exe
 *.out
 *.app
+
+# Probleminstances
+**/Release/
+**/EURO/
+**/MISTA/
+**/results/
+**/exp/
+!**/exp/sched1.par
+!**/exp/ga1.par
+!**/exp/decomp1.par
+*.dat
+
+log.txt
