@@ -102,11 +102,12 @@ public:
 
 	// LOCAL SEARCH
 	// ACTUAL LOCAL SEARCH PROCEDURES
-	bool localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);						// if not bestFit => firstFit
-	bool localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);					// if not bestFit => firstFit
-	bool localSearchBatchConsolidation(bool bestFit = true);													// if not bestFit => firstFit
-	void localSearchBatchLeftShifting();																		// TODO
-	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);		// LOCAL SEARCH OPERATION BASED (ALMOST USELESS)	
+	bool localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);									// if not bestFit => firstFit
+	bool localSearchJobSwapping(std::pair<size_t, size_t>& swap, prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);	// version for ga reports which jobs are swapped
+	bool localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, bool bestFit = true);								// if not bestFit => firstFit
+	bool localSearchBatchConsolidation(bool bestFit = true);																// if not bestFit => firstFit
+	void localSearchBatchLeftShifting();																					// TODO
+	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);					// LOCAL SEARCH OPERATION BASED (ALMOST USELESS)	
 	
 	void perturbRandomJobSwap();
 	void perturbRandomBatchRightShifting();		

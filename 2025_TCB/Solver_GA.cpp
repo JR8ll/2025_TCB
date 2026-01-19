@@ -3,7 +3,8 @@
 #include<vector>
 
 #include "MTRand.h"	// brkgaAPI
-#include "BRKGA.h"	// brkgaAPI
+//#include "BRKGA.h"	// brkgaAPI
+#include "BRKGA_SelectiveLocalSearch.h"
 
 #include "Solver_GA.h"
 #include "Functions.h"
@@ -25,7 +26,7 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 	chrono::seconds usedTime;
 	chrono::time_point<chrono::high_resolution_clock> stop;
 
-	GaDecoderJobLs decoder(&sched, schedParams);
+	GaDecoderJobListSched decoder(&sched, schedParams, params);
 	const long unsigned rngSeed = TCB::seed;
 	MTRand rng(rngSeed);
 
@@ -34,7 +35,8 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 
 	params->maxThreads = MAXT;
 
-	BRKGA<GaDecoderJobLs, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, MAXT);
+	BRKGA_SelectiveLocalSearch<GaDecoderJobListSched, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, MAXT);
+	//BRKGA<GaDecoderJobListSched, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, MAXT);
 
 	int iterationCounter = 0;
 	do {

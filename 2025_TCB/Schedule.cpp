@@ -1050,13 +1050,9 @@ void Schedule::perturbRandomJobRightShifting() {
 }
 bool Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 	bool bImprovedOnce = false;
-	int debug = 0;
 	bool bImproved = true;
 	int nJobs = scheduledJobs.size();
 	while (bImproved) {
-
-		debug++;
-
 		bImproved = false;
 		rule(scheduledJobs);
 		bool swapFeasible = true;
@@ -1087,6 +1083,50 @@ bool Schedule::localSearchJobSwapping(prioRule<pJob> rule, bool bestFit) {
 		}
 		if (bestFit && bestImprovement > 0) {
 			locSearchSwapJobs(best1, best2);
+			bImprovedOnce = true;
+			bImproved = true;
+		}
+	}
+	return bImprovedOnce;
+}
+bool Schedule::localSearchJobSwapping(pair<size_t, size_t>& swap, prioRule<pJob> rule, bool bestFit) {
+	bool bImprovedOnce = false;
+	bool bImproved = true;
+	int nJobs = scheduledJobs.size();
+	while (bImproved) {
+		bImproved = false;
+		rule(scheduledJobs);
+		bool swapFeasible = true;
+		double bestImprovement = 0;
+		size_t best1 = 0;
+		size_t best2 = 0;
+		for (size_t j = 0; j < nJobs; ++j) {
+			for (int k = nJobs - 1; k >= 0; --k) {
+				if (j != k) {
+					double tempImprovement = locSearchEvaluateJobSwap(j, k, swapFeasible);
+					if (swapFeasible && tempImprovement > bestImprovement) {
+						if (!bestFit) { // FIRST FIT
+							locSearchSwapJobs(j, k);
+							swap = make_pair(j, k);
+							bImprovedOnce = true;
+							bImproved = true;
+							break;
+						}
+						else {			// BEST FIT
+							bestImprovement = tempImprovement;
+							best1 = j;
+							best2 = k;
+						}
+					}
+				}
+			}
+			if (bImproved) {
+				break; // continue with while loop
+			}
+		}
+		if (bestFit && bestImprovement > 0) {
+			locSearchSwapJobs(best1, best2);
+			swap = make_pair(best1, best2);
 			bImprovedOnce = true;
 			bImproved = true;
 		}

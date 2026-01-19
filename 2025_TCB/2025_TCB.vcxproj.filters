@@ -63,6 +63,9 @@
     <ClInclude Include="Solver_CP.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="BRKGA_SelectiveLocalSearch.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Operation.cpp">

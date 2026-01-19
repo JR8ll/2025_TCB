@@ -7,13 +7,14 @@
 class Schedule;
 
 struct GA_params {
-	int nPop;				// population size
-	double pElt;			// elite fraction of population
-	double pRpM;			// fraction of population to be replaced by mutants
-	double rhoe;			// probability that offspring inherit allele from elite parent
-	unsigned K;				// number of independent populations
-	int maxThreads;			// number of parallel threads
-	int iterations;			// REPORTING: number of generations processed 
+	int nPop;						// population size
+	double pElt;					// elite fraction of population
+	double pRpM;					// fraction of population to be replaced by mutants
+	double rhoe;					// probability that offspring inherit allele from elite parent
+	unsigned K;						// number of independent populations
+	int maxThreads;					// number of parallel threads
+	bool applyLocalSearchBestFit;	// if true, local search follows best fit, if false first fit strategy
+	int iterations;					// REPORTING: number of generations processed 
 };
 
 class Solver_GA {
