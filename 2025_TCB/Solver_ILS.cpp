@@ -1,5 +1,5 @@
-#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "Solver_ILS.h"
 #include "Schedule.h"
@@ -79,6 +79,90 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
 
     sched._reconstruct(bestSched.get());
     return bestTWT;
+}
+
+double Solver_ILS::solveILSparallelized(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait) {
+    unsigned int nCores = thread::hardware_concurrency();
+    auto start = chrono::high_resolution_clock::now();
+    chrono::seconds usedTime;
+    chrono::time_point<chrono::high_resolution_clock> stop;
+
+
+    vector<ILS_Thread> ILS_threads(nCores);
+    vector<thread> threads;
+    for (unsigned int core = 0; core < nCores; ++core) {
+        ILS_threads[core].bestSched = sched.clone();
+        threads.emplace_back(workerILS, move(ILS_threads[core].bestSched), schedParams, params, init, rule, iTilimSeconds, start, &ILS_threads[core], pWait);
+    }
+
+    for (auto& t : threads) t.join();
+
+    int globalBestIdx = 0;
+    double globalBestTWT = ILS_threads[0].bestTWT;
+    for (int i = 0; i < nCores; ++i) {
+        if (ILS_threads[i].bestTWT < globalBestTWT) {
+            globalBestTWT = ILS_threads[i].bestTWT;
+            globalBestIdx = i;
+        }
+    }
+
+    sched._reconstruct(ILS_threads[globalBestIdx].bestSched.get());
+    return globalBestTWT;
+}
+
+void Solver_ILS::workerILS(unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, chrono::time_point<chrono::high_resolution_clock> start, ILS_Thread* localBest, double pWait) {
+    double bestTWT = DBL_MAX;
+    unique_ptr<Schedule> bestSched = sched->clone();
+    chrono::seconds usedTime;
+    chrono::time_point<chrono::high_resolution_clock> stop;
+
+    localBest->multiStartIterations = 0;
+
+    do {// MULTISTART-LOOP
+        // INITIALIZE
+        unique_ptr<Schedule> tempSched = sched->clone();
+        (tempSched.get()->*init)(rule, *schedParams);
+
+        localBest->ilsIterations.push_back(0);
+        do {// ILS LOOP
+            // LOCAL SEARCH
+            bool bLeftShiftApplied = false;
+            bool bJobSwapApplied = false;
+            bool bBatchConsolidationApplied = false;
+            do {
+                bLeftShiftApplied = tempSched->localSearchJobLeftShifting(&sortJobsRandomly, ilsParams->applyBestFit);
+                bJobSwapApplied = tempSched->localSearchJobSwapping(&sortJobsRandomly, ilsParams->applyBestFit);
+                bBatchConsolidationApplied = tempSched->localSearchBatchConsolidation(ilsParams->applyBestFit);
+            } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
+
+            double tempTWT = tempSched->getTWT();
+            if (tempTWT < localBest->bestTWT) {
+                localBest->bestTWT = tempTWT;
+                localBest->bestSched = tempSched->clone();
+                stop = chrono::high_resolution_clock::now();
+                usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+                localBest->bestAfterSeconds = usedTime.count();
+            }
+            // PERTURBATION
+            uniform_real_distribution<> perturbDistrib(0, 1);
+            for (size_t i = 0; i < ilsParams->nPerturbationSteps; ++i) {
+                double perturbChoice = perturbDistrib(TCB::rng);
+                if (perturbChoice < 0.5) {
+                    tempSched->perturbRandomJobSwap();
+                }
+                else {
+                    tempSched->perturbRandomJobRightShifting();
+                }
+            }
+
+            ++localBest->ilsIterations[localBest->multiStartIterations];
+            stop = chrono::high_resolution_clock::now();
+            usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+        } while (usedTime.count() < ((double)iTilimSeconds / (double)ilsParams->nStarts) * (ilsParams->multiStartIterations + 1));   // MULTISTART
+        stop = chrono::high_resolution_clock::now();
+        usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+        ++localBest->multiStartIterations;
+    } while (usedTime.count() < iTilimSeconds);
 }
 
 ILS_params Solver_ILS::getDefaultParams() {

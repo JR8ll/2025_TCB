@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common_aliases.h"
+#include<chrono>
 
 class Schedule;
 
@@ -14,6 +15,14 @@ struct ILS_params {
 	int bestAfterSeconds;				// REPORTING: best solution found after ... seconds
 };
 
+struct ILS_Thread {
+	double bestTWT = DBL_MAX;
+	std::unique_ptr<Schedule> bestSched;
+	double bestAfterSeconds = 0.0;
+	std::vector<size_t> ilsIterations;
+	int multiStartIterations = 0;
+};
+
 class Solver_ILS {
 private:
 	Sched_params* schedParams;
@@ -21,7 +30,9 @@ private:
 public:
 	Solver_ILS(Sched_params& schedParams, ILS_params& ilsParams);
 	double solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);
+	double solveILSparallelized(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);
 
+	static void workerILS(std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams,  initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localILS, double pWait = 0.0);
 	static ILS_params getDefaultParams();
 
 };

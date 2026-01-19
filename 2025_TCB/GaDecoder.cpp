@@ -27,9 +27,9 @@ double GaDecoderJobListSched::applyNonPersitentLocalSearch(Schedule* sched) cons
     bool bJobSwapApplied = false;
     bool bBatchConsolidationApplied = false;
     do {
-        bLeftShiftApplied = sched->localSearchJobLeftShifting(&sortJobsRandomly, gaParams->applyLocalSearchBestFit);
-        bJobSwapApplied = sched->localSearchJobSwapping(&sortJobsRandomly, gaParams->applyLocalSearchBestFit);
-        bBatchConsolidationApplied = sched->localSearchBatchConsolidation(gaParams->applyLocalSearchBestFit);
+        bLeftShiftApplied = sched->localSearchJobLeftShifting(&sortJobsByStart, gaParams->applyLocalSearchBestFit);     // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!
+        bJobSwapApplied = sched->localSearchJobSwapping(&sortJobsByStart, gaParams->applyLocalSearchBestFit);           // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!
+        bBatchConsolidationApplied = sched->localSearchBatchConsolidation(gaParams->applyLocalSearchBestFit);           // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!
     } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
 	
     return sched->getTWT();
@@ -37,4 +37,7 @@ double GaDecoderJobListSched::applyNonPersitentLocalSearch(Schedule* sched) cons
 void GaDecoderJobListSched::formSchedule(const std::vector<double>& chr)
 {
 	masterSched->lSchedJobsWithRandomKeySorting(sortJobsByRK, chr);
+    if (gaParams->localSearchFraction > 0.0) {
+        applyNonPersitentLocalSearch(masterSched);
+    }
 }
