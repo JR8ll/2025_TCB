@@ -148,7 +148,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 			schedParamsString << "n/a";
 		}
 		if (gaParams != nullptr) {
-			gaParamsString << gaParams->nPop << "|" << gaParams->pElt << "|" << gaParams->pRpM << "|" << gaParams->rhoe  << "|" << gaParams->K << "|" << gaParams->maxThreads;
+			gaParamsString << gaParams->nPop << "|" << gaParams->pElt << "|" << gaParams->pRpM << "|" << gaParams->rhoe  << "|" << gaParams->K << "|" << gaParams->maxThreads << "|" << gaParams->applyLocalSearchBestFit << "|" << gaParams->localSearchFraction;
 		} else {
 			gaParamsString << "n/a";
 		}
@@ -356,6 +356,8 @@ void loadGaParams(GA_params& gaParams, string filename) {
 		else if (key == "rhoe") iss >> gaParams.rhoe;
 		else if (key == "K") iss >> gaParams.K;
 		else if (key == "maxThreads") iss >> gaParams.maxThreads;
+		else if (key == "applyLocalSearchBestFit") iss >> gaParams.applyLocalSearchBestFit;
+		else if (key == "localSearchFraction") iss >> gaParams.localSearchFraction;
 	}
 	input.close();
 }

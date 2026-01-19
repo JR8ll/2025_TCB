@@ -12,15 +12,17 @@ double GaDecoderJobListSched::decode(const vector<double>& chr) const {
 	mySched->lSchedJobsWithRandomKeySorting(sortJobsByRK, chr, *schedParams);
 	return mySched->getTWT();
 }
-void GaDecoderJobListSched::applyPersistentLocalSearch(unique_ptr<Schedule> sched, vector<double>& chr) {
-    bool bJobSwapApplied = false;
-    pair<size_t, size_t> swap = make_pair(0, 0);
-    do {
-        bJobSwapApplied = sched->localSearchJobSwapping(&sortJobsRandomly, gaParams->applyLocalSearchBestFit);
-    } while (bJobSwapApplied);
-
+double GaDecoderJobListSched::decodeWithLocalSearch(const std::vector<double>& chr) const
+{
+    unique_ptr<Schedule> mySched = masterSched->clone();
+    mySched->lSchedJobsWithRandomKeySorting(sortJobsByRK, chr, *schedParams);
+    double twtBefore = mySched->getTWT();
+    applyNonPersitentLocalSearch(mySched.get());
+    double twtAfter = mySched->getTWT();
+    return mySched->getTWT();
 }
-double GaDecoderJobListSched::applyNonPersitentLocalSearch(unique_ptr<Schedule> sched) const {
+
+double GaDecoderJobListSched::applyNonPersitentLocalSearch(Schedule* sched) const {
     bool bLeftShiftApplied = false;
     bool bJobSwapApplied = false;
     bool bBatchConsolidationApplied = false;

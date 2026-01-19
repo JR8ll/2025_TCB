@@ -14,6 +14,7 @@ struct GA_params {
 	unsigned K;						// number of independent populations
 	int maxThreads;					// number of parallel threads
 	bool applyLocalSearchBestFit;	// if true, local search follows best fit, if false first fit strategy
+	double localSearchFraction;		// percentage of the elite, where the best x percent of the non-elite are decoded with local search (elite fitness values are just copied, not decoded)
 	int iterations;					// REPORTING: number of generations processed 
 };
 

@@ -4,24 +4,34 @@
 
 class GaDecoderJobListSched;
 
+ //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ //+++++ BEWARE: This class definition requires the following modifications to the original brkgaAPI:			  +++++
+ //+++++ 1) BRKGA.h -> line 123 change access modificator for attributes of class BRKGA from private to protected +++++
+ //+++++ 2) Population.h -> line 25 in class Population add forward definition for friend class					  +++++
+ //+++++                    "template< class Decoder, class RNG > friend class BRKGA_SelectiveLocalSearch;		  +++++
+ //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 template<class Decoder, class RNG>
 class BRKGA_SelectiveLocalSearch : public BRKGA<Decoder, RNG> {
 	
 private: 
 	static_assert(std::is_same<Decoder, GaDecoderJobListSched>::value,
 		"BRKGA_SelectiveLocalSearch requires GaDecoderJobListSched");
+	int nLocalSearch;
 
 public:
 	BRKGA_SelectiveLocalSearch(int n, int nPop, double pElt, double pRpM,
 		double rhoe, Decoder& decoder, RNG& rng,
 		int K, int MAXT)
 		: BRKGA<Decoder, RNG>(n, nPop, pElt, pRpM, rhoe, decoder, rng, K, MAXT)	{
-		int debugger = 666;
+	}
+
+	void setLocalSearchFraction(double fraction) {
+		this->nLocalSearch = floor(fraction * (double)pe);
 	}
 
 	void evolve(unsigned generations = 1) {
 		if (generations == 0) { throw std::range_error("Cannot evolve for 0 generations."); }
-
 		for (unsigned i = 0; i < generations; ++i) {
 			for (unsigned j = 0; j < K; ++j) {
 				this->evolution(*this->current[j], *this->previous[j]);	// First evolve the population (curr, next)
@@ -97,7 +107,13 @@ public:
 			#pragma omp parallel for num_threads(MAX_THREADS)
 		#endif
 		for (int i = int(pe); i < int(p); ++i) {
-			next.setFitness(i, refDecoder.decode(next.population[i]));
+			if (i < int(pe) + nLocalSearch) {
+				next.setFitness(i, refDecoder.decodeWithLocalSearch(next.population[i]));
+			}
+			else {
+				next.setFitness(i, refDecoder.decode(next.population[i]));
+			}
+			
 		}
 
 
