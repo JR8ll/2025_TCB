@@ -99,7 +99,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 	}
 
 	if (argc > 9) {
-		if (iSolver == ALG_ILS) {
+		if (iSolver == ALG_ILS || iSolver == ALG_ILS_PARALLELIZED) {
 			try {
 				loadILSParams(ilsParams, argv[9]);
 			}
@@ -147,7 +147,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		} else {
 			schedParamsString << "n/a";
 		}
-		if (gaParams != nullptr) {
+		if (solverType == ALG_BRKGALISTSCH || solverType == ALG_BRKGALS2MILP) { //gaParams != nullptr) {
 			gaParamsString << gaParams->nPop << "|" << gaParams->pElt << "|" << gaParams->pRpM << "|" << gaParams->rhoe  << "|" << gaParams->K << "|" << gaParams->maxThreads << "|" << gaParams->applyLocalSearchBestFit << "|" << gaParams->localSearchFraction;
 		} else {
 			gaParamsString << "n/a";
@@ -157,14 +157,14 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		} else {
 			decompParamsString << "n/a";
 		}
-		if (ilsParams != nullptr) {
-			int meanIlsIterations = 0;
+		if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED) { //ilsParams != nullptr) {
+			/*int meanIlsIterations = 0;
 			if (!ilsParams->ilsIterations.empty()) {
 				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
 				double avg = static_cast<double>(sum) / ilsParams->ilsIterations.size();
 				meanIlsIterations = static_cast<int>(round(avg));
-			}
-			ilsParamsString << ilsParams->multiStartIterations << "|" << meanIlsIterations << "|" << ilsParams->nPerturbationSteps << "|" << (ilsParams->applyBestFit ? "bestFit" : "firstFit");
+			}*/
+			ilsParamsString << ilsParams->multiStartIterations << "|" << ilsParams->nPerturbationSteps << "|" << (ilsParams->applyBestFit ? "bestFit" : "firstFit");
 		}
 		else {
 			ilsParamsString << "n/a";
@@ -182,8 +182,14 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		else if (solverType == ALG_LISTSCHEDATC || solverType == ALG_ITMILPLSHIFT) {
 			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
 		}
-		else if (solverType == ALG_ILS) {
-			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "\t";
+		else if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED) {
+			int meanIlsIterations = 0;
+			if (!ilsParams->ilsIterations.empty()) {
+				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
+				double avg = static_cast<double>(sum) / ilsParams->ilsIterations.size();
+				meanIlsIterations = static_cast<int>(round(avg));
+			}
+			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "avgIt=" << meanIlsIterations << "\t";
 		} 
 		else {
 			file << "n/a\t";

@@ -31,7 +31,7 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             // LOCAL SEARCH
             
            // DEBUGGING
-           cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+           //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
            //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
            /*if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 5) {
                 tempSched->saveJsonFactory("DEBUGGING");
@@ -103,6 +103,9 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializer<pJob> init,
         if (ILS_threads[i].bestTWT < globalBestTWT) {
             globalBestTWT = ILS_threads[i].bestTWT;
             globalBestIdx = i;
+            params->bestAfterSeconds = ILS_threads[i].bestAfterSeconds;
+            params->ilsIterations = ILS_threads[i].ilsIterations;
+            params->multiStartIterations = ILS_threads[i].multiStartIterations;
         }
     }
 
@@ -122,6 +125,10 @@ void Solver_ILS::workerILS(unique_ptr<Schedule>& sched, Sched_params* schedParam
         // INITIALIZE
         unique_ptr<Schedule> tempSched = sched->clone();
         (tempSched.get()->*init)(rule, *schedParams);
+
+        // DEBUGGING
+        /* cout << "Thread id " << this_thread::get_id() << endl;
+        cout << *tempSched;*/
 
         localBest->ilsIterations.push_back(0);
         do {// ILS LOOP
@@ -172,6 +179,6 @@ ILS_params Solver_ILS::getDefaultParams() {
     ilsParams.applyBestFit = true;
     ilsParams.randomizedLocalSearchSequence = false;
     ilsParams.multiStartIterations = 0;
-    ilsParams.ilsIterations = vector<int>();
+    ilsParams.ilsIterations = vector<size_t>();
     return ilsParams;
 }

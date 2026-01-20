@@ -11,7 +11,8 @@ static const int ALG_LISTSCHEDATC = 2;		// simple List scheduling approach
 static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
 static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
 static const int ALG_ILS = 5;
-static const int ALG_ITMILPLSHIFT = 6;		// iterated MILP solving with final left-shifting local search improvement
+static const int ALG_ILS_PARALLELIZED = 6;
+static const int ALG_ITMILPLSHIFT = 7;		// iterated MILP solving with final left-shifting local search improvement
 
 struct GA_params;
 struct ILS_params;

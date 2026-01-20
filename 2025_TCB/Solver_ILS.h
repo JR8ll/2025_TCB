@@ -11,7 +11,7 @@ struct ILS_params {
 	bool applyBestFit;					// true: local search follows greedy/best fit strategy, false: local search follows first-fit strategy			
 	bool randomizedLocalSearchSequence;
 	int multiStartIterations;			// REPORTING: number of new initializations (MULTI-START)
-	std::vector<int> ilsIterations;		// REPORTING: number of iterations (local search + perturbation)
+	std::vector<size_t> ilsIterations;		// REPORTING: number of iterations (local search + perturbation)
 	int bestAfterSeconds;				// REPORTING: best solution found after ... seconds
 };
 

@@ -155,8 +155,15 @@ int main(int argc, char* argv[]) {
 		{
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
-			//ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);
-			ils.solveILSparallelized(*sched.get(), init, sortJobsRandomly, iTilimSeconds);		
+			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);	
+		}
+		break;
+	case ALG_ILS_PARALLELIZED:
+		solverName = "ILS_PARALLEL";
+		{
+			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
+			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
+			ils.solveILSparallelized(*sched.get(), init, sortJobsRandomly, iTilimSeconds);
 		}
 		break;
 	case ALG_ITMILPLSHIFT: 
