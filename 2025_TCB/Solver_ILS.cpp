@@ -34,10 +34,10 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
            // DEBUGGING
            //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
            //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
-           if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2222) {
-                tempSched->saveJsonFactory("DEBUGGING");
-                int debugger = 666;
-            }
+           //if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2222) {
+           //     tempSched->saveJsonFactory("DEBUGGING");
+           //     int debugger = 666;
+           // }
             
             // [JR-2026-Jan-12] wrapped local search in do-while-loop
             bool bLeftShiftApplied = false;
@@ -45,26 +45,11 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             bool bBatchConsolidationApplied = false;
             do {  
                 bLeftShiftApplied = tempSched->localSearchJobLeftShifting(&sortJobsRandomly, params->applyBestFit);
-                if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2221) {
-                    tempSched->saveJsonFactory("DEBUGGING");
-                    int debugger = 666;
-                }
                 bJobSwapApplied = tempSched->localSearchJobSwapping(&sortJobsRandomly, params->applyBestFit);
-                if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2221) {
-                    tempSched->saveJsonFactory("DEBUGGING");
-                    int debugger = 666;
-                }
                 bBatchConsolidationApplied = tempSched->localSearchBatchConsolidation(params->applyBestFit);
-                if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2221) {
-                    tempSched->saveJsonFactory("DEBUGGING");
-                    int debugger = 666;
-                }
             } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
 
-            if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2221) {
-                tempSched->saveJsonFactory("DEBUGGING");
-                int debugger = 666;
-            }
+
 
 
             double tempTWT = tempSched->getTWT();
@@ -82,24 +67,11 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
                 if (perturbChoice < 0.5) {
                     //TCB::logger.Log(Info, "perturbRandomJobSwap");
                     tempSched->perturbRandomJobSwap();
-                    if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2221) {
-                        tempSched->saveJsonFactory("DEBUGGING");
-                        int debugger = 666;
-                    }
                 }
                 else {
                     //TCB::logger.Log(Info, "perturbRandomJobRightShifting");
                     tempSched->perturbRandomJobRightShifting();  
-                    if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2221) {
-                        tempSched->saveJsonFactory("DEBUGGING");
-                        int debugger = 666;
-                    }
                 }
-            }
-
-            if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2221) {
-                tempSched->saveJsonFactory("DEBUGGING");
-                int debugger = 666;
             }
 
             ++params->ilsIterations[params->multiStartIterations];

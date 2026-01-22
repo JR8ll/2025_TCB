@@ -36,6 +36,7 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 
 	BRKGA_SelectiveLocalSearch<GaDecoderJobListSched, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, MAXT);
 	algorithm.setLocalSearchFraction(params->localSearchFraction);
+	algorithm.setGenerationGapsLocalSearch(params->localSearchEveryNGenerations);
 	//BRKGA<GaDecoderJobListSched, MTRand> algorithm((int)sched.getN(), params->nPop, params->pElt, params->pRpM, params->rhoe, decoder, rng, params->K, MAXT);
 
 	int iterationCounter = 0;

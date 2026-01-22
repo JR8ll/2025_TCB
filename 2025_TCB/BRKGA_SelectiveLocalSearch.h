@@ -18,7 +18,9 @@ private:
 	static_assert(std::is_same<Decoder, GaDecoderJobListSched>::value,
 		"BRKGA_SelectiveLocalSearch requires GaDecoderJobListSched");
 	int nLocalSearch;
+	int nGenerationGapsLocalSearch;
 	int currentGeneration;
+	
 
 public:
 	BRKGA_SelectiveLocalSearch(int n, int nPop, double pElt, double pRpM,
@@ -30,6 +32,9 @@ public:
 
 	void setLocalSearchFraction(double fraction) {
 		this->nLocalSearch = floor(fraction * (double)pe);
+	}
+	void setGenerationGapsLocalSearch(int nGenerations) {
+		nGenerationGapsLocalSearch = nGenerations;
 	}
 
 	void evolve(unsigned generations = 1) {
@@ -109,18 +114,24 @@ public:
 		#ifdef _OPENMP
 			#pragma omp parallel for num_threads(MAX_THREADS)
 		#endif
+
 		for (int i = int(pe); i < int(p); ++i) {
-			//if(currentGeneration % // TODO: if currentGeneration % 
-				if (i < int(pe) + nLocalSearch) {
+			if (i < int(pe) + nLocalSearch) {
+				// apply local search to a small subset of chromosomes...
+				if (currentGeneration % nGenerationGapsLocalSearch == 0) {
+					// ...in every ith generation.
 					next.setFitness(i, refDecoder.decodeWithLocalSearch(next.population[i]));
 				}
 				else {
 					next.setFitness(i, refDecoder.decode(next.population[i]));
 				}
-			
+			}
+			else {
+				next.setFitness(i, refDecoder.decode(next.population[i]));
+			}
 		}
 
-
+		
 
 		// Now we must sort 'current' by fitness, since things might have changed:
 		next.sortFitness();
