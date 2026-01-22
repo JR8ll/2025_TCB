@@ -148,7 +148,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 			schedParamsString << "n/a";
 		}
 		if (solverType == ALG_BRKGALISTSCH || solverType == ALG_BRKGALS2MILP) { //gaParams != nullptr) {
-			gaParamsString << gaParams->nPop << "|" << gaParams->pElt << "|" << gaParams->pRpM << "|" << gaParams->rhoe  << "|" << gaParams->K << "|" << gaParams->maxThreads << "|" << gaParams->applyLocalSearchBestFit << "|" << gaParams->localSearchFraction;
+			gaParamsString << gaParams->nPop << "|" << gaParams->pElt << "|" << gaParams->pRpM << "|" << gaParams->rhoe  << "|" << gaParams->K << "|" << gaParams->maxThreads << "|" << gaParams->applyLocalSearchBestFit << "|" << gaParams->localSearchFraction << "|" << gaParams->localSearchEveryNGenerations;
 		} else {
 			gaParamsString << "n/a";
 		}
