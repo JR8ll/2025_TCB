@@ -1,27 +1,8 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Functions.cpp
+  Solver_ILS.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Functions.cpp(120): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(20): warning C4267: '=' : conversion from 'size_t' to 'long', possible loss of data
-          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(31) : see reference to function template instantiation '_Ty std::_Accumulate<unsigned __int64*,_Ty,_Fn2>(_InIt,_InIt,_Ty,_Fn2)' being compiled
-          with
-          [
-              _Ty=long
-  ,            _Fn2=std::plus<void>
-  ,            _InIt=unsigned __int64 *
-          ]
-          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(39) : see reference to function template instantiation '_Ty std::accumulate<_InIt,_Ty,std::plus<void>>(_InIt,_InIt,_Ty,_Fn2)' being compiled
-          with
-          [
-              _Ty=long
-  ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>
-  ,            _Fn2=std::plus<void>
-          ]
-          Functions.cpp(163) : see reference to function template instantiation '_Ty std::accumulate<std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>,long>(_InIt,_InIt,_Ty)' being compiled
-          with
-          [
-              _Ty=long
-  ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>
-          ]
+Solver_ILS.cpp(76): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
+Solver_ILS.cpp(145): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(192): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

@@ -18,12 +18,14 @@ private:
 	static_assert(std::is_same<Decoder, GaDecoderJobListSched>::value,
 		"BRKGA_SelectiveLocalSearch requires GaDecoderJobListSched");
 	int nLocalSearch;
+	int currentGeneration;
 
 public:
 	BRKGA_SelectiveLocalSearch(int n, int nPop, double pElt, double pRpM,
 		double rhoe, Decoder& decoder, RNG& rng,
 		int K, int MAXT)
 		: BRKGA<Decoder, RNG>(n, nPop, pElt, pRpM, rhoe, decoder, rng, K, MAXT)	{
+		currentGeneration = 0;
 	}
 
 	void setLocalSearchFraction(double fraction) {
@@ -38,6 +40,7 @@ public:
 				std::swap(this->current[j], this->previous[j]);		// Update (prev = curr; curr = prev == next)
 			}
 		}
+		currentGeneration++;
 	}
 
 	void applyNonPersistantLocalSearch(double fraction) { // apply local search to the best <fraction> percent of the population
@@ -107,12 +110,13 @@ public:
 			#pragma omp parallel for num_threads(MAX_THREADS)
 		#endif
 		for (int i = int(pe); i < int(p); ++i) {
-			if (i < int(pe) + nLocalSearch) {
-				next.setFitness(i, refDecoder.decodeWithLocalSearch(next.population[i]));
-			}
-			else {
-				next.setFitness(i, refDecoder.decode(next.population[i]));
-			}
+			//if(currentGeneration % // TODO: if currentGeneration % 
+				if (i < int(pe) + nLocalSearch) {
+					next.setFitness(i, refDecoder.decodeWithLocalSearch(next.population[i]));
+				}
+				else {
+					next.setFitness(i, refDecoder.decode(next.population[i]));
+				}
 			
 		}
 

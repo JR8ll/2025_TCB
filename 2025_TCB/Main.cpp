@@ -30,7 +30,7 @@ mt19937 TCB::rng = mt19937(123456789);
 
 int main(int argc, char* argv[]) {
 
-	//Problem::genInstancesTCB25_Jun25_exactMILPvsCP();
+	Problem::genInstancesTCB25_Jun25_exactMILPvsCP();
 	//Problem::genInstancesEURO25_exact();
 	//Problem::genInstancesEURO25_integer();
 
@@ -56,56 +56,6 @@ int main(int argc, char* argv[]) {
 	auto start = chrono::high_resolution_clock::now();
 	chrono::seconds usedTime;
 	chrono::time_point<chrono::high_resolution_clock> stop;
-
-	//DEBUGGING 
-
-
-	//sched->lSchedJobsWithSorting(sortJobsDebugging, 0);
-	//sched->saveJsonFactory("BEFORE_PERT");
-	//sched->perturbRandomJobSwap();
-	//sched->saveJsonFactory("AFTER_RND_SWAP");
-	//sched->perturbRandomJobRightShifting();
-	//sched->perturbRandomJobRightShifting();
-	//sched->perturbRandomJobRightShifting();
-	//sched->localSearchBatchConsolidation();
-	//sched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");
-	//sched->localSearchJobLeftShifting();
-	//sched->saveJsonFactory("AFTER_JOBLEFTSHIFTING");
-	//
-
-	//bool test = false;
-	
-	/*sched->saveJsonFactory("JOBWISE");
-
-	sched->localSearchBatchConsolidation(false);
-	sched->saveJsonFactory("AFTER_BATCHCONSOLIDATION");
-	
-	sched->localSearchConsolidateBatch(0, 0, 2, 0, 3, 0);
-
-	sched->reset();
-	sched->lSchedJobsStageWiseBackwardWithSorting(sortJobsDebugging, 0);
-	sched->localSearchJobLeftShifting();
-	sched->saveJsonFactory("AFTER_LEFTSHIFT");
-
-	sched->reset();
-	sched->lSchedJobsStageWiseWithSorting(sortJobsDebugging, 0);
-	sched->saveJsonFactory("AFTER_STAGEWISE");
-
-
-	sched->debugSetR(2, 40);
-	sched->debugSetR(8, 0);
-	sched->debugAddMachine(3);
-	sched->saveJsonFactory("BEFORE");
-	vector<vector<pair<double, double>>> testOption = vector<vector<pair<double, double>>>();
-
-	Operation* testOp = sched->getScheduledJob(3)->getOpPtr(1);
-	vector<pair<double, double>> rShiftOptions = sched->getRightShiftOptions(testOp, 25);
-	pair<double, double> testR0 = sched->locSearchEvaluateJobRightShift(3, 1, 25, testOption);
-
-	sched->localSearchJobLeftShifting(&sortJobsByD, false);
-	sched->saveJsonFactory("AFTERLSHIFT");
-	sched->localSearchJobSwapping();
-	*/
 
 	// SOLVE
 	switch (iSolver) {
@@ -161,6 +111,7 @@ int main(int argc, char* argv[]) {
 	case ALG_ILS_PARALLELIZED:
 		solverName = "ILS_PARALLEL";
 		{
+			//cout << "BEWARE: extensive logging to find infinite loops in multithreading application..." << endl;
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
 			ils.solveILSparallelized(*sched.get(), init, sortJobsRandomly, iTilimSeconds);

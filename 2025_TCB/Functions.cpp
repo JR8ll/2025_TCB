@@ -182,7 +182,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		else if (solverType == ALG_LISTSCHEDATC || solverType == ALG_ITMILPLSHIFT) {
 			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
 		}
-		else if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED) {
+		else if (solverType == ALG_ILS || solverType == ALG_ILS_PARALLELIZED) {
 			int meanIlsIterations = 0;
 			if (!ilsParams->ilsIterations.empty()) {
 				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
@@ -191,6 +191,9 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 			}
 			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "avgIt=" << meanIlsIterations << "\t";
 		} 
+		else if (solverType == ALG_ITERATEDMILP) {
+			file << "relMipGap=" << std::fixed << std::setprecision(3) << decompParams->relMipGap << "\t";
+		}
 		else {
 			file << "n/a\t";
 		}
@@ -364,6 +367,7 @@ void loadGaParams(GA_params& gaParams, string filename) {
 		else if (key == "maxThreads") iss >> gaParams.maxThreads;
 		else if (key == "applyLocalSearchBestFit") iss >> gaParams.applyLocalSearchBestFit;
 		else if (key == "localSearchFraction") iss >> gaParams.localSearchFraction;
+		else if (key == "localSearchEveryNGenerations") iss >> gaParams.localSearchEveryNGenerations;
 	}
 	input.close();
 }

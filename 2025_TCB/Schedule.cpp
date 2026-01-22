@@ -978,7 +978,9 @@ void Schedule::perturbRandomJobSwap() {
 		k = distrib(TCB::rng);
 		++i;
 	}
-	locSearchSwapJobs(j, k);
+	if (i < max) {
+		locSearchSwapJobs(j, k);
+	}	
 }
 void Schedule::perturbRandomBatchRightShifting(){
 	// 1) randomly choose batch at first stage (TODO: maybe also consider laters stages)

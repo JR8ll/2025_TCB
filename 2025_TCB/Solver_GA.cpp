@@ -3,7 +3,6 @@
 #include<vector>
 
 #include "MTRand.h"	// brkgaAPI
-//#include "BRKGA.h"	// brkgaAPI
 #include "BRKGA_SelectiveLocalSearch.h"
 
 #include "Solver_GA.h"
@@ -67,6 +66,9 @@ GA_params Solver_GA::getDefaultParams() {
 	gaParams.K = 3;
 	int processor_count = std::thread::hardware_concurrency();
 	gaParams.maxThreads = max(1, processor_count);
+	gaParams.applyLocalSearchBestFit = true;
+	gaParams.localSearchFraction = 0.05;
+	gaParams.localSearchEveryNGenerations = 1;
 	return gaParams;
 }
 

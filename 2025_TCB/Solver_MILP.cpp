@@ -617,6 +617,8 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 		env.end();
 	}
 
+	params->relMipGap = cplex.getMIPRelativeGap();	// [JR-2026-Jan-21] output rel MIP gap of last iteration (only really interesting for exact solutions with nDash == n
+
 	cout << ".";
 	// construct schedule from solution
 	for (int stg = 0; stg < nStages; ++stg) {
@@ -786,6 +788,10 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule
 	unique_ptr<Schedule> initSched = schedule->clone();
 	initSched->lSchedJobsWithSorting(initRule);
 	initSched->updateWaitingTimes();
+
+	// DEBUGGING
+	//initSched->saveJsonFactory("INITIAL_SCHEDULE_EDD");
+
 	schedule->mimicWaitingTimes(initSched.get());
 
 	while (schedule->getN() > 0) {
@@ -798,6 +804,10 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule
 
 		// ASSIGN THE NEXT NDASH JOBS
 		solveJobBasedMILP(schedule, nDash, cplexTilim);
+
+		// DEBUGGING
+		//schedule->saveJsonFactory("PARTIAL_SCHEDULE_AFTER_ITERATION");
+		//int breakpoint = 666;
 
 	}
 
