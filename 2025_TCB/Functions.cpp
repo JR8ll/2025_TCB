@@ -391,6 +391,7 @@ void loadDecompParams(DECOMPMILP_params& decompParams, string filename) {
 		else if (key == "cplexTilim") iss >> decompParams.cplexTilim;
 		else if (key == "method") iss >> decompParams.method;
 		else if (key == "initPrioRule") iss >> decompParams.initPrioRule;
+		else if (key == "presetMipGap") iss >> decompParams.presetMipGap;
 	}
 	input.close();
 }

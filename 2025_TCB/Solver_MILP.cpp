@@ -588,6 +588,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	IloCplex cplex(mod);
 	cplex.setOut(env.getNullStream());				// GO-LIVE: uncomment
 	//cplex.exportModel("milp.lp");					// GO-LIVE: comment
+	cplex.setParam(IloCplex::EpGap, params->presetMipGap);	// [JR-2026-Jan-23]
 	cplex.setParam(IloCplex::TiLim, cplexTilim);	
 
 	try {
@@ -821,6 +822,7 @@ DECOMPMILP_params Solver_MILP::getDefaultParams() {
 	decompParams.cplexTilim = 60;
 	decompParams.method = DECOMP_SOLVER_MILP;
 	decompParams.initPrioRule = PRIORULE_EDD;
+	decompParams.presetMipGap = 0.0001;
 	return decompParams;
 }
 

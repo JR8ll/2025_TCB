@@ -21,6 +21,7 @@ struct DECOMPMILP_params {
 	int cplexTilim;				// time limit for MILP/CP solver
 	int method;					// 1: MILP, 2: CP
 	int initPrioRule;			// 1: EDD, 2: FCFS, ...
+	double presetMipGap;		// accuracy set on the CPLEX solver
 	double relMipGap;			// reporting: relative MIP gap from the last iteration
 };
 
