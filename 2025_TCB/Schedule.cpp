@@ -798,6 +798,12 @@ double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtM
 		double opR = op->getAvailability();
 		if (opR < bat2->getStart() && opR > bat1->getStart()) {	// this move is only relevant if op can be left shifted (< current start) and it cannot simply be inserted into previous batch (otherwise an insertion/shift move would do the trick)
 			if (op->getS() <= bat1->getAvailableCap()) {
+				
+				// DEBUGGING
+				if (idxWc == 2 && tgtMac == 0 && tgtBatch == 16 && srcBatch == 17) {
+					int debugger = 666;
+				}
+				
 				unique_ptr<Schedule> copySched = clone();
 				if (copySched->localSearchConsolidateBatch(idxWc, tgtMac, tgtBatch, srcMac, srcBatch, movingOpIdx)) {
 					double tempTWT = copySched->getTWT();
@@ -851,8 +857,7 @@ bool Schedule::localSearchConsolidateBatch(size_t wcIdx, size_t tgtMacIdx, size_
 				for (size_t b = 0; b < currentMac->size(); ++b) {
 					Batch* currentBat = &(*currentMac)[b];
 					if (currentBat->getStart() < originalCompletion) {
-						// if a batch was started before the left shifted batch, it cannot have been affected
-						continue;
+						continue;	// if a batch was started before the left shifted batch, it cannot have been affected
 					}
 					// Batches from here on may have been affected, successive batches may still be affected even if 
 					
@@ -873,7 +878,6 @@ bool Schedule::localSearchConsolidateBatch(size_t wcIdx, size_t tgtMacIdx, size_
 		// delete srcbatch after job insertion into target
 		size_t srcBatIdx = srcBat->getIdx();
 		srcMac->removeBatch(srcBatIdx);
-		// TODO this may have enabled additional left shifts
 	}
 
 	// left shifting of the successors of the left shifted operation
@@ -890,14 +894,20 @@ bool Schedule::localSearchConsolidateBatch(size_t wcIdx, size_t tgtMacIdx, size_
 				bool bDiscreteMove;	// if true, succOp is inserted into existing batch
 				vector<pair<double, double>> possibleLeftShifts = getLeftShiftOptions(succOp);
 				for (size_t opt = 0; opt < possibleLeftShifts.size(); ++opt) {
-					if ((possibleLeftShifts[opt].first == possibleLeftShifts[opt].second && possibleLeftShifts[opt].first <= maxLeftShift + TCB::precision)
-						||(possibleLeftShifts[opt].first >= possibleLeftShifts[opt].second && possibleLeftShifts[opt].second <= maxLeftShift + TCB::precision) ) {
-						bDiscreteMove = executeLeftShiftOption(succOp, possibleLeftShifts[opt]);
+					if ((possibleLeftShifts[opt].first == possibleLeftShifts[opt].second && possibleLeftShifts[opt].first <= maxLeftShift + TCB::precision)) {	
+						bDiscreteMove = executeLeftShiftOption(succOp, possibleLeftShifts[opt]); 
+						break;
+					}
+					// [JR-2026-Jan-24] seperate condition for continuous moves
+					if (possibleLeftShifts[opt].second <= maxLeftShift + TCB::precision) { // [JR-2026-Jan-25] deleted condition part (possibleLeftShifts[opt].first >= possibleLeftShifts[opt].second &&
+						pair<double, double> optionToBeExecuted = make_pair(min(maxLeftShift, possibleLeftShifts[opt].first), possibleLeftShifts[opt].second);
+						executeLeftShiftOption(succOp, optionToBeExecuted); 
+						bDiscreteMove = false;
 						break;
 					}
 				}
 
-				if ((bDiscreteMove && bOnlyOp) || !bDiscreteMove) {
+				if ((bDiscreteMove && bOnlyOp) || !bDiscreteMove) {		// [JR-2026-Jan-24] changed (bDiscreteMove && bOnlyOp) || !bDiscreteMove) to bOnlyOp
 					// in this case left shifting succeeding batches at this machine may have become feasible
 					for (size_t b = 0; b < succMac->size(); ++b) {
 						// consider all batches starting later than original succBatch start
@@ -1201,13 +1211,20 @@ bool Schedule::localSearchBatchConsolidation(bool bestFit) {
 			for (size_t m = 0; m < workcenter->size(); ++m) {
 				Machine* machine = &(*workcenter)[m];
 
-				for (int b = 0; (b + 1) < machine->size(); ++b) {		// beware of trap: ->size() returns size_t, so ->size() - 1 would become a big value for ->size() == 0 !!!
+				for (int b = 0; (b + 1) < machine->size(); ++b) {		
 						Batch* batch = &(*machine)[b];
 						Batch* succB = &(*machine)[b + 1];	
 
 						if (batch->getF() == succB->getF()) {
 							for (size_t op = 0; op < succB->size(); ++op) {
-								size_t opIdx = op;	// by value			
+								size_t opIdx = op;	// by value
+
+								// DEBUGGING
+								if (o == 2 && m == 0 && b == 16) {
+									int debugger = 666;
+								}
+
+
 								double tempImprovement = localSearchEvaluateBatchConsolidation(o, m, b, m, b+1, opIdx);	// opIdx by reference
 								
 								if (tempImprovement > bestImprovement) {
@@ -1238,7 +1255,9 @@ bool Schedule::localSearchBatchConsolidation(bool bestFit) {
 
 		if (bestFit && bestImprovement > 0) {
 			// BEST FIT => execute best move if improvement > 0
-			localSearchConsolidateBatch(bestWc, bestM, bestB, bestM, bestB+1, bestOp);		
+			if (!localSearchConsolidateBatch(bestWc, bestM, bestB, bestM, bestB + 1, bestOp)) {
+				throw(ExcSched("INVALID SCHEDULE AFTER CONSOLIDATE BATCH"));	// [JR-2026-Jan-24]
+			}
 
 			bImprovedOnce = true;
 			bImproving = true;
@@ -2167,5 +2186,25 @@ void Schedule::debugAllBatchesNotEmptyAndWithMachineReference() {
 			}
 		}
 	}
+}
+
+bool Schedule::debugNoTwoBatchesStartingSimultaneously() {
+	for (size_t wcIdx = 0; wcIdx < size(); ++wcIdx) {
+		Workcenter* wc = workcenters[wcIdx].get();
+		for (size_t mIdx = 0; mIdx < wc->size(); ++mIdx) {
+			Machine* mac = &(*wc)[mIdx];
+			for (size_t bIdx = 0; bIdx < mac->size(); ++bIdx) {
+				for (size_t cIdx = 0; cIdx < mac->size(); ++cIdx) {
+					if (bIdx != cIdx) {
+						if ((*mac)[bIdx].getStart() == (*mac)[cIdx].getStart()) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return false;
 }
 

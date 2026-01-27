@@ -202,12 +202,6 @@ void Workcenter::ensureValidity(Operation* op) {
 }
 
 void Workcenter::ensureValidityFixedBatchFormation(Operation* op) {
-
-	// DEBUGGING
-	if (op->getId() == 49 && op->getStg() == 3) {
-		int debugger = 666;
-	}
-
 	bool bValid = false;
 	bool bOverlaps = true;
 	bool bTcViolations = true;
@@ -350,7 +344,7 @@ void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pus
 
 							
 	// push right at same machine
-	if (bestStart > from - TCB::precision && bestStart < from + TCB::precision) {
+	if (bestStart > from - TCB::precision && bestStart < from + TCB::precision && bestMacIdx != mIdx) {		// [JR-2026-Jan-27] added && bestMacIdx != mIdx (Problem: necessary rightShifts from pushingSuccessors may be pending)
 		// pushing successors is not necessary because the ideal position is available at another machine
 		moveBatch(bat, bestMacIdx, bestStart, checkValidity);
 	} else if (pushingSuccessors) {		
@@ -361,7 +355,9 @@ void Workcenter::rightShiftBatch(size_t mIdx, size_t bIdx, double from, bool pus
 			Batch* succBat = &(*mac)[myBatIdx + 1];
 			if (bat->getC() > succBat->getStart()) {
 				// RECURSION
-				rightShiftBatch(mIdx, myBatIdx + 1, bat->getC(), pushingSuccessors, checkValidity);
+				if (!succBat->isEmpty()) {			// [JR-2026-Jan-01]	added guard
+					rightShiftBatch(mIdx, myBatIdx + 1, bat->getC(), pushingSuccessors, checkValidity);
+				}
 			}
 		} 
 	} else {
@@ -477,6 +473,7 @@ void Workcenter::findBestStartNotBefore(Batch* batch, size_t& bestMacIdx, double
 			tempStart = notBefore;
 			return;
 		}
+		if (batch->size() <= 0) TCB::logger.Log(Error, "Workcenter::findBestSTartNotBefore(...) - BATCH EMPTY!");
 		double earliestSlot = mac->getEarliestSlot(notBefore, (*batch)[0]);
 		if (earliestSlot < tempStart) {
 			tempStart = earliestSlot;
@@ -650,3 +647,20 @@ double Workcenter::getMinMSP() const {
 	}
 	return minMSP;
 }
+
+bool Workcenter::debugNoTwoBatchesStartingSimultaneously() {
+	for (size_t mIdx = 0; mIdx < machines.size(); ++mIdx) {
+		Machine* mac = machines[mIdx].get();
+		for (size_t bIdx = 0; bIdx < mac->size(); ++bIdx) {
+			for (size_t cIdx = 0; cIdx < mac->size(); ++cIdx) {
+				if (bIdx != cIdx) {
+					if ((*mac)[bIdx].getStart() == (*mac)[cIdx].getStart()) {
+						//cout << "See mac[" << mIdx << "] starting at " << (*mac)[bIdx].getStart() << endl;
+						return false;
+					}
+				}
+			}
+		}
+	}
+}
+

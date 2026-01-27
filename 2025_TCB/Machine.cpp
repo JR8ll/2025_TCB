@@ -201,7 +201,7 @@ bool Machine::hasOverlaps() const {
 		double start1 = batches[b1]->getStart(); 
 		double completion1 = batches[b1]->getC();
 		for (size_t b2 = 0; b2 < size(); ++b2) {
-			if (b1 != b2) {
+			if (b1 != b2 && (!batches[b1]->isEmpty() && !batches[b2]->isEmpty())) {		// [JR-2026-Jan-25] added !isEmpty() for both batches
 				double start2 = batches[b2]->getStart();
 				double completion2 = batches[b2]->getC();
 				if (start1 + TCB::precision < start2 && completion1 - TCB::precision > start2) {

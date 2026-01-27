@@ -62,4 +62,6 @@ public:
 	double getTWT() const;		// total weighted tardiness
 	double getMinMSP() const;	// smallest makespan (completion of last batch)
 
+	bool debugNoTwoBatchesStartingSimultaneously();
+	
 };

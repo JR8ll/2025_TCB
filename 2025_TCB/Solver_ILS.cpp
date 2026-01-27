@@ -32,12 +32,12 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
             // LOCAL SEARCH
             
            // DEBUGGING
-           //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
-           //TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
-           //if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 2222) {
-           //     tempSched->saveJsonFactory("DEBUGGING");
-           //     int debugger = 666;
-           // }
+           /*cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << " TWT: " << bestTWT << endl;
+           TCB::logger.Log(Info, to_string(params->ilsIterations[params->multiStartIterations] + 1));
+           if (params->multiStartIterations + 1 == 1 && params->ilsIterations[params->multiStartIterations] + 1 == 28) {
+                tempSched->saveJsonFactory("debugging");
+                int debugger = 666;
+            }*/
             
             // [JR-2026-Jan-12] wrapped local search in do-while-loop
             bool bLeftShiftApplied = false;
