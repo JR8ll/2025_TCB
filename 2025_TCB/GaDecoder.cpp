@@ -37,7 +37,13 @@ double GaDecoderJobListSched::applyNonPersitentLocalSearch(Schedule* sched) cons
 void GaDecoderJobListSched::formSchedule(const std::vector<double>& chr)
 {
 	masterSched->lSchedJobsWithRandomKeySorting(sortJobsByRK, chr);
-    if (gaParams->localSearchFraction > 0.0) {
-        applyNonPersitentLocalSearch(masterSched);
+    if (gaParams != nullptr) {
+        if (gaParams->localSearchFraction > 0.0) {
+            applyNonPersitentLocalSearch(masterSched);
+        }
     }
+}
+
+Schedule* GaDecoderJobListSched::returnSchedule() {
+    return masterSched;
 }

@@ -18,5 +18,6 @@ public:
 	double decodeWithLocalSearch(const std::vector<double>& chr) const;
 	double applyNonPersitentLocalSearch(Schedule* sched) const;									// non-inheritabel local search (not encodable)
 	void formSchedule(const std::vector<double>& chr);
+	Schedule* returnSchedule();
 };
 

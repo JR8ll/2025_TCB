@@ -6,13 +6,16 @@
 #include "Common_aliases.h"
 #include "Log.h"
 
-static const int ALG_ITERATEDMILP = 1;		// iterated MILP solving
-static const int ALG_LISTSCHEDATC = 2;		// simple List scheduling approach
-static const int ALG_BRKGALISTSCH = 3;		// biased random-key ga with a list scheduling decoder
-static const int ALG_BRKGALS2MILP = 4;		// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
-static const int ALG_ILS = 5;
-static const int ALG_ILS_PARALLELIZED = 6;
-static const int ALG_ITMILPLSHIFT = 7;		// iterated MILP solving with final left-shifting local search improvement
+static const int ALG_ITERATEDMILP = 1;						// iterated MILP solving
+static const int ALG_LISTSCHEDATC = 2;						// simple List scheduling approach
+static const int ALG_BRKGALISTSCH = 3;						// biased random-key ga with a list scheduling decoder
+static const int ALG_BRKGALS2MILP = 4;						// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
+static const int ALG_ILS = 5;								// LS working on a Schedule-object
+static const int ALG_ILS_PARALLELIZED = 6;					// LS working on a Schedule-object parallelized
+static const int ALG_ILS_PERMUTATION = 7;					// LS working on a sequence/permutation/chromosome
+static const int ALG_ILS_PERMUTATION_PARALLELIZED = 8;		// LS working on a sequence/permutation/chromosome parallelized
+static const int ALG_ILS_HYBRID = 9;						// Starts with ILS on sequence, eventually switches to ILS on schedule-object
+static const int ALG_ITMILPLSHIFT = 10;						// iterated MILP solving with final left-shifting local search improvement
 
 struct GA_params;
 struct ILS_params;

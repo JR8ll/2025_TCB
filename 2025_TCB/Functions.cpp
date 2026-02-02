@@ -99,7 +99,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 	}
 
 	if (argc > 9) {
-		if (iSolver == ALG_ILS || iSolver == ALG_ILS_PARALLELIZED) {
+		if (iSolver == ALG_ILS || iSolver == ALG_ILS_PARALLELIZED || iSolver == ALG_ILS_PERMUTATION || iSolver == ALG_ILS_PERMUTATION_PARALLELIZED || iSolver == ALG_ILS_HYBRID) {
 			try {
 				loadILSParams(ilsParams, argv[9]);
 			}
@@ -157,7 +157,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		} else {
 			decompParamsString << "n/a";
 		}
-		if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED) { //ilsParams != nullptr) {
+		if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED || solverType == ALG_ILS_PERMUTATION || solverType == ALG_ILS_PERMUTATION_PARALLELIZED || solverType == ALG_ILS_HYBRID) { //ilsParams != nullptr) {
 			/*int meanIlsIterations = 0;
 			if (!ilsParams->ilsIterations.empty()) {
 				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
@@ -182,7 +182,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		else if (solverType == ALG_LISTSCHEDATC || solverType == ALG_ITMILPLSHIFT) {
 			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
 		}
-		else if (solverType == ALG_ILS || solverType == ALG_ILS_PARALLELIZED) {
+		else if (solverType == ALG_ILS || solverType == ALG_ILS_PARALLELIZED || solverType == ALG_ILS_PERMUTATION || solverType == ALG_ILS_PERMUTATION_PARALLELIZED || solverType == ALG_ILS_HYBRID) {
 			int meanIlsIterations = 0;
 			if (!ilsParams->ilsIterations.empty()) {
 				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
@@ -410,7 +410,8 @@ void loadILSParams(ILS_params& ilsParams, string filename) {
 		if (key == "nStarts") iss >> ilsParams.nStarts;
 		else if (key == "nPerturbationSteps") iss >> ilsParams.nPerturbationSteps;
 		else if (key == "applyBestFit") iss >> ilsParams.applyBestFit;										// 0 (false) or 1 (true)
-		else if (key == "randomizedLocalSearchSequence") iss >> ilsParams.randomizedLocalSearchSequence;	// 0 (false) or 1 (true)	
+		else if (key == "randomizedLocalSearchSequence") iss >> ilsParams.randomizedLocalSearchSequence;	// 0 (false) or 1 (true)
+		else if (key == "firstPhaseTimeLimitAllocation") iss >> ilsParams.firstPhaseTimeLimitAllocation;
 	}
 	input.close();
 }

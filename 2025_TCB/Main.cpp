@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
 		}
 		break;
 	case ALG_ILS:
-		solverName = "ILS";
+		solverName = "ILS";																												// 5
 		{
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 		}
 		break;
 	case ALG_ILS_PARALLELIZED:
-		solverName = "ILS_PARALLEL";
+		solverName = "ILS_PARALLEL";																									// 6
 		{
 			//cout << "BEWARE: extensive logging to find infinite loops in multithreading application..." << endl;
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
@@ -117,8 +117,27 @@ int main(int argc, char* argv[]) {
 			ils.solveILSparallelized(*sched.get(), init, sortJobsRandomly, iTilimSeconds);
 		}
 		break;
+	case ALG_ILS_PERMUTATION: 
+		solverName = "ILS_PERMUTATION";																									// 7
+		{
+			Solver_Sequence_ILS ilsSeq = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams);
+			ilsSeq.solveILS(*sched.get(), iTilimSeconds);
+		}
+		break;
+	case ALG_ILS_PERMUTATION_PARALLELIZED:
+		solverName = "ILS_PERMUTATION_PARALLEL";																						// 8
+		{
+			cout << "Branch ILS_PERMUTATION_PARALLEL not yet implemented." << endl;
+		}
+		break;
+	case ALG_ILS_HYBRID:
+		solverName = "ILS_HYBRID";																										// 9
+		{
+			cout << "Branch ILS_HYBRID not yet implemented." << endl;
+		}
+		break;
 	case ALG_ITMILPLSHIFT: 
-		solverName = "MILP2LSHIFT";
+		solverName = "MILP2LSHIFT";																										// 10
 		{
 			Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
 			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim, sortJobsByD, sortJobsByGATC);

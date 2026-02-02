@@ -1,7 +1,5 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Workcenter.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  GaDecoder.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Workcenter.cpp(34): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\workcenter.cpp(665): warning C4715: 'Workcenter::debugNoTwoBatchesStartingSimultaneously' : not all control paths return a value
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

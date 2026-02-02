@@ -31,6 +31,9 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(20): warn
   GaDecoder.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Job.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Log.cpp
   Machine.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -75,6 +78,8 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): war
           [
               _Ty=Job
           ]
+  Product.cpp
+Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -83,17 +88,17 @@ Schedule.cpp(119): warning C4267: 'argument' : conversion from 'size_t' to 'int'
 Schedule.cpp(128): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(257): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(460): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(975): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1060): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1101): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1143): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1147): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1695): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1696): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1822): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1823): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(2054): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-Schedule.cpp(2144): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(981): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1066): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1107): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1149): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1153): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1708): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1709): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1835): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(1836): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Schedule.cpp(2067): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Schedule.cpp(2157): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
   Solver_CP.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -217,7 +222,7 @@ c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: 
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 Workcenter.cpp(34): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Generating code
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1445): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1458): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
   Finished generating code
 concert.lib(ilosstructi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosstructi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Release\concert.pdb'; linking object as if no debug info
 concert.lib(ilohash.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilohash.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Release\concert.pdb'; linking object as if no debug info
