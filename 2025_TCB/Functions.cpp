@@ -5,6 +5,7 @@
 #include <string>
 #include <Windows.h>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <unordered_map>
 
@@ -99,7 +100,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 	}
 
 	if (argc > 9) {
-		if (iSolver == ALG_ILS || iSolver == ALG_ILS_PARALLELIZED || iSolver == ALG_ILS_PERMUTATION || iSolver == ALG_ILS_PERMUTATION_PARALLELIZED || iSolver == ALG_ILS_HYBRID) {
+		if (iSolver == ALG_ILS || iSolver == ALG_ILS_PARALLELIZED || iSolver == ALG_ILS_SEQUENCE || iSolver == ALG_ILS_SEQUENCE_PARALLELIZED || iSolver == ALG_ILS_HYBRID) {
 			try {
 				loadILSParams(ilsParams, argv[9]);
 			}
@@ -157,7 +158,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		} else {
 			decompParamsString << "n/a";
 		}
-		if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED || solverType == ALG_ILS_PERMUTATION || solverType == ALG_ILS_PERMUTATION_PARALLELIZED || solverType == ALG_ILS_HYBRID) { //ilsParams != nullptr) {
+		if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED || solverType == ALG_ILS_SEQUENCE || solverType == ALG_ILS_SEQUENCE_PARALLELIZED || solverType == ALG_ILS_HYBRID) { //ilsParams != nullptr) {
 			/*int meanIlsIterations = 0;
 			if (!ilsParams->ilsIterations.empty()) {
 				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
@@ -182,7 +183,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		else if (solverType == ALG_LISTSCHEDATC || solverType == ALG_ITMILPLSHIFT) {
 			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
 		}
-		else if (solverType == ALG_ILS || solverType == ALG_ILS_PARALLELIZED || solverType == ALG_ILS_PERMUTATION || solverType == ALG_ILS_PERMUTATION_PARALLELIZED || solverType == ALG_ILS_HYBRID) {
+		else if (solverType == ALG_ILS || solverType == ALG_ILS_PARALLELIZED || solverType == ALG_ILS_SEQUENCE || solverType == ALG_ILS_SEQUENCE_PARALLELIZED || solverType == ALG_ILS_HYBRID) {
 			int meanIlsIterations = 0;
 			if (!ilsParams->ilsIterations.empty()) {
 				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
@@ -431,6 +432,15 @@ Sched_params getDefaultParams() {
 
 double getObjectiveTWT(const Schedule* sched) {
 	return sched->getTWT();
+}
+
+void coutDblVec(std::vector<double>& vec){
+	cout << "[";
+	cout << fixed << setprecision(2);
+	for (size_t i = 0; i < vec.size() - 1; ++i) {
+		cout << vec[i] << ", ";
+	}
+	cout << vec[vec.size()-1] << "]" << endl;
 }
 
 vector<double> getDoubleGrid(double low, double high, double step) {

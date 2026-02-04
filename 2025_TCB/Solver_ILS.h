@@ -27,6 +27,14 @@ struct ILS_Thread {
 	int multiStartIterations = 0;
 };
 
+struct ILSseq_Thread {
+	double bestTWT = DBL_MAX;
+	std::vector<double> bestChr;
+	double bestAfterSeconds = 0.0;
+	std::vector<size_t> ilsIterations;
+	int multiStartIterations = 0;
+};
+
 class Solver_ILS {
 protected:
 	Sched_params* schedParams;
@@ -38,7 +46,7 @@ public:
 	double solveILSparallelized(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);
 	double solveILSonJobSequence(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);		// local search on sequence permutation (insert, swap)
 
-	static void workerILS(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams,  initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localILS, double pWait = 0.0);
+	static void workILS(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams,  initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localILS, double pWait = 0.0);
 	static ILS_params getDefaultParams();
 
 	static std::vector<DWORD> GetPCoreIndices();
@@ -46,30 +54,51 @@ public:
 
 class Solver_Sequence_ILS : public Solver_ILS {
 private: 
-	GaDecoderJobListSched decoder;	// means to decode a schedule from a given random key sequence
-	std::vector<double> chr;		// chromosome = random key vector
-	std::vector<double> bestChr;	
+	std::vector<double> currentChr;
+	std::vector<double> bestChr;
 	double currentTWT;
 	double bestTWT;
+	Schedule* masterSched;
 
 public: 
 	Solver_Sequence_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters);
 	~Solver_Sequence_ILS();
 
-	double solveILS(Schedule& sched, int iTilimSeconds);
+	double solveILSseq(Schedule& sched, int iTilimSeconds);
+	double solveILSseqParallelized(Schedule& sched, int iTilimSeconds);
 
-	void insertJob(std::vector<double>& perm, size_t jobIdx, size_t posIdx);		// move random key from [jobIdx] to [posIdx]
-	void swapJob(std::vector<double>& perm, size_t firstIdx, size_t secondIdx);		// swap keys at two indices
+	void insertJob(size_t jobIdx, size_t posIdx);		// move random key from [jobIdx] to [posIdx]
+	void swapJob(size_t firstIdx, size_t secondIdx);		// swap keys at two indices
 	double evaluateJobInsert(size_t jobIdx, size_t posIdx);
 	double evaluateJobSwap(size_t firstIdx, size_t secondIdx);
 	bool localSearchInsertJob(bool bestFit = true);
 	bool localSearchSwapJob(bool bestFit = true);
 
-	void perturbJobInsert();	// insert a randomly picked job to a randomly picked position
-	void perturbJobSwap();		// swap two randomly chosen random keys
-	void perturbRandomKey();	// reinitialize a random key at a randomly picked position
+	void insertJob(std::vector<double>& perm, size_t jobIdx, size_t posIdx);		// move random key from [jobIdx] to [posIdx]
+	void swapJob(std::vector<double>& perm, size_t firstIdx, size_t secondIdx);		// swap keys at two indices
+	double evaluateJobInsert(std::vector<double>& chromosome, size_t jobIdx, size_t posIdx);
+	double evaluateJobSwap(std::vector<double>& chromosome, size_t firstIdx, size_t secondIdx);
+	bool localSearchInsertJob(std::vector<double>& chromosome, bool bestFit = true);
+	bool localSearchSwapJob(std::vector<double>& chromosome, bool bestFit = true);
+
+	
+	void perturbJobInsert();									// insert a randomly picked job to a randomly picked position
+	void perturbJobSwap();										// swap two randomly chosen random keys
+	void perturbRandomKey();									// reinitialize a random key at a randomly picked position
+	void perturbJobInsert(std::vector<double>& chromosome);		// insert a randomly picked job to a randomly picked position
+	void perturbJobSwap(std::vector<double>& chromosome);		// swap two randomly chosen random keys
+	void perturbRandomKey(std::vector<double>& chromosome);		// reinitialize a random key at a randomly picked position
+
+	void decode(Schedule* sched, std::vector<double>& chromosome);
+	void formMasterSchedule(std::vector<double>& chromosome);
+	double decodeAndGetTWT(std::vector<double>& chr);
+	static double staticDecodeAndGetTWT(Schedule* sched, std::vector<double>& chr);
 
 	void initRandomPermutation();
+	static void initRandomPermutation(std::vector<double>& chromosome);
+
+	static void workILSseq(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILSseq_Thread* localILS);
 
 };
+
 

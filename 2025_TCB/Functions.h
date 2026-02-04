@@ -12,8 +12,8 @@ static const int ALG_BRKGALISTSCH = 3;						// biased random-key ga with a list 
 static const int ALG_BRKGALS2MILP = 4;						// get best sequence from brkga, then iteratively apply ops from this sequence to MILP
 static const int ALG_ILS = 5;								// LS working on a Schedule-object
 static const int ALG_ILS_PARALLELIZED = 6;					// LS working on a Schedule-object parallelized
-static const int ALG_ILS_PERMUTATION = 7;					// LS working on a sequence/permutation/chromosome
-static const int ALG_ILS_PERMUTATION_PARALLELIZED = 8;		// LS working on a sequence/permutation/chromosome parallelized
+static const int ALG_ILS_SEQUENCE = 7;						// LS working on a sequence/permutation/chromosome
+static const int ALG_ILS_SEQUENCE_PARALLELIZED = 8;			// LS working on a sequence/permutation/chromosome parallelized
 static const int ALG_ILS_HYBRID = 9;						// Starts with ILS on sequence, eventually switches to ILS on schedule-object
 static const int ALG_ITMILPLSHIFT = 10;						// iterated MILP solving with final left-shifting local search improvement
 
@@ -54,6 +54,7 @@ public:
 void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams, ILS_params& ilsParams);
 void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams, ILS_params* ilsParams);
 
+
 void sortJobsRandomly(std::vector<pJob>& jobs);		
 void sortJobsByC(std::vector<pJob>& jobs);									// by completion (to be called on scheduled jobs)
 void sortJobsByStart(std::vector<pJob>& jobs);								// by start	(to be called on scheduled jobs)
@@ -82,6 +83,8 @@ void loadILSParams(ILS_params& ilsParams, std::string filename);
 Sched_params getDefaultParams();
 
 double getObjectiveTWT(const Schedule* sched);
+
+void coutDblVec(std::vector<double>& vec);
 
 std::vector<double> getDoubleGrid(double low, double high, double step);
 

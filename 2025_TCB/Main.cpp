@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
 		{
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
-			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);	
+			ils.solveILS(*sched.get(), init, sortJobsRandomly, iTilimSeconds);
 		}
 		break;
 	case ALG_ILS_PARALLELIZED:
@@ -117,17 +117,18 @@ int main(int argc, char* argv[]) {
 			ils.solveILSparallelized(*sched.get(), init, sortJobsRandomly, iTilimSeconds);
 		}
 		break;
-	case ALG_ILS_PERMUTATION: 
-		solverName = "ILS_PERMUTATION";																									// 7
+	case ALG_ILS_SEQUENCE: 
+		solverName = "ILS_SEQ";																											// 7
 		{
 			Solver_Sequence_ILS ilsSeq = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams);
-			ilsSeq.solveILS(*sched.get(), iTilimSeconds);
+			ilsSeq.solveILSseq(*sched.get(), iTilimSeconds);
 		}
 		break;
-	case ALG_ILS_PERMUTATION_PARALLELIZED:
-		solverName = "ILS_PERMUTATION_PARALLEL";																						// 8
+	case ALG_ILS_SEQUENCE_PARALLELIZED:
+		solverName = "ILS_SEQ_PARALLEL";																								// 8
 		{
-			cout << "Branch ILS_PERMUTATION_PARALLEL not yet implemented." << endl;
+			Solver_Sequence_ILS ilsSeq = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams);
+			ilsSeq.solveILSseqParallelized(*sched.get(), iTilimSeconds);
 		}
 		break;
 	case ALG_ILS_HYBRID:
