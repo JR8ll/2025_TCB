@@ -44,9 +44,11 @@ public:
 	Solver_ILS(Sched_params& schedParams, ILS_params& ilsParams);
 	double solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);					// local search on schedule (insert job, swap job, merge batch)
 	double solveILSparallelized(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);
+	double solveILSparallelized(Schedule& sched, initializerRK<pJob> init, const std::vector<double>& randomKeys, int iTilimSeconds, double pWait = 0.0);
 	double solveILSonJobSequence(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);		// local search on sequence permutation (insert, swap)
 
-	static void workILS(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams,  initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localILS, double pWait = 0.0);
+	static void workILS(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams,  initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localBest, double pWait = 0.0);
+	static void workILSrk(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializerRK<pJob> init, const std::vector<double>& randomKeys, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localBest, double pWait = 0.0);
 	static ILS_params getDefaultParams();
 
 	static std::vector<DWORD> GetPCoreIndices();
@@ -81,7 +83,8 @@ public:
 	bool localSearchInsertJob(std::vector<double>& chromosome, bool bestFit = true);
 	bool localSearchSwapJob(std::vector<double>& chromosome, bool bestFit = true);
 
-	
+	std::vector<double> getBestChr();
+
 	void perturbJobInsert();									// insert a randomly picked job to a randomly picked position
 	void perturbJobSwap();										// swap two randomly chosen random keys
 	void perturbRandomKey();									// reinitialize a random key at a randomly picked position
@@ -98,7 +101,19 @@ public:
 	static void initRandomPermutation(std::vector<double>& chromosome);
 
 	static void workILSseq(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILSseq_Thread* localILS);
+};
 
+class Solver_Hybrid_ILS {
+private:
+	Solver_Sequence_ILS phase1;
+	Solver_ILS phase2;
+	Sched_params* schedParams;
+	ILS_params* ilsParams;
+public:
+	Solver_Hybrid_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters);
+	~Solver_Hybrid_ILS();
+
+	double solveILShybrid(Schedule& sched, int iTilimTotal);
 };
 
 

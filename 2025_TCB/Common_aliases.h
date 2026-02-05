@@ -32,3 +32,6 @@ using objectiveFunction = double(*)(const Schedule*);
 
 template<typename T>
 using initializer = void(Schedule::*)(prioRule<T>, Sched_params&);
+
+template<typename T>
+using initializerRK = void(Schedule::*)(prioRuleKeySet<T>, const std::vector<double>& keys, Sched_params&);

@@ -4,14 +4,20 @@ c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpec
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 Solver_ILS.cpp(65): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
 Solver_ILS.cpp(121): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(174): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(272): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(340): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(615): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(625): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(636): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(644): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(654): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(665): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(733): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(158): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(211): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(275): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(373): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
+Solver_ILS.cpp(441): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(718): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(728): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(739): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(747): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(757): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(768): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(836): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  Main.cpp
+  Functions.cpp
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe
