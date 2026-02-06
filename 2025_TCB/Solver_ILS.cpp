@@ -260,6 +260,13 @@ void Solver_ILS::workILS(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_par
                 bLeftShiftApplied = tempSched->localSearchJobLeftShifting(&sortJobsRandomly, ilsParams->applyBestFit);
                 bJobSwapApplied = tempSched->localSearchJobSwapping(&sortJobsRandomly, ilsParams->applyBestFit);
                 bBatchConsolidationApplied = tempSched->localSearchBatchConsolidation(ilsParams->applyBestFit);
+
+                // local search can become very time consuming => abort when time limit is reached  [JR-2026-Feb-06]
+                stop = chrono::high_resolution_clock::now();
+                usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+                if (usedTime.count() >= ((double)iTilimSeconds / (double)ilsParams->nStarts) * (ilsParams->multiStartIterations + 1)) {
+                    break;
+                }
             } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
 
             double tempTWT = tempSched->getTWT();
@@ -328,6 +335,14 @@ void Solver_ILS::workILSrk(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_p
                 bLeftShiftApplied = tempSched->localSearchJobLeftShifting(&sortJobsRandomly, ilsParams->applyBestFit);
                 bJobSwapApplied = tempSched->localSearchJobSwapping(&sortJobsRandomly, ilsParams->applyBestFit);
                 bBatchConsolidationApplied = tempSched->localSearchBatchConsolidation(ilsParams->applyBestFit);
+
+                // local search can become very time consuming => abort when time limit is reached  [JR-2026-Feb-06]
+                stop = chrono::high_resolution_clock::now();
+                usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+                if (usedTime.count() >= ((double)iTilimSeconds / (double)ilsParams->nStarts) * (ilsParams->multiStartIterations + 1)) {
+                    break;
+                }
+
             } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
 
             double tempTWT = tempSched->getTWT();
@@ -982,6 +997,11 @@ Solver_Hybrid_ILS::Solver_Hybrid_ILS(Schedule* schedule, Sched_params* schedPara
 Solver_Hybrid_ILS::~Solver_Hybrid_ILS() {}
 
 double Solver_Hybrid_ILS::solveILShybrid(Schedule& sched, int iTilimTotal) {
+    // DEBUGGING START TIME MEASUREMENT
+    //auto start = chrono::high_resolution_clock::now();
+    //chrono::seconds usedTime;
+    //chrono::time_point<chrono::high_resolution_clock> stop;
+
     double bestTWT = DBL_MAX;
     int iTilimPhase1 = (int)(ilsParams->firstPhaseTimeLimitAllocation * (double)iTilimTotal);
     int iTilimPhase2 = iTilimTotal - iTilimPhase1;
@@ -991,14 +1011,21 @@ double Solver_Hybrid_ILS::solveILShybrid(Schedule& sched, int iTilimTotal) {
     ilsParams->bestTWTAfterPhase1 = bestTWT;                    //report twt after phase1
 
     // DEBUGGING
-    cout << "Phase 1 finished with TWT=" << bestTWT << endl;
+    //stop = chrono::high_resolution_clock::now();
+    //usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+    cout << "Phase 1 finished with TWT=" << bestTWT << endl; // " after " << usedTime.count() << "seconds." << endl;
 
     vector<vector<double>> chromosomeSet = phase1.getBestChrParallel();    // TODO return different permutations from each core
     sched.reset();
     sched.sortUnscheduled(sortJobsById);
 
+    // clear reporting from 1st phase
+    ilsParams->multiStartIterations = 0;
+    ilsParams->ilsIterations.clear();
+
     // PHASE 2 - ILS on schedule (initial schedule from phase 1)
     initializerRK<pJob> init2 = &Schedule::lSchedJobsWithRandomKeySorting;
     bestTWT = phase2.solveILSparallelized(sched, init2, chromosomeSet, iTilimPhase2);
+
     return bestTWT;
 }

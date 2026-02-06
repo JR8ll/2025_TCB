@@ -7,19 +7,19 @@ Solver_ILS.cpp(129): warning C4244: '=' : conversion from 'double' to 'int', pos
 Solver_ILS.cpp(173): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
 Solver_ILS.cpp(217): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
 Solver_ILS.cpp(231): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(271): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(299): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(339): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(442): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(533): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(812): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(822): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(833): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(841): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(851): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(862): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(899): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(938): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(278): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(306): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(354): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(457): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
+Solver_ILS.cpp(548): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(827): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(837): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(848): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(856): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(866): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(877): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(914): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(953): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
   Generating code
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1458): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
   Finished generating code

@@ -183,19 +183,18 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		else if (solverType == ALG_LISTSCHEDATC || solverType == ALG_ITMILPLSHIFT) {
 			file << "leftShImpr=" << schedParams->leftShiftImprovement << "\t";
 		}
-		else if (solverType == ALG_ILS || solverType == ALG_ILS_PARALLELIZED || solverType == ALG_ILS_SEQUENCE || solverType == ALG_ILS_SEQUENCE_PARALLELIZED || solverType == ALG_ILS_HYBRID) {
+		else if (solverType == ALG_ILS || solverType == ALG_ILS_PARALLELIZED || solverType == ALG_ILS_SEQUENCE || solverType == ALG_ILS_SEQUENCE_PARALLELIZED) {
 			int meanIlsIterations = 0;
 			if (!ilsParams->ilsIterations.empty()) {
 				long sum = accumulate(ilsParams->ilsIterations.begin(), ilsParams->ilsIterations.end(), 0L);
 				double avg = static_cast<double>(sum) / ilsParams->ilsIterations.size();
 				meanIlsIterations = static_cast<int>(round(avg));
 			}
-			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "|avgIt=" << meanIlsIterations;
-			if (solverType == ALG_ILS_HYBRID) {
-				file << "|bestTWTAfterPhase1=" << fixed << setprecision(1) << ilsParams->bestTWTAfterPhase1;
-			}
-			file << "\t";
+			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "|avgIt=" << meanIlsIterations << "\t";
 		} 
+		else if (solverType == ALG_ILS_HYBRID) {
+			file << "bestTWTAfterPhase1=" << fixed << setprecision(1) << ilsParams->bestTWTAfterPhase1 << "\t";
+		}
 		else if (solverType == ALG_ITERATEDMILP) {
 			file << "relMipGap=" << std::fixed << std::setprecision(3) << decompParams->relMipGap << "\t";
 		}

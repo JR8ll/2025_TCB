@@ -3,23 +3,51 @@
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 Solver_ILS.cpp(65): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(126): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(167): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(208): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(222): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(260): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(288): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(326): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(427): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(508): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(787): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(797): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(808): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(816): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(826): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(129): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(173): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(217): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(231): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(278): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(306): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(354): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(457): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
+Solver_ILS.cpp(548): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(827): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
 Solver_ILS.cpp(837): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(870): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(906): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(848): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(856): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(866): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(877): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(914): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(953): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+  Functions.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+Functions.cpp(121): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(20): warning C4267: '=' : conversion from 'size_t' to 'long', possible loss of data
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(31) : see reference to function template instantiation '_Ty std::_Accumulate<unsigned __int64*,_Ty,_Fn2>(_InIt,_InIt,_Ty,_Fn2)' being compiled
+          with
+          [
+              _Ty=long
+  ,            _Fn2=std::plus<void>
+  ,            _InIt=unsigned __int64 *
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(39) : see reference to function template instantiation '_Ty std::accumulate<_InIt,_Ty,std::plus<void>>(_InIt,_InIt,_Ty,_Fn2)' being compiled
+          with
+          [
+              _Ty=long
+  ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>
+  ,            _Fn2=std::plus<void>
+          ]
+          Functions.cpp(189) : see reference to function template instantiation '_Ty std::accumulate<std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>,long>(_InIt,_InIt,_Ty)' being compiled
+          with
+          [
+              _Ty=long
+  ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>
+          ]
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  Main.cpp
 concert.lib(ilosstructi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosstructi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
 concert.lib(ilohash.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilohash.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
 concert.lib(iloalg.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloalg.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
