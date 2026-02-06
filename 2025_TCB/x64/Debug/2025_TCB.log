@@ -3,21 +3,59 @@
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 Solver_ILS.cpp(65): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(121): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(158): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(211): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(275): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(373): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(441): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(718): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(728): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(739): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(747): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(757): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(768): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(836): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  Main.cpp
-  Functions.cpp
+Solver_ILS.cpp(126): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(167): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(208): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(222): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(260): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(288): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(326): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(427): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
+Solver_ILS.cpp(508): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(787): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(797): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(808): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(816): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(826): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(837): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(870): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(906): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+concert.lib(ilosstructi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosstructi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilohash.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilohash.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloalg.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloalg.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloenv.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloenv.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilostimei.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilostimei.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloallocator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloallocator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilosatomi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosatomi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloserror.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloserror.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilosdisplayi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosdisplayi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilorandom.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilorandom.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilothread.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilothread.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilossol.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilossol.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilotypes.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilotypes.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloexpression.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloexpression.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilosbasic.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosbasic.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloset.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloset.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloconstraint.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloconstraint.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloanyexpr.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloanyexpr.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloextractable.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloextractable.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilomap.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilomap.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilotupleset.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilotupleset.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilosmodel.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosmodel.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilosolution.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosolution.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloiterator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloiterator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilossequencei.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilossequencei.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilocollection.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollection.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilocollectionstruct.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollectionstruct.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilosimplecollection.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosimplecollection.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilocollectionoperator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollectionoperator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilocollectioniterator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollectioniterator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloskiplist.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloskiplist.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilonumfunci.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilonumfunci.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(iloparami.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloparami.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(ilointervalsi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilointervalsi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(evalkernel.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(evalkernel.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(evaluator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(evaluator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(evalexpand.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(evalexpand.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
+concert.lib(strtod.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(strtod.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

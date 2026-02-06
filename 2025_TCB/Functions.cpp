@@ -127,7 +127,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 	ofstream file(fullPath, ios::app);
 	if (file.is_open()) {
 		if (!fileExists) {
-			// headings
+			// +++ HEADINGS +++
 			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "ILS_params\t" << "miscReporting\t" << "CreatedOn" << endl;
 		}
 		
@@ -176,7 +176,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		ostringstream dateString;
 		dateString << put_time(localTime, "%Y-%m-%d %H:%M:%S");
 
-		// misc reporting
+		// +++ MISC REPORTING +++
 		if (solverType == ALG_BRKGALISTSCH || solverType == ALG_BRKGALS2MILP) {
 			file << "nGen=" << gaParams->iterations << "\t";
 		}
@@ -190,7 +190,11 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 				double avg = static_cast<double>(sum) / ilsParams->ilsIterations.size();
 				meanIlsIterations = static_cast<int>(round(avg));
 			}
-			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "avgIt=" << meanIlsIterations << "\t";
+			file << "bestSolutionAfterSec=" << ilsParams->bestAfterSeconds << "|avgIt=" << meanIlsIterations;
+			if (solverType == ALG_ILS_HYBRID) {
+				file << "|bestTWTAfterPhase1=" << fixed << setprecision(1) << ilsParams->bestTWTAfterPhase1;
+			}
+			file << "\t";
 		} 
 		else if (solverType == ALG_ITERATEDMILP) {
 			file << "relMipGap=" << std::fixed << std::setprecision(3) << decompParams->relMipGap << "\t";
@@ -206,6 +210,9 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 	}
 }
 
+void sortJobsById(std::vector<pJob>& jobs) {
+	sort(jobs.begin(), jobs.end(), compJobsById);
+}
 void sortJobsRandomly(std::vector<pJob>& jobs) {
 	shuffle(jobs.begin(), jobs.end(), TCB::rng);
 }
@@ -256,6 +263,9 @@ void sortJobsDebugging(std::vector<pJob>& jobs) {
 	sort(jobs.begin(), jobs.end(), compJobsDebugging);
 }
 
+bool compJobsById(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
+	return a->getId() < b->getId();
+}
 bool compJobsByC(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
 	double cA = a->getC();
 	double cB = b->getC();
@@ -414,6 +424,12 @@ void loadILSParams(ILS_params& ilsParams, string filename) {
 		else if (key == "randomizedLocalSearchSequence") iss >> ilsParams.randomizedLocalSearchSequence;	// 0 (false) or 1 (true)
 		else if (key == "firstPhaseTimeLimitAllocation") iss >> ilsParams.firstPhaseTimeLimitAllocation;
 	}
+
+	// initialize reporting attributes
+	ilsParams.multiStartIterations = 0;
+	ilsParams.ilsIterations = vector<size_t>(ilsParams.nStarts, 0);
+	ilsParams.bestAfterSeconds = 0;
+	ilsParams.bestTWTAfterPhase1 = DBL_MAX;
 	input.close();
 }
 

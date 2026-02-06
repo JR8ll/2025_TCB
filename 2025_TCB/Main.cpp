@@ -111,7 +111,6 @@ int main(int argc, char* argv[]) {
 	case ALG_ILS_PARALLELIZED:
 		solverName = "ILS_PARALLEL";																									// 6
 		{
-			//cout << "BEWARE: extensive logging to find infinite loops in multithreading application..." << endl;
 			Solver_ILS ils = Solver_ILS(schedParams, ilsParams);
 			initializer<pJob> init = &Schedule::lSchedJobsWithSorting;
 			ils.solveILSparallelized(*sched.get(), init, sortJobsRandomly, iTilimSeconds);
@@ -120,21 +119,24 @@ int main(int argc, char* argv[]) {
 	case ALG_ILS_SEQUENCE: 
 		solverName = "ILS_SEQ";																											// 7
 		{
-			Solver_Sequence_ILS ilsSeq = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams);
+			Solver_Sequence_ILS ilsSeq = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams, 1);									// [JR-2026-Feb-06] one core used
 			ilsSeq.solveILSseq(*sched.get(), iTilimSeconds);
 		}
 		break;
 	case ALG_ILS_SEQUENCE_PARALLELIZED:
 		solverName = "ILS_SEQ_PARALLEL";																								// 8
 		{
-			Solver_Sequence_ILS ilsSeq = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams);
+			int nCores = Solver_ILS::GetPCoreIndices(false).size();
+			Solver_Sequence_ILS ilsSeq = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams, nCores);
 			ilsSeq.solveILSseqParallelized(*sched.get(), iTilimSeconds);
 		}
 		break;
 	case ALG_ILS_HYBRID:
 		solverName = "ILS_HYBRID";																										// 9
 		{
-			cout << "Branch ILS_HYBRID not yet implemented." << endl;
+			int nCores = Solver_ILS::GetPCoreIndices(false).size();
+			Solver_Hybrid_ILS ilsHybrid = Solver_Hybrid_ILS(sched.get(), &schedParams, &ilsParams, nCores);
+			ilsHybrid.solveILShybrid(*sched.get(), iTilimSeconds);
 		}
 		break;
 	case ALG_ITMILPLSHIFT: 

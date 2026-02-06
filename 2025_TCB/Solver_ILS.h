@@ -12,11 +12,13 @@ struct ILS_params {
 	int nStarts;							// Multi-Start, number of new initializations
 	int nPerturbationSteps;					// number of perturbations steps between two local search phases 
 	bool applyBestFit;						// true: local search follows greedy/best fit strategy, false: local search follows first-fit strategy			
-	bool randomizedLocalSearchSequence;
+	bool randomizedLocalSearchSequence;		// NOT YET USED (controls different sorting order for local search steps)
 	double firstPhaseTimeLimitAllocation;	// percentage of time limit dedicated to a first phase (relevant for hybrid ILS)
+	
 	int multiStartIterations;				// REPORTING: number of new initializations (MULTI-START)
 	std::vector<size_t> ilsIterations;		// REPORTING: number of iterations (local search + perturbation)
 	int bestAfterSeconds;					// REPORTING: best solution found after ... seconds
+	double bestTWTAfterPhase1;				// REPORTING: for hybrid ILS - best TWT after phase 1 (sequence based ILS)
 };
 
 struct ILS_Thread {
@@ -27,6 +29,11 @@ struct ILS_Thread {
 	int multiStartIterations = 0;
 };
 
+struct ThreadParams {
+	Sched_params localSchedParams;
+	ILS_params localIlsParams;
+};
+
 struct ILSseq_Thread {
 	double bestTWT = DBL_MAX;
 	std::vector<double> bestChr;
@@ -35,6 +42,7 @@ struct ILSseq_Thread {
 	int multiStartIterations = 0;
 };
 
+// ILS operating on a schedule-object
 class Solver_ILS {
 protected:
 	Sched_params* schedParams;
@@ -42,28 +50,30 @@ protected:
 public:
 	Solver_ILS();
 	Solver_ILS(Sched_params& schedParams, ILS_params& ilsParams);
-	double solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);					// local search on schedule (insert job, swap job, merge batch)
+	double solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);													// local search on schedule (insert job, swap job, merge batch)
 	double solveILSparallelized(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);
-	double solveILSparallelized(Schedule& sched, initializerRK<pJob> init, const std::vector<double>& randomKeys, int iTilimSeconds, double pWait = 0.0);
-	double solveILSonJobSequence(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait = 0.0);		// local search on sequence permutation (insert, swap)
-
-	static void workILS(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams,  initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localBest, double pWait = 0.0);
-	static void workILSrk(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializerRK<pJob> init, const std::vector<double>& randomKeys, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localBest, double pWait = 0.0);
+	double solveILSparallelized(Schedule& sched, initializerRK<pJob> init, const std::vector<double>& randomKeys, int iTilimSeconds, double pWait = 0.0);					// random key init
+	double solveILSparallelized(Schedule& sched, initializerRK<pJob> init, const std::vector<std::vector<double>>& randomKeySets, int iTilimSeconds, double pWait = 0.0);	// parallel random key inits
+	
+	static void workILS(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams,  initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, uint64_t threadSeed, ILS_Thread* localBest, double pWait = 0.0);
+	static void workILSrk(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializerRK<pJob> init, const std::vector<double>& randomKeys, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, uint64_t threadSeed, ILS_Thread* localBest, double pWait = 0.0);
 	static ILS_params getDefaultParams();
 
-	static std::vector<DWORD> GetPCoreIndices();
+	static std::vector<DWORD> GetPCoreIndices(bool showWarning = true);
 };
 
+// ILS operating on a sequence of jobs (represented by a random key permutation), list-scheduling is used for decoding 
 class Solver_Sequence_ILS : public Solver_ILS {
 private: 
 	std::vector<double> currentChr;
 	std::vector<double> bestChr;
+	std::vector<std::vector<double>> bestChrParallel;		// for parallel processing, save best sequence from every thread
 	double currentTWT;
 	double bestTWT;
 	Schedule* masterSched;
 
 public: 
-	Solver_Sequence_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters);
+	Solver_Sequence_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters, int nCores);
 	~Solver_Sequence_ILS();
 
 	double solveILSseq(Schedule& sched, int iTilimSeconds);
@@ -84,6 +94,7 @@ public:
 	bool localSearchSwapJob(std::vector<double>& chromosome, bool bestFit = true);
 
 	std::vector<double> getBestChr();
+	std::vector<std::vector<double>> getBestChrParallel();
 
 	void perturbJobInsert();									// insert a randomly picked job to a randomly picked position
 	void perturbJobSwap();										// swap two randomly chosen random keys
@@ -100,7 +111,7 @@ public:
 	void initRandomPermutation();
 	static void initRandomPermutation(std::vector<double>& chromosome);
 
-	static void workILSseq(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILSseq_Thread* localILS);
+	static void workILSseq(DWORD coreIndex, std::unique_ptr<Schedule>& sched, Sched_params schedParams, ILS_params ilsParams, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, uint64_t threadSeed, ILSseq_Thread* localILS);
 };
 
 class Solver_Hybrid_ILS {
@@ -110,7 +121,7 @@ private:
 	Sched_params* schedParams;
 	ILS_params* ilsParams;
 public:
-	Solver_Hybrid_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters);
+	Solver_Hybrid_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters, int nCores);
 	~Solver_Hybrid_ILS();
 
 	double solveILShybrid(Schedule& sched, int iTilimTotal);

@@ -91,10 +91,18 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
     return bestTWT;
 }
 
+// RANDOM OR PRIORULE INIT
 double Solver_ILS::solveILSparallelized(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait) {
-    unsigned int nCores = thread::hardware_concurrency();
-
     vector<DWORD> pCores = GetPCoreIndices();
+    uint64_t globalSeed = TCB::rng();
+    vector<uint64_t> threadsSeeds(pCores.size());
+    vector<ThreadParams> threadParams(pCores.size());
+    for (size_t i = 0; i < pCores.size(); ++i) {
+        threadsSeeds[i] = globalSeed + i;
+        threadParams[i].localSchedParams = *schedParams;    // struct copy
+        threadParams[i].localIlsParams = *params;           // struct copy
+    }
+
     //cout << "Using " << pCores.size() << " cores..." << endl;
 
     auto start = chrono::high_resolution_clock::now();
@@ -102,12 +110,12 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializer<pJob> init,
     chrono::time_point<chrono::high_resolution_clock> stop;
 
 
-    vector<ILS_Thread> ILS_threads(nCores);
+    vector<ILS_Thread> ILS_threads(pCores.size());
     vector<thread> threads;
     for (unsigned int core = 0; core < pCores.size(); ++core) {    // [JR-2026-Jan-22] replaced nCores with pCores.size()
         DWORD coreIndex = pCores[core];
         ILS_threads[core].bestSched = sched.clone();
-        threads.emplace_back(workILS, coreIndex, move(ILS_threads[core].bestSched), schedParams, params, init, rule, iTilimSeconds, start, &ILS_threads[core], pWait);
+        threads.emplace_back(workILS, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, init, rule, iTilimSeconds, start, threadsSeeds[core], & ILS_threads[core], pWait);
     }
 
     for (auto& t : threads) t.join();
@@ -128,10 +136,17 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializer<pJob> init,
     return globalBestTWT;
 }
 
-double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> init, const std::vector<double>& randomKeys, int iTilimSeconds, double pWait) {
-    unsigned int nCores = thread::hardware_concurrency();
-
+// RANDOM KEY INIT (single RK)
+double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> init, const vector<double>& randomKeys, int iTilimSeconds, double pWait) {
     vector<DWORD> pCores = GetPCoreIndices();
+    uint64_t globalSeed = TCB::rng();
+    vector<uint64_t> threadsSeeds(pCores.size());
+    vector<ThreadParams> threadParams(pCores.size());
+    for (size_t i = 0; i < pCores.size(); ++i) {
+        threadsSeeds[i] = globalSeed + i;
+        threadParams[i].localSchedParams = *schedParams;    // struct copy
+        threadParams[i].localIlsParams = *params;           // struct copy
+    }
     //cout << "Using " << pCores.size() << " cores..." << endl;
 
     auto start = chrono::high_resolution_clock::now();
@@ -139,12 +154,12 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> ini
     chrono::time_point<chrono::high_resolution_clock> stop;
 
 
-    vector<ILS_Thread> ILS_threads(nCores);
+    vector<ILS_Thread> ILS_threads(pCores.size());
     vector<thread> threads;
     for (unsigned int core = 0; core < pCores.size(); ++core) {    // [JR-2026-Jan-22] replaced nCores with pCores.size()
         DWORD coreIndex = pCores[core];
         ILS_threads[core].bestSched = sched.clone();
-        threads.emplace_back(workILSrk, coreIndex, move(ILS_threads[core].bestSched), schedParams, params, init, randomKeys, iTilimSeconds, start, &ILS_threads[core], pWait);
+        threads.emplace_back(workILSrk, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, init, randomKeys, iTilimSeconds, start, threadsSeeds[core], & ILS_threads[core], pWait);
     }
 
     for (auto& t : threads) t.join();
@@ -165,13 +180,56 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> ini
     return globalBestTWT;
 }
 
-double Solver_ILS::solveILSonJobSequence(Schedule& sched, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, double pWait) {
-    cout << "Solver_ILS::solveILSonJobSequence(...) not yet implemented." << endl;
-    
-    return -1.0;
+// RANDOM KEY INIT (multiple RK)
+double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> init, const vector<vector<double>>& randomKeySets, int iTilimSeconds, double pWait) {
+    vector<DWORD> pCores = GetPCoreIndices();
+    uint64_t globalSeed = TCB::rng();
+    vector<uint64_t> threadsSeeds(pCores.size());
+    vector<ThreadParams> threadParams(pCores.size());
+    for (size_t i = 0; i < pCores.size(); ++i) {
+        threadsSeeds[i] = globalSeed + i;
+        threadParams[i].localSchedParams = *schedParams;    // struct copy
+        threadParams[i].localIlsParams = *params;           // struct copy
+    }
+
+    //cout << "Using " << pCores.size() << " cores..." << endl;
+
+    auto start = chrono::high_resolution_clock::now();
+    chrono::seconds usedTime;
+    chrono::time_point<chrono::high_resolution_clock> stop;
+
+    vector<ILS_Thread> ILS_threads(pCores.size());
+    vector<thread> threads;
+    for (unsigned int core = 0; core < pCores.size(); ++core) {    // [JR-2026-Jan-22] replaced nCores with pCores.size()
+        DWORD coreIndex = pCores[core];
+        ILS_threads[core].bestSched = sched.clone();
+        threads.emplace_back(workILSrk, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, init, randomKeySets[core], iTilimSeconds, start, threadsSeeds[core], &ILS_threads[core], pWait);
+    }
+
+    for (auto& t : threads) t.join();
+
+    int globalBestIdx = 0;
+    double globalBestTWT = ILS_threads[0].bestTWT;
+    for (int i = 0; i < pCores.size(); ++i) {  // [JR-2026-Jan-22] replaced nCores with pCores.size()
+        if (ILS_threads[i].bestTWT < globalBestTWT) {
+            globalBestTWT = ILS_threads[i].bestTWT;
+            globalBestIdx = i;
+            params->bestAfterSeconds = ILS_threads[i].bestAfterSeconds;
+            params->ilsIterations = ILS_threads[i].ilsIterations;
+            params->multiStartIterations = ILS_threads[i].multiStartIterations;
+        }
+    }
+
+    sched._reconstruct(ILS_threads[globalBestIdx].bestSched.get());
+    return globalBestTWT;
 }
 
-void Solver_ILS::workILS(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, chrono::time_point<chrono::high_resolution_clock> start, ILS_Thread* localBest, double pWait) {
+
+
+
+void Solver_ILS::workILS(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializer<pJob> init, prioRule<pJob> rule, int iTilimSeconds, chrono::time_point<chrono::high_resolution_clock> start, uint64_t threadSeed, ILS_Thread* localBest, double pWait) {
+    mt19937 localRng(threadSeed);
+
     DWORD_PTR mask = 1ULL << coreIndex;
     SetThreadAffinityMask(GetCurrentThread(), mask);
     
@@ -180,6 +238,8 @@ void Solver_ILS::workILS(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_par
     chrono::seconds usedTime;
     chrono::time_point<chrono::high_resolution_clock> stop;
 
+    localBest->ilsIterations.clear();
+    localBest->ilsIterations.reserve(ilsParams->nStarts);
     localBest->multiStartIterations = 0;
 
     do {// MULTISTART-LOOP
@@ -213,7 +273,7 @@ void Solver_ILS::workILS(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_par
             // PERTURBATION
             uniform_real_distribution<> perturbDistrib(0, 1);
             for (size_t i = 0; i < ilsParams->nPerturbationSteps; ++i) {
-                double perturbChoice = perturbDistrib(TCB::rng);
+                double perturbChoice = perturbDistrib(localRng);
                 if (perturbChoice < 0.5) {
                     tempSched->perturbRandomJobSwap();
                 }
@@ -235,7 +295,9 @@ void Solver_ILS::workILS(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_par
     } while (usedTime.count() < iTilimSeconds);
 }
 
-void Solver_ILS::workILSrk(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializerRK<pJob> init, const vector<double>& randomKeys, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, ILS_Thread* localBest, double pWait) {
+void Solver_ILS::workILSrk(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, initializerRK<pJob> init, const vector<double>& randomKeys, int iTilimSeconds, std::chrono::time_point<std::chrono::high_resolution_clock> start, uint64_t threadSeed, ILS_Thread* localBest, double pWait) {
+    mt19937 localRng(threadSeed);
+    
     DWORD_PTR mask = 1ULL << coreIndex;
     SetThreadAffinityMask(GetCurrentThread(), mask);
 
@@ -244,6 +306,8 @@ void Solver_ILS::workILSrk(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_p
     chrono::seconds usedTime;
     chrono::time_point<chrono::high_resolution_clock> stop;
 
+    localBest->ilsIterations.clear();
+    localBest->ilsIterations.reserve(ilsParams->nStarts);
     localBest->multiStartIterations = 0;
 
     do {// MULTISTART-LOOP
@@ -277,7 +341,7 @@ void Solver_ILS::workILSrk(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_p
             // PERTURBATION
             uniform_real_distribution<> perturbDistrib(0, 1);
             for (size_t i = 0; i < ilsParams->nPerturbationSteps; ++i) {
-                double perturbChoice = perturbDistrib(TCB::rng);
+                double perturbChoice = perturbDistrib(localRng);
                 if (perturbChoice < 0.5) {
                     tempSched->perturbRandomJobSwap();
                 }
@@ -306,12 +370,16 @@ ILS_params Solver_ILS::getDefaultParams() {
     ilsParams.applyBestFit = true;
     ilsParams.randomizedLocalSearchSequence = false;
     ilsParams.multiStartIterations = 0;
-    ilsParams.ilsIterations = vector<size_t>();
+    ilsParams.ilsIterations = vector<size_t>(ilsParams.nStarts, 0);
+    ilsParams.bestAfterSeconds = 0;
+    ilsParams.bestTWTAfterPhase1 = DBL_MAX;
     return ilsParams;
 }
 
-vector<DWORD> Solver_ILS::GetPCoreIndices() {
-    cout << "Optimized for 12th Gen Intel(R) Core(TM) i7-12700: using 8 performance cores..." << endl;
+vector<DWORD> Solver_ILS::GetPCoreIndices(bool showWarning) {
+    if (showWarning) {
+        cout << "Optimized for 12th Gen Intel(R) Core(TM) i7-12700: using 8 performance cores..." << endl;
+    }
     return { 0, 1, 2, 3, 4, 5, 6, 7 };
     
     //SYSTEM_INFO si;
@@ -330,7 +398,8 @@ vector<DWORD> Solver_ILS::GetPCoreIndices() {
 
 
 // +++++++ SEQUENCE BASED ILS +++++++++++++
-Solver_Sequence_ILS::Solver_Sequence_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters) : bestChr(schedule->getN()), currentChr(schedule->getN()) {
+Solver_Sequence_ILS::Solver_Sequence_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters, int nCores) : bestChr(schedule->getN()), currentChr(schedule->getN()) {
+    bestChrParallel = vector<vector<double>>(nCores, vector<double>(schedule->getN(), 0.0));
     masterSched = schedule;
     schedParams = schedParameters;
     params = ilsParameters;
@@ -408,41 +477,62 @@ double Solver_Sequence_ILS::solveILSseq(Schedule& sched, int iTilimSeconds) {
 }
 
 double Solver_Sequence_ILS::solveILSseqParallelized(Schedule& sched, int iTilimSeconds) {
-    unsigned int nCores = thread::hardware_concurrency();
-
     vector<DWORD> pCores = GetPCoreIndices();
+    vector<ILSseq_Thread> ILSseq_threads(pCores.size());
+    vector<thread> threads;
+
+    uint64_t globalSeed = TCB::rng();
+    vector<uint64_t> threadsSeeds(pCores.size());
+    vector<ThreadParams> threadParams(pCores.size());
+    for (size_t i = 0; i < pCores.size(); ++i) {
+        threadsSeeds[i] = globalSeed + i;
+        threadParams[i].localSchedParams = *schedParams;    // struct copy
+        threadParams[i].localIlsParams = *params;           // struct copy
+    }
+
     ////cout << "Using " << pCores.size() << " cores..." << endl;
 
     auto start = chrono::high_resolution_clock::now();
     chrono::seconds usedTime;
     chrono::time_point<chrono::high_resolution_clock> stop;
 
-    vector<ILSseq_Thread> ILSseq_threads(nCores);
-    vector<thread> threads;
+    auto globalDeadline = chrono::high_resolution_clock::now() + chrono::seconds(iTilimSeconds);
+
+
     for (unsigned int core = 0; core < pCores.size(); ++core) {   
         DWORD coreIndex = pCores[core];
-        ILSseq_threads[core].bestChr = vector<double>(sched.getN());
-        threads.emplace_back(workILSseq, coreIndex, sched.clone(), schedParams, params, iTilimSeconds, start, &ILSseq_threads[core]);
+        // [JR-2026-Feb-06] initialization
+        ILSseq_threads[core].bestChr = vector<double>(sched.getN(), 0.0);
+        ILSseq_threads[core].bestTWT = DBL_MAX;
+        ILSseq_threads[core].bestAfterSeconds = 0.0;
+
+        auto threadStart = chrono::high_resolution_clock::now(); // start;
+        threads.emplace_back(workILSseq, coreIndex, sched.clone(), threadParams[core].localSchedParams, threadParams[core].localIlsParams, iTilimSeconds, start, threadsSeeds[core], &ILSseq_threads[core]);
     }
+
+    // DEBUGGING
+    /*for (auto& t : threads) {
+        if (t.joinable()) {
+            cout << "Thread " << &t << " joining..." << endl;
+            t.join();
+        }
+    }*/
 
     for (auto& t : threads) t.join();
 
     int globalBestIdx = 0;
     double globalBestTWT = ILSseq_threads[0].bestTWT;
     for (int i = 0; i < pCores.size(); ++i) { 
-        
-        // DEBUGGING
-        //cout << "Thread " << i << ": TWT= " << ILSseq_threads[i].bestTWT << ", ";
-        //coutDblVec(ILSseq_threads[i].bestChr);
-
+        bestChrParallel[i] = ILSseq_threads[i].bestChr;
         if (ILSseq_threads[i].bestTWT < globalBestTWT) {
             globalBestTWT = ILSseq_threads[i].bestTWT;
             globalBestIdx = i;
-            params->bestAfterSeconds = ILSseq_threads[i].bestAfterSeconds;
-            params->ilsIterations = ILSseq_threads[i].ilsIterations;
-            params->multiStartIterations = ILSseq_threads[i].multiStartIterations;
         }
     }
+
+    params->bestAfterSeconds = ILSseq_threads[globalBestIdx].bestAfterSeconds;
+    params->ilsIterations = ILSseq_threads[globalBestIdx].ilsIterations;
+    params->multiStartIterations = ILSseq_threads[globalBestIdx].multiStartIterations;
 
     formMasterSchedule(ILSseq_threads[globalBestIdx].bestChr);
     return globalBestTWT;
@@ -710,9 +800,13 @@ bool Solver_Sequence_ILS::localSearchSwapJob(vector<double>& chromosome, bool be
     return bEventuallyImproved;
 }
 
-std::vector<double> Solver_Sequence_ILS::getBestChr() {
+vector<double> Solver_Sequence_ILS::getBestChr() {
     return bestChr;
 }
+vector<vector<double>> Solver_Sequence_ILS::getBestChrParallel() {
+    return bestChrParallel;
+}
+
 
 void Solver_Sequence_ILS::perturbJobInsert() {
     uniform_int_distribution<> idxDistrib(0, currentChr.size() - 1);
@@ -792,13 +886,18 @@ void Solver_Sequence_ILS::initRandomPermutation(){
     generate(currentChr.begin(), currentChr.end(), [&] { return rkDistrib(TCB::rng); });
     currentTWT = decodeAndGetTWT(currentChr);
 }
-
 void Solver_Sequence_ILS::initRandomPermutation(vector<double>& chromosome) {
     uniform_real_distribution<> rkDistrib(0.0, 1.0);
     generate(chromosome.begin(), chromosome.end(), [&] { return rkDistrib(TCB::rng); });
 }
 
-void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_params* schedParams, ILS_params* ilsParams, int iTilimSeconds, chrono::time_point<chrono::high_resolution_clock> start, ILSseq_Thread* localBest) {
+void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sched, Sched_params schedParams, ILS_params ilsParams, int iTilimSeconds, chrono::time_point<chrono::high_resolution_clock> start, uint64_t threadSeed, ILSseq_Thread* localBest) {
+    // DEBUGGING
+    //cout << "Thread " << coreIndex << " gestartet um " << chrono::duration_cast<chrono::milliseconds>(start.time_since_epoch()).count() << endl;
+
+    
+    mt19937 localRng(threadSeed);
+    
     DWORD_PTR mask = 1ULL << coreIndex;
     SetThreadAffinityMask(GetCurrentThread(), mask);
 
@@ -808,23 +907,26 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
     chrono::seconds usedTime;
     chrono::time_point<chrono::high_resolution_clock> stop;
 
+    localBest->ilsIterations.clear();
+    localBest->ilsIterations.reserve(ilsParams.nStarts);
     localBest->multiStartIterations = 0;
+    
 
-    Solver_Sequence_ILS worker = Solver_Sequence_ILS(sched.get(), schedParams, ilsParams);
+    Solver_Sequence_ILS worker = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams, 1);   // [JR-2026-Feb-06] last parameter nCores (in working thread one should be fine)
 
     do {// MULTISTART-LOOP
         // INITIALIZE
         worker.initRandomPermutation();
         vector<double> tempChr = worker.currentChr;
 
-        localBest->ilsIterations.push_back(0);
+        localBest->ilsIterations.emplace_back(0);
         do {// ILS LOOP
             // LOCAL SEARCH
             bool bJobInsertApplied = false;
             bool bJobSwapApplied = false;
             do {
-                bJobInsertApplied = worker.localSearchInsertJob(ilsParams->applyBestFit);
-                bJobSwapApplied = worker.localSearchSwapJob(ilsParams->applyBestFit);
+                bJobInsertApplied = worker.localSearchInsertJob(ilsParams.applyBestFit);
+                bJobSwapApplied = worker.localSearchSwapJob(ilsParams.applyBestFit);
             } while (bJobInsertApplied || bJobSwapApplied);
 
             double tempTWT = worker.currentTWT;
@@ -837,8 +939,8 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
             }
             // PERTURBATION
             uniform_real_distribution<> perturbDistrib(0, 1);
-            for (size_t i = 0; i < ilsParams->nPerturbationSteps; ++i) {
-                double perturbChoice = perturbDistrib(TCB::rng);
+            for (size_t i = 0; i < ilsParams.nPerturbationSteps; ++i) {
+                double perturbChoice = perturbDistrib(localRng);
                 if (perturbChoice < 1.0 / 3.0) {
                     //TCB::logger.Log(Info, "perturbRandomJobSwap");
                     worker.perturbJobInsert();
@@ -855,39 +957,48 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
             ++localBest->ilsIterations[localBest->multiStartIterations];
             stop = chrono::high_resolution_clock::now();
             usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
-        } while (usedTime.count() < ((double)iTilimSeconds / (double)ilsParams->nStarts) * (ilsParams->multiStartIterations + 1));   // MULTISTART
+            // DEBUGGING 
+            //cout << "Thread " << coreIndex << ": start: " << start.time_since_epoch().count() << "usedTime: " << usedTime.count() << ", nStarts : " << ilsParams.nStarts << ", multiStartIterations : " << ilsParams.multiStartIterations << endl;
+        } while (usedTime.count() < ((double)iTilimSeconds / (double)ilsParams.nStarts) * (ilsParams.multiStartIterations + 1));   // MULTISTART
 
         //TCB::logger.Log(Info, "Thread ended.");
         stop = chrono::high_resolution_clock::now();
         usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
         ++localBest->multiStartIterations;
     } while (usedTime.count() < iTilimSeconds);
+
+    // DEBUGGING
+    stop = chrono::high_resolution_clock::now();
+    usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+    //cout << "Thread " << coreIndex << " ENDE nach " << usedTime.count() << "s" << endl;
 }
 
-Solver_Hybrid_ILS::Solver_Hybrid_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters) : phase1(schedule, schedParameters, ilsParameters), phase2(*schedParameters, *ilsParameters) {
-    // phase1 = Solver_Sequence_ILS(schedule, schedParameters, ilsParameters);
-    // phase2 = Solver_ILS(*schedParameters, *ilsParameters);
+
+// +++++++ HYBRID ILS (Sequence + Schedule) +++++++++++++
+Solver_Hybrid_ILS::Solver_Hybrid_ILS(Schedule* schedule, Sched_params* schedParameters, ILS_params* ilsParameters, int nCores) : phase1(schedule, schedParameters, ilsParameters, nCores), phase2(*schedParameters, *ilsParameters) {
     schedParams = schedParameters;
     ilsParams = ilsParameters; 
 }
-
 Solver_Hybrid_ILS::~Solver_Hybrid_ILS() {}
 
 double Solver_Hybrid_ILS::solveILShybrid(Schedule& sched, int iTilimTotal) {
-    cout << "Solver_Hybrid_ILS::solveILShybrid(...) not yet implemented." << endl;
     double bestTWT = DBL_MAX;
     int iTilimPhase1 = (int)(ilsParams->firstPhaseTimeLimitAllocation * (double)iTilimTotal);
     int iTilimPhase2 = iTilimTotal - iTilimPhase1;
 
     // PHASE 1 - ILS on sequence/permutation of jobs
     bestTWT = phase1.solveILSseqParallelized(sched, iTilimPhase1);
-    //TODO report twt after phase1
+    ilsParams->bestTWTAfterPhase1 = bestTWT;                    //report twt after phase1
 
-    vector<double> chromosome = phase1.getBestChr();    // TODO return different permutations from each core
+    // DEBUGGING
+    cout << "Phase 1 finished with TWT=" << bestTWT << endl;
+
+    vector<vector<double>> chromosomeSet = phase1.getBestChrParallel();    // TODO return different permutations from each core
     sched.reset();
+    sched.sortUnscheduled(sortJobsById);
 
     // PHASE 2 - ILS on schedule (initial schedule from phase 1)
     initializerRK<pJob> init2 = &Schedule::lSchedJobsWithRandomKeySorting;
-    bestTWT = phase2.solveILSparallelized(sched, init2, chromosome, iTilimPhase2);
+    bestTWT = phase2.solveILSparallelized(sched, init2, chromosomeSet, iTilimPhase2);
     return bestTWT;
 }
