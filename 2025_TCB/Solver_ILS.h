@@ -14,7 +14,9 @@ struct ILS_params {
 	bool applyBestFit;						// true: local search follows greedy/best fit strategy, false: local search follows first-fit strategy			
 	bool randomizedLocalSearchSequence;		// NOT YET USED (controls different sorting order for local search steps)
 	double firstPhaseTimeLimitAllocation;	// percentage of time limit dedicated to a first phase (relevant for hybrid ILS)
-	
+	double secondPhaseRandomizedFraction;	// percentage of threads in the 2nd phase to be started with a random solution
+	double seqLSsearchDepth;				// this value multiplied with n defines the number of maximal local search steps evaluated during sequence based local search ILS (phase 1 in hybrid ILS)
+
 	int multiStartIterations;				// REPORTING: number of new initializations (MULTI-START)
 	std::vector<size_t> ilsIterations;		// REPORTING: number of iterations (local search + perturbation)
 	int bestAfterSeconds;					// REPORTING: best solution found after ... seconds
@@ -83,15 +85,15 @@ public:
 	void swapJob(size_t firstIdx, size_t secondIdx);		// swap keys at two indices
 	double evaluateJobInsert(size_t jobIdx, size_t posIdx);
 	double evaluateJobSwap(size_t firstIdx, size_t secondIdx);
-	bool localSearchInsertJob(bool bestFit = true);
-	bool localSearchSwapJob(bool bestFit = true);
+	bool localSearchInsertJob(std::chrono::time_point<std::chrono::high_resolution_clock> finishBy, bool bestFit = true);
+	bool localSearchSwapJob(std::chrono::time_point<std::chrono::high_resolution_clock> finishBy, bool bestFit = true);
 
 	void insertJob(std::vector<double>& perm, size_t jobIdx, size_t posIdx);		// move random key from [jobIdx] to [posIdx]
 	void swapJob(std::vector<double>& perm, size_t firstIdx, size_t secondIdx);		// swap keys at two indices
 	double evaluateJobInsert(std::vector<double>& chromosome, size_t jobIdx, size_t posIdx);
 	double evaluateJobSwap(std::vector<double>& chromosome, size_t firstIdx, size_t secondIdx);
-	bool localSearchInsertJob(std::vector<double>& chromosome, bool bestFit = true);
-	bool localSearchSwapJob(std::vector<double>& chromosome, bool bestFit = true);
+	bool localSearchInsertJob(std::vector<double>& chromosome, std::chrono::time_point<std::chrono::high_resolution_clock> finishBy, bool bestFit = true);
+	bool localSearchSwapJob(std::vector<double>& chromosome, std::chrono::time_point<std::chrono::high_resolution_clock> finishBy, bool bestFit = true);
 
 	std::vector<double> getBestChr();
 	std::vector<std::vector<double>> getBestChrParallel();

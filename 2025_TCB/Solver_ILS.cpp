@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <thread>
 #include <iostream>
+#include <iomanip>
 #include <numeric>
 #include <random>
 #include "Solver_ILS.h"
@@ -192,6 +193,14 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> ini
         threadParams[i].localIlsParams = *params;           // struct copy
     }
 
+    int iCoresForRandomInit = (int) round(params->secondPhaseRandomizedFraction * (double)pCores.size());
+    if (iCoresForRandomInit >= pCores.size()) {
+        TCB::logger.Log(Warning, "ILS_HYBRID running with randomly initialized solutions in phase 2 only. We therefore dedicate one core to work on a solution initialized in phase 1.");
+        cout << "WARNING: ILS_HYBRID running with randomly initialized solutions in phase 2 only. We therefore dedicate one core to work on a solution initialized in phase 1." << endl;
+        cout << "(set parameter 'secondPhaseRandomizedFraction' < " << fixed << setprecision(2) << (1.0 - (1.0 / (double)pCores.size())) << " to avoid this message)." << endl;
+        iCoresForRandomInit--;
+    }
+
     //cout << "Using " << pCores.size() << " cores..." << endl;
 
     auto start = chrono::high_resolution_clock::now();
@@ -203,7 +212,16 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> ini
     for (unsigned int core = 0; core < pCores.size(); ++core) {    // [JR-2026-Jan-22] replaced nCores with pCores.size()
         DWORD coreIndex = pCores[core];
         ILS_threads[core].bestSched = sched.clone();
-        threads.emplace_back(workILSrk, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, init, randomKeySets[core], iTilimSeconds, start, threadsSeeds[core], &ILS_threads[core], pWait);
+
+        if (core < iCoresForRandomInit) {
+            // Random initial solution
+            initializer<pJob> initRandomly = &Schedule::lSchedJobsWithSorting;
+            threads.emplace_back(workILS, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, initRandomly, sortJobsRandomly, iTilimSeconds, start, threadsSeeds[core], &ILS_threads[core], pWait);
+        }
+        else {
+            // Initial solution from job sequence obtained in phase 1
+            threads.emplace_back(workILSrk, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, init, randomKeySets[core], iTilimSeconds, start, threadsSeeds[core], &ILS_threads[core], pWait);
+        }     
     }
 
     for (auto& t : threads) t.join();
@@ -384,6 +402,10 @@ ILS_params Solver_ILS::getDefaultParams() {
     ilsParams.nPerturbationSteps = 5;
     ilsParams.applyBestFit = true;
     ilsParams.randomizedLocalSearchSequence = false;
+    ilsParams.firstPhaseTimeLimitAllocation = 0.5;
+    ilsParams.secondPhaseRandomizedFraction = 0.5;
+    ilsParams.seqLSsearchDepth = 1.0;
+    // reporting
     ilsParams.multiStartIterations = 0;
     ilsParams.ilsIterations = vector<size_t>(ilsParams.nStarts, 0);
     ilsParams.bestAfterSeconds = 0;
@@ -429,6 +451,8 @@ double Solver_Sequence_ILS::solveILSseq(Schedule& sched, int iTilimSeconds) {
     double bestTWT = DBL_MAX;
     vector<double> bestChr = vector<double>(sched.getN());
 
+    auto finishBy = start + std::chrono::seconds(iTilimSeconds);
+
     params->multiStartIterations = 0;
 
     do {    // MULTISTART-LOOP
@@ -444,8 +468,8 @@ double Solver_Sequence_ILS::solveILSseq(Schedule& sched, int iTilimSeconds) {
             bool bJobSwapApplied = false;
            
             do { 
-                bJobInsertApplied = localSearchInsertJob(tempChr, params->applyBestFit);
-                bJobSwapApplied = localSearchSwapJob(tempChr, params->applyBestFit);
+                bJobInsertApplied = localSearchInsertJob(tempChr, finishBy,params->applyBestFit);
+                bJobSwapApplied = localSearchSwapJob(tempChr, finishBy, params->applyBestFit);
             } while (bJobInsertApplied || bJobSwapApplied);
 
             double tempTWT = decodeAndGetTWT(tempChr);
@@ -578,11 +602,13 @@ double Solver_Sequence_ILS::evaluateJobSwap(size_t firstIdx, size_t secondIdx) {
     swapJob(tempChr, firstIdx, secondIdx);
     return currentTWT - decodeAndGetTWT(tempChr);
 }
-bool Solver_Sequence_ILS::localSearchInsertJob(bool bestFit) {
+bool Solver_Sequence_ILS::localSearchInsertJob(chrono::time_point<chrono::high_resolution_clock> finishBy, bool bestFit) {
     // DEFAULT: random order (TODO: other sorting orders to be defined)
     vector<size_t> indices(currentChr.size());
     iota(indices.begin(), indices.end(), 0);
     shuffle(indices.begin(), indices.end(), TCB::rng);
+
+    int searchDepth = round(params->seqLSsearchDepth * (double) currentChr.size());
 
     double bestImprovement = 0;
     size_t bestJobIdx = 0;
@@ -593,7 +619,13 @@ bool Solver_Sequence_ILS::localSearchInsertJob(bool bestFit) {
         bImproved = false;
 
         for (size_t i = 0; i < indices.size(); ++i) {
+            if (i > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {                              // [JR-2026-Feb-07] limiting search depth to facilitate more iterations
+                break;
+            }
             for (size_t j = 0; j < indices.size(); ++j) {
+                if (j > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {                              // [JR-2026-Feb-07] limiting search depth to facilitate more iterations
+                    break;
+                }
                 if (i != j) {
                     double tempImprovement = evaluateJobInsert(currentChr, indices[i], indices[j]);
                     if (tempImprovement > bestImprovement) {
@@ -631,11 +663,13 @@ bool Solver_Sequence_ILS::localSearchInsertJob(bool bestFit) {
 
     return bEventuallyImproved;
 }
-bool Solver_Sequence_ILS::localSearchSwapJob(bool bestFit) {
+bool Solver_Sequence_ILS::localSearchSwapJob(chrono::time_point<chrono::high_resolution_clock> finishBy, bool bestFit) {
     // DEFAULT: random order (TODO: other sorting orders to be defined)
     vector<size_t> indices(currentChr.size());
     iota(indices.begin(), indices.end(), 0);
     shuffle(indices.begin(), indices.end(), TCB::rng);
+
+    int searchDepth = round(params->seqLSsearchDepth * (double)currentChr.size());
 
     double bestImprovement = 0;
     size_t bestFirstIdx = 0;
@@ -645,7 +679,13 @@ bool Solver_Sequence_ILS::localSearchSwapJob(bool bestFit) {
     while (bImproved) {
         bImproved = false;
         for (size_t i = 0; i < indices.size(); ++i) {
+            if (i > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {                              // [JR-2026-Feb-07] limiting search depth to facilitate more iterations
+                break;
+            }
             for (size_t j = 0; j < indices.size(); ++j) {
+                if (j > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {                              // [JR-2026-Feb-07] limiting search depth to facilitate more iterations
+                    break;
+                }
                 if (i != j) {
                     double tempImprovement = evaluateJobSwap(currentChr, indices[i], indices[j]);
                     if (tempImprovement > bestImprovement) {
@@ -709,11 +749,13 @@ double Solver_Sequence_ILS::evaluateJobSwap(vector<double>& chromosome, size_t f
     return currentTWT - decodeAndGetTWT(tempChr);
 }
 
-bool Solver_Sequence_ILS::localSearchInsertJob(vector<double>& chromosome, bool bestFit) {
+bool Solver_Sequence_ILS::localSearchInsertJob(vector<double>& chromosome, chrono::time_point<chrono::high_resolution_clock> finishBy, bool bestFit) {
     // DEFAULT: random order (TODO: other sorting orders to be defined)
     vector<size_t> indices(chromosome.size());
     iota(indices.begin(), indices.end(), 0);
     shuffle(indices.begin(), indices.end(), TCB::rng);
+
+    int searchDepth = round(params->seqLSsearchDepth * (double)chromosome.size());
 
     double bestImprovement = 0;
     size_t bestJobIdx = 0;
@@ -724,7 +766,13 @@ bool Solver_Sequence_ILS::localSearchInsertJob(vector<double>& chromosome, bool 
         bImproved = false;
 
         for (size_t i = 0; i < indices.size(); ++i) {
+            if (i > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {                              // [JR-2026-Feb-07] limiting search depth to facilitate more iterations
+                break;
+            }
             for (size_t j = 0; j < indices.size(); ++j) {
+                if (j > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {
+                    break;
+                }
                 if (i != j) {
                     double tempImprovement = evaluateJobInsert(chromosome, indices[i], indices[j]);
                     if (tempImprovement > bestImprovement) {
@@ -738,8 +786,7 @@ bool Solver_Sequence_ILS::localSearchInsertJob(vector<double>& chromosome, bool 
                             bEventuallyImproved = true;
                             bestImprovement = 0;
                             break;
-                        }
-                    
+                        }              
                     }
                 }
                 if (bImproved) {
@@ -762,11 +809,13 @@ bool Solver_Sequence_ILS::localSearchInsertJob(vector<double>& chromosome, bool 
 
     return bEventuallyImproved;
 }
-bool Solver_Sequence_ILS::localSearchSwapJob(vector<double>& chromosome, bool bestFit) {
+bool Solver_Sequence_ILS::localSearchSwapJob(vector<double>& chromosome, chrono::time_point<chrono::high_resolution_clock> finishBy, bool bestFit) {
     // DEFAULT: random order (TODO: other sorting orders to be defined)
     vector<size_t> indices(chromosome.size());
     iota(indices.begin(), indices.end(), 0);
     shuffle(indices.begin(), indices.end(), TCB::rng);
+
+    int searchDepth = round(params->seqLSsearchDepth * (double)chromosome.size());
 
     double bestImprovement = 0;
     size_t bestFirstIdx = 0;
@@ -776,8 +825,14 @@ bool Solver_Sequence_ILS::localSearchSwapJob(vector<double>& chromosome, bool be
     while (bImproved) {
         bImproved = false;
         for (size_t i = 0; i < indices.size(); ++i) {
+            if (i > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {                              // [JR-2026-Feb-07] limiting search depth to facilitate more iterations
+                break;
+            }
             for (size_t j = 0; j < indices.size(); ++j) {
                 if (i != j) {
+                    if (j > searchDepth || chrono::high_resolution_clock::now() >= finishBy) {
+                        break;
+                    }
                     double tempImprovement = evaluateJobSwap(chromosome, indices[i], indices[j]);
                     if (tempImprovement > bestImprovement) {
                         bestImprovement = tempImprovement;
@@ -889,7 +944,7 @@ void Solver_Sequence_ILS::formMasterSchedule(std::vector<double>& chromosome) {
 double Solver_Sequence_ILS::decodeAndGetTWT(std::vector<double>& chr) {
     unique_ptr<Schedule> mySched = masterSched->clone();
     mySched->lSchedJobsWithRandomKeySorting(sortJobsByRK, chr);
-    return mySched->getTWT();
+     return mySched->getTWT();
 }
 double Solver_Sequence_ILS::staticDecodeAndGetTWT(Schedule* sched, vector<double>& chr) {
     unique_ptr<Schedule> mySched = sched->clone();
@@ -926,6 +981,7 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
     localBest->ilsIterations.reserve(ilsParams.nStarts);
     localBest->multiStartIterations = 0;
     
+    auto finishBy = start + std::chrono::seconds(iTilimSeconds);
 
     Solver_Sequence_ILS worker = Solver_Sequence_ILS(sched.get(), &schedParams, &ilsParams, 1);   // [JR-2026-Feb-06] last parameter nCores (in working thread one should be fine)
 
@@ -940,8 +996,8 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
             bool bJobInsertApplied = false;
             bool bJobSwapApplied = false;
             do {
-                bJobInsertApplied = worker.localSearchInsertJob(ilsParams.applyBestFit);
-                bJobSwapApplied = worker.localSearchSwapJob(ilsParams.applyBestFit);
+                bJobInsertApplied = worker.localSearchInsertJob(finishBy, ilsParams.applyBestFit);
+                bJobSwapApplied = worker.localSearchSwapJob(finishBy, ilsParams.applyBestFit);
             } while (bJobInsertApplied || bJobSwapApplied);
 
             double tempTWT = worker.currentTWT;
@@ -983,8 +1039,8 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
     } while (usedTime.count() < iTilimSeconds);
 
     // DEBUGGING
-    stop = chrono::high_resolution_clock::now();
-    usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
+    //stop = chrono::high_resolution_clock::now();
+    //usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
     //cout << "Thread " << coreIndex << " ENDE nach " << usedTime.count() << "s" << endl;
 }
 

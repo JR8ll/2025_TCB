@@ -165,7 +165,14 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 				double avg = static_cast<double>(sum) / ilsParams->ilsIterations.size();
 				meanIlsIterations = static_cast<int>(round(avg));
 			}*/
-			ilsParamsString << ilsParams->multiStartIterations << "|" << ilsParams->nPerturbationSteps << "|" << (ilsParams->applyBestFit ? "bestFit" : "firstFit");
+			ilsParamsString << ilsParams->nStarts << "|" << ilsParams->nPerturbationSteps << "|" << (ilsParams->applyBestFit ? "bestFit" : "firstFit");
+			if (solverType == ALG_ILS_SEQUENCE || solverType == ALG_ILS_SEQUENCE_PARALLELIZED) {
+				ilsParamsString << "|" << fixed << setprecision(2)  << ilsParams->seqLSsearchDepth;
+			}
+
+			if (solverType == ALG_ILS_HYBRID) {
+				ilsParamsString << "|" << fixed << setprecision(2) << "|" << ilsParams->seqLSsearchDepth << "|" << ilsParams->firstPhaseTimeLimitAllocation << "|" << ilsParams->secondPhaseRandomizedFraction;
+			}
 		}
 		else {
 			ilsParamsString << "n/a";
@@ -413,6 +420,20 @@ void loadILSParams(ILS_params& ilsParams, string filename) {
 		throw ExcSched("loadILSParams file not found");
 	}
 
+	// Inititialization in case .par-file does not contain all expected information
+	ilsParams.nPerturbationSteps = 15;
+	ilsParams.applyBestFit = true;
+	ilsParams.randomizedLocalSearchSequence = true;
+	ilsParams.firstPhaseTimeLimitAllocation = 0.5;
+	ilsParams.secondPhaseRandomizedFraction = 0.5;
+	ilsParams.seqLSsearchDepth = 1.0;
+
+	// initialize reporting attributes
+	ilsParams.multiStartIterations = 0;
+	ilsParams.ilsIterations = vector<size_t>(ilsParams.nStarts, 0);
+	ilsParams.bestAfterSeconds = 0;
+	ilsParams.bestTWTAfterPhase1 = DBL_MAX;
+
 	while (getline(input, line)) {
 		istringstream iss(line);
 		string key;
@@ -422,13 +443,10 @@ void loadILSParams(ILS_params& ilsParams, string filename) {
 		else if (key == "applyBestFit") iss >> ilsParams.applyBestFit;										// 0 (false) or 1 (true)
 		else if (key == "randomizedLocalSearchSequence") iss >> ilsParams.randomizedLocalSearchSequence;	// 0 (false) or 1 (true)
 		else if (key == "firstPhaseTimeLimitAllocation") iss >> ilsParams.firstPhaseTimeLimitAllocation;
+		else if (key == "secondPhaseRandomizedFraction") iss >> ilsParams.secondPhaseRandomizedFraction;
+		else if (key == "seqLSsearchDepth") iss >> ilsParams.seqLSsearchDepth;
 	}
-
-	// initialize reporting attributes
-	ilsParams.multiStartIterations = 0;
-	ilsParams.ilsIterations = vector<size_t>(ilsParams.nStarts, 0);
-	ilsParams.bestAfterSeconds = 0;
-	ilsParams.bestTWTAfterPhase1 = DBL_MAX;
+	
 	input.close();
 }
 
