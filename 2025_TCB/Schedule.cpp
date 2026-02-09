@@ -798,12 +798,7 @@ double Schedule::localSearchEvaluateBatchConsolidation(size_t idxWc, size_t tgtM
 		double opR = op->getAvailability();
 		if (opR < bat2->getStart() && opR > bat1->getStart()) {	// this move is only relevant if op can be left shifted (< current start) and it cannot simply be inserted into previous batch (otherwise an insertion/shift move would do the trick)
 			if (op->getS() <= bat1->getAvailableCap()) {
-				
-				// DEBUGGING
-				if (idxWc == 2 && tgtMac == 0 && tgtBatch == 16 && srcBatch == 17) {
-					int debugger = 666;
-				}
-				
+		
 				unique_ptr<Schedule> copySched = clone();
 				if (copySched->localSearchConsolidateBatch(idxWc, tgtMac, tgtBatch, srcMac, srcBatch, movingOpIdx)) {
 					double tempTWT = copySched->getTWT();
@@ -1218,12 +1213,6 @@ bool Schedule::localSearchBatchConsolidation(bool bestFit) {
 						if (batch->getF() == succB->getF()) {
 							for (size_t op = 0; op < succB->size(); ++op) {
 								size_t opIdx = op;	// by value
-
-								// DEBUGGING
-								if (o == 2 && m == 0 && b == 16) {
-									int debugger = 666;
-								}
-
 
 								double tempImprovement = localSearchEvaluateBatchConsolidation(o, m, b, m, b+1, opIdx);	// opIdx by reference
 								

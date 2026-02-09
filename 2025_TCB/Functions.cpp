@@ -165,13 +165,16 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 				double avg = static_cast<double>(sum) / ilsParams->ilsIterations.size();
 				meanIlsIterations = static_cast<int>(round(avg));
 			}*/
-			ilsParamsString << ilsParams->nStarts << "|" << ilsParams->nPerturbationSteps << "|" << (ilsParams->applyBestFit ? "bestFit" : "firstFit");
-			if (solverType == ALG_ILS_SEQUENCE || solverType == ALG_ILS_SEQUENCE_PARALLELIZED) {
-				ilsParamsString << "|" << fixed << setprecision(2)  << ilsParams->seqLSsearchDepth;
+			ilsParamsString << ilsParams->nStarts;
+			if (solverType == ALG_ILS || ALG_ILS_PARALLELIZED || solverType == ALG_ILS_HYBRID) {
+				ilsParamsString << "|" << ilsParams->nPerturbationSteps << "|" << (ilsParams->applyBestFit ? "bestFit" : "firstFit");
+			}
+			if (solverType == ALG_ILS_SEQUENCE || solverType == ALG_ILS_SEQUENCE_PARALLELIZED || ALG_ILS_HYBRID) {
+				ilsParamsString << "|" << ilsParams->nPerturbationStepsSeq << "|" << (ilsParams->applyBestFitSeq ? "bestFitSeq" : "firstFitSeq") << "|" << fixed << setprecision(2) << ilsParams->seqLSsearchDepth;
 			}
 
 			if (solverType == ALG_ILS_HYBRID) {
-				ilsParamsString << "|" << fixed << setprecision(2) << "|" << ilsParams->seqLSsearchDepth << "|" << ilsParams->firstPhaseTimeLimitAllocation << "|" << ilsParams->secondPhaseRandomizedFraction;
+				ilsParamsString << "|" << fixed << setprecision(2) << ilsParams->seqLSsearchDepth << "|" << ilsParams->firstPhaseTimeLimitAllocation << "|" << ilsParams->secondPhaseRandomizedFraction;
 			}
 		}
 		else {
@@ -421,8 +424,11 @@ void loadILSParams(ILS_params& ilsParams, string filename) {
 	}
 
 	// Inititialization in case .par-file does not contain all expected information
+	ilsParams.nStarts = 1;
 	ilsParams.nPerturbationSteps = 15;
+	ilsParams.nPerturbationStepsSeq = ilsParams.nPerturbationSteps;
 	ilsParams.applyBestFit = true;
+	ilsParams.applyBestFitSeq = true;
 	ilsParams.randomizedLocalSearchSequence = true;
 	ilsParams.firstPhaseTimeLimitAllocation = 0.5;
 	ilsParams.secondPhaseRandomizedFraction = 0.5;
@@ -440,7 +446,9 @@ void loadILSParams(ILS_params& ilsParams, string filename) {
 		getline(iss, key, ':');
 		if (key == "nStarts") iss >> ilsParams.nStarts;
 		else if (key == "nPerturbationSteps") iss >> ilsParams.nPerturbationSteps;
+		else if (key == "nPerturbationStepsSeq") iss >> ilsParams.nPerturbationStepsSeq;
 		else if (key == "applyBestFit") iss >> ilsParams.applyBestFit;										// 0 (false) or 1 (true)
+		else if (key == "applyBestFitSeq") iss >> ilsParams.applyBestFitSeq;								// 0 (false) or 1 (true)
 		else if (key == "randomizedLocalSearchSequence") iss >> ilsParams.randomizedLocalSearchSequence;	// 0 (false) or 1 (true)
 		else if (key == "firstPhaseTimeLimitAllocation") iss >> ilsParams.firstPhaseTimeLimitAllocation;
 		else if (key == "secondPhaseRandomizedFraction") iss >> ilsParams.secondPhaseRandomizedFraction;

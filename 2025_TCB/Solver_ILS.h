@@ -10,8 +10,10 @@ class Schedule;
 
 struct ILS_params {
 	int nStarts;							// Multi-Start, number of new initializations
-	int nPerturbationSteps;					// number of perturbations steps between two local search phases 
-	bool applyBestFit;						// true: local search follows greedy/best fit strategy, false: local search follows first-fit strategy			
+	int nPerturbationSteps;					// number of perturbation steps between two local search phases 
+	int nPerturbationStepsSeq;				// number of perturbation steps for sequence based ILS
+	bool applyBestFit;						// true: local search follows greedy/best fit strategy, false: local search follows first-fit strategy	
+	bool applyBestFitSeq;					// true: local search follows greedy/best fit strategy, false: local search follows first-fit strategy, seperate search strategy controller for sequence-based ILS
 	bool randomizedLocalSearchSequence;		// NOT YET USED (controls different sorting order for local search steps)
 	double firstPhaseTimeLimitAllocation;	// percentage of time limit dedicated to a first phase (relevant for hybrid ILS)
 	double secondPhaseRandomizedFraction;	// percentage of threads in the 2nd phase to be started with a random solution

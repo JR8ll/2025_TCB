@@ -1,0 +1,7 @@
+nStarts: 1
+nPerturbationSteps: 15
+applyBestFit: 1
+randomizedLocalSearchSequence: 0
+firstPhaseTimeLimitAllocation: 0.1
+secondPhaseRandomizedFraction: 0.5
+seqLSsearchDepth: 0.5

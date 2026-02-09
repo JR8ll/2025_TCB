@@ -31,8 +31,9 @@ double Solver_ILS::solveILS(Schedule& sched, initializer<pJob> init, prioRule<pJ
         // INITIALIZE
         unique_ptr<Schedule> tempSched = sched.clone();
         (tempSched.get()->*init)(rule, *schedParams);
+        bestTWT = tempSched->getTWT();  // [JR-2026-Feb-09] consider initial TWT
 
-            params->ilsIterations.push_back(0);
+        params->ilsIterations.push_back(0);
         do {// ILS LOOP
             // LOCAL SEARCH
             
@@ -400,7 +401,9 @@ ILS_params Solver_ILS::getDefaultParams() {
     ILS_params ilsParams = ILS_params();
     ilsParams.nStarts = 1;
     ilsParams.nPerturbationSteps = 5;
+    ilsParams.nPerturbationStepsSeq = ilsParams.nPerturbationSteps;
     ilsParams.applyBestFit = true;
+    ilsParams.applyBestFitSeq = true;
     ilsParams.randomizedLocalSearchSequence = false;
     ilsParams.firstPhaseTimeLimitAllocation = 0.5;
     ilsParams.secondPhaseRandomizedFraction = 0.5;
@@ -468,9 +471,11 @@ double Solver_Sequence_ILS::solveILSseq(Schedule& sched, int iTilimSeconds) {
             bool bJobSwapApplied = false;
            
             do { 
-                bJobInsertApplied = localSearchInsertJob(tempChr, finishBy,params->applyBestFit);
-                bJobSwapApplied = localSearchSwapJob(tempChr, finishBy, params->applyBestFit);
-            } while (bJobInsertApplied || bJobSwapApplied);
+                //cout << "insert job..." << fixed << setprecision(1) << decodeAndGetTWT(tempChr) << endl;
+                bJobInsertApplied = localSearchInsertJob(tempChr, finishBy,params->applyBestFitSeq);
+                //cout << "swap job..." << fixed << setprecision(1) << decodeAndGetTWT(tempChr) << endl;
+                bJobSwapApplied = localSearchSwapJob(tempChr, finishBy, params->applyBestFitSeq);
+            } while ((bJobInsertApplied || bJobSwapApplied) && chrono::high_resolution_clock::now() < finishBy);
 
             double tempTWT = decodeAndGetTWT(tempChr);
             if (tempTWT < bestTWT) {
@@ -482,12 +487,12 @@ double Solver_Sequence_ILS::solveILSseq(Schedule& sched, int iTilimSeconds) {
             }
 
             // DEBÚGGING
-            cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << "tempTWT: " << tempTWT << ", bestTWT" << bestTWT << endl;
+            //cout << "ILS iteration " << params->multiStartIterations + 1 << "." << params->ilsIterations[params->multiStartIterations] + 1 << "tempTWT: " << tempTWT << ", bestTWT" << bestTWT << endl;
             
             // PERTURBATION
         
             uniform_real_distribution<> perturbDistrib(0, 1);
-            for (size_t i = 0; i < params->nPerturbationSteps; ++i) {
+            for (size_t i = 0; i < params->nPerturbationStepsSeq; ++i) {        // [JR-2026-Feb-08] seperate parameter nPerturbationStepsSeq
                 double perturbChoice = perturbDistrib(TCB::rng);
                 if (perturbChoice < 1.0 / 3.0) {
                     //TCB::logger.Log(Info, "perturbRandomJobSwap");
@@ -996,9 +1001,9 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
             bool bJobInsertApplied = false;
             bool bJobSwapApplied = false;
             do {
-                bJobInsertApplied = worker.localSearchInsertJob(finishBy, ilsParams.applyBestFit);
-                bJobSwapApplied = worker.localSearchSwapJob(finishBy, ilsParams.applyBestFit);
-            } while (bJobInsertApplied || bJobSwapApplied);
+                bJobInsertApplied = worker.localSearchInsertJob(finishBy, ilsParams.applyBestFitSeq);
+                bJobSwapApplied = worker.localSearchSwapJob(finishBy, ilsParams.applyBestFitSeq);
+            } while ((bJobInsertApplied || bJobSwapApplied) && chrono::high_resolution_clock::now() < finishBy);
 
             double tempTWT = worker.currentTWT;
             if (tempTWT < localBest->bestTWT) {
@@ -1010,7 +1015,7 @@ void Solver_Sequence_ILS::workILSseq(DWORD coreIndex, unique_ptr<Schedule>& sche
             }
             // PERTURBATION
             uniform_real_distribution<> perturbDistrib(0, 1);
-            for (size_t i = 0; i < ilsParams.nPerturbationSteps; ++i) {
+            for (size_t i = 0; i < ilsParams.nPerturbationStepsSeq; ++i) { // [JR-2026-Feb-08] seperate parameter 
                 double perturbChoice = perturbDistrib(localRng);
                 if (perturbChoice < 1.0 / 3.0) {
                     //TCB::logger.Log(Info, "perturbRandomJobSwap");
