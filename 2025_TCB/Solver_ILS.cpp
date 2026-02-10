@@ -202,8 +202,6 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> ini
         iCoresForRandomInit--;
     }
 
-    //cout << "Using " << pCores.size() << " cores..." << endl;
-
     auto start = chrono::high_resolution_clock::now();
     chrono::seconds usedTime;
     chrono::time_point<chrono::high_resolution_clock> stop;
@@ -214,14 +212,14 @@ double Solver_ILS::solveILSparallelized(Schedule& sched, initializerRK<pJob> ini
         DWORD coreIndex = pCores[core];
         ILS_threads[core].bestSched = sched.clone();
 
-        if (core < iCoresForRandomInit) {
+        if (core < pCores.size() - iCoresForRandomInit) {
+            // Initial solution from job sequence obtained in phase 1
+            threads.emplace_back(workILSrk, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, init, randomKeySets[core], iTilimSeconds, start, threadsSeeds[core], &ILS_threads[core], pWait);
+        }
+        else {
             // Random initial solution
             initializer<pJob> initRandomly = &Schedule::lSchedJobsWithSorting;
             threads.emplace_back(workILS, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, initRandomly, sortJobsRandomly, iTilimSeconds, start, threadsSeeds[core], &ILS_threads[core], pWait);
-        }
-        else {
-            // Initial solution from job sequence obtained in phase 1
-            threads.emplace_back(workILSrk, coreIndex, move(ILS_threads[core].bestSched), &threadParams[core].localSchedParams, &threadParams[core].localIlsParams, init, randomKeySets[core], iTilimSeconds, start, threadsSeeds[core], &ILS_threads[core], pWait);
         }     
     }
 
@@ -1076,9 +1074,23 @@ double Solver_Hybrid_ILS::solveILShybrid(Schedule& sched, int iTilimTotal) {
     //usedTime = chrono::duration_cast<chrono::seconds>(stop - start);
     cout << "Phase 1 finished with TWT=" << bestTWT << endl; // " after " << usedTime.count() << "seconds." << endl;
 
+
+
     vector<vector<double>> chromosomeSet = phase1.getBestChrParallel();    // TODO return different permutations from each core
     sched.reset();
     sched.sortUnscheduled(sortJobsById);
+
+    // sort chromosomes by non-increasing TWT values
+    vector<size_t> chrIndices(chromosomeSet.size());
+    iota(chrIndices.begin(), chrIndices.end(), 0);
+    sort(chrIndices.begin(), chrIndices.end(), [&](size_t a, size_t b) {
+        return phase1.decodeAndGetTWT(chromosomeSet[a]) < phase1.decodeAndGetTWT(chromosomeSet[b]);
+    });
+    vector<vector<double>> sortedChromosomeSet;
+    sortedChromosomeSet.reserve(chromosomeSet.size());
+    for (size_t i = 0; i < chrIndices.size(); ++i) {
+        sortedChromosomeSet.push_back(chromosomeSet[chrIndices[i]]);
+    }
 
     // clear reporting from 1st phase
     ilsParams->multiStartIterations = 0;
@@ -1086,7 +1098,7 @@ double Solver_Hybrid_ILS::solveILShybrid(Schedule& sched, int iTilimTotal) {
 
     // PHASE 2 - ILS on schedule (initial schedule from phase 1)
     initializerRK<pJob> init2 = &Schedule::lSchedJobsWithRandomKeySorting;
-    bestTWT = phase2.solveILSparallelized(sched, init2, chromosomeSet, iTilimPhase2);
+    bestTWT = phase2.solveILSparallelized(sched, init2, sortedChromosomeSet, iTilimPhase2);
 
     return bestTWT;
 }
