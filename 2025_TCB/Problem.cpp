@@ -3,6 +3,7 @@
 #include<algorithm>
 #include<fstream>
 #include<iomanip>
+#include<iostream>
 #include<numeric>
 #include<random>
 #include<sstream>
@@ -129,6 +130,45 @@ Problem::Problem(ProbParams& params, bool bInteger) {
 					}
 				}
 				constraints.insert(make_pair(low, high));
+
+				// define tc length 
+				double p = 0;
+				for (int o = low; o < high; ++o) {
+					p += pTimes[i][o];
+				}
+				double tcLength = p * params.tcFlowFactor;
+				if (bInteger) {
+					tcLength = floor(tcLength);
+				}
+				tc[i][low][high] = tcLength;
+			}
+		}
+		break;
+	case 2:		// from any lower stage there is at most one constraint connecting it to a single higher stage
+		for (int i = 0; i < F; ++i) {
+			set<pair<int, int> > constraints = set<pair<int, int> >();
+			set<int> firstStages = set<int>();
+			int nTc = nTcDist(TCB::rng);	// number of time constraints for this product
+			for (int t = 0; t < nTc; ++t) {
+				// select two stages arbitrarily
+				int low = stepDist(TCB::rng);
+				int high = stepDist(TCB::rng);
+				if (high < low) {
+					int temp = high;
+					high = low;
+					low = temp;
+				}
+				while (low == high || firstStages.find(low) != firstStages.end()) {
+					high = stepDist(TCB::rng);
+					low = stepDist(TCB::rng);
+					if (high < low) {
+						int temp = high;
+						high = low;
+						low = temp;
+					}
+				}
+				constraints.insert(make_pair(low, high));
+				firstStages.insert(low);
 
 				// define tc length 
 				double p = 0;
@@ -995,6 +1035,59 @@ void Problem::createAutoSchedModelFiles(string topfolder, string subfolder, Prob
 	}
 }
 
+double Problem::getAvgWorkloadPerMachine(int stageIdx) {
+	if (stageIdx < 0 || stageIdx >= stgs) throw out_of_range("Problem::getAvgWorkloadPerMachine(...) out of range.");
+	double totalProcessingTime = 0.0;
+	for (size_t j = 0; j < jobs_f.size(); ++j) {
+		totalProcessingTime += pTimes[jobs_f[j] - 1][stageIdx] * (double) jobs_s[j] / (double) m_B[stageIdx];	// CONSIDERING JOB AND BATCH SIZE
+	}
+	return totalProcessingTime / (double)m_o[stageIdx];
+}
+
+void Problem::configureBottleneck(pair<int, int> bottleneckStageIndices, double bottleneckCriticality, bool integerValues) {
+	if (bottleneckStageIndices.first < 0 || bottleneckStageIndices.first >= stgs || bottleneckStageIndices.second < 0 || bottleneckStageIndices.second >= stgs) throw out_of_range("Problem::configureBottleneck(...) out of range.");
+	uniform_int_distribution<int> bnStageDist = uniform_int_distribution<int>(bottleneckStageIndices.first, bottleneckStageIndices.second);
+	int bottleneckStageIdx = bnStageDist(TCB::rng);
+
+	// get basic stage (= stage with lowest workload)
+	int basicStageIdx = 0;
+	int maxDistance = 0;
+	for (int i = 0; i < stgs; ++i) {	// arg max(o in 1...stgs) |o - o_bottleneck|
+		int tempDistance = abs(bottleneckStageIdx - i);
+		if (tempDistance > maxDistance) {
+			maxDistance = tempDistance;
+			basicStageIdx = i;
+		}
+	}
+
+	double baseWorkload = getAvgWorkloadPerMachine(basicStageIdx);
+
+	// adapt workload of all stages (but the basic stage)
+	for (int i = 0; i < stgs; ++i) {
+		if (i != basicStageIdx) {
+			double myWorkload = getAvgWorkloadPerMachine(i);
+			double actualWorkloadRatio = myWorkload / baseWorkload;
+			double targetWorkloadRatio = ((maxDistance - abs(bottleneckStageIdx - i))  * bottleneckCriticality) + 1;
+			for (int f = 0; f < F; ++f) {
+				pTimes[f][i] *= (targetWorkloadRatio / actualWorkloadRatio);
+				if (integerValues) {
+					pTimes[f][i] = round(pTimes[f][i]);
+				}
+			}
+		}
+	}
+
+	// TEST
+	for (int i = 0; i < stgs; ++i) {
+		cout << "Stage " << (i + 1) << ": Workload/machine = " << fixed << setprecision(1) << getAvgWorkloadPerMachine(i);
+		if (i == basicStageIdx) cout << " (basic stage)";
+		if (i == bottleneckStageIdx) cout << " (bottleneck stage)";
+		cout << endl;
+	}
+
+	int debugger = 666;
+}
+
 void Problem::_setG() {
 	double bigInteger = 0;
 	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
@@ -1486,6 +1579,81 @@ void Problem::genInstancesTCB25_Jun25_exactMILPvsCP() {
 		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
 		string fileName = "ProbI_TCB_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_exact.dat";
+		prob.saveToDat(fileName);
+	}
+}
+
+void Problem::genInstancesTCB26_Testing() {
+	ProbParams params;
+	params.omega = 9;
+	params.F = 5;
+	params.stgs = 10;
+	params.n = 100;
+	params.m_oIntervals = make_pair(4, 10);
+	params.m_BIntervals = make_pair(2, 6);
+	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 2;
+	params.tcFlowFactor = 1.5;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.3);
+
+	
+	int nmin_tc = params.stgs / 3.0; 
+	int nmax_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
+	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
+
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	int nInstances = 10;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		cout << "DEBUGGING: BOTTLENECKCONFIG" << endl;
+		prob.configureBottleneck(make_pair(7, 7), 0.125);	// [JR-2026-Feb-18] BOTTLENECK CONFIGURATION
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.tcFlowFactor = 3.0;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.tcFlowFactor = 1.5;
+	params.n = 200;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.tcFlowFactor = 3.0;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + ".dat";
 		prob.saveToDat(fileName);
 	}
 }

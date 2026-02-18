@@ -1,80 +1,29 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Functions.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Functions.cpp(121): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(20): warning C4267: '=' : conversion from 'size_t' to 'long', possible loss of data
-          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(31) : see reference to function template instantiation '_Ty std::_Accumulate<unsigned __int64*,_Ty,_Fn2>(_InIt,_InIt,_Ty,_Fn2)' being compiled
-          with
-          [
-              _Ty=long
-  ,            _Fn2=std::plus<void>
-  ,            _InIt=unsigned __int64 *
-          ]
-          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(39) : see reference to function template instantiation '_Ty std::accumulate<_InIt,_Ty,std::plus<void>>(_InIt,_InIt,_Ty,_Fn2)' being compiled
-          with
-          [
-              _Ty=long
-  ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>
-  ,            _Fn2=std::plus<void>
-          ]
-          Functions.cpp(199) : see reference to function template instantiation '_Ty std::accumulate<std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>,long>(_InIt,_InIt,_Ty)' being compiled
-          with
-          [
-              _Ty=long
-  ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>
-          ]
-  Main.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Main.cpp(130): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Main.cpp(138): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Main.cpp(162): warning C4244: 'argument' : conversion from '__int64' to 'int', possible loss of data
-  Schedule.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Schedule.cpp(92): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(119): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(128): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(257): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(460): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(976): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1061): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1102): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1144): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1148): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1697): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1698): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1824): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(1825): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Schedule.cpp(2056): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-Schedule.cpp(2146): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
   Solver_ILS.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 Solver_ILS.cpp(67): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
 Solver_ILS.cpp(131): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
 Solver_ILS.cpp(175): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(217): warning C4018: '<' : signed/unsigned mismatch
-Solver_ILS.cpp(236): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(250): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(297): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(325): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(373): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(486): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(577): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(616): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(677): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(763): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(823): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(887): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(897): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(908): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(916): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(926): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(937): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(974): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(1014): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(234): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(248): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(295): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(323): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(371): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Solver_ILS.cpp(484): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
+Solver_ILS.cpp(575): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(614): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(675): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(761): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(821): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+Solver_ILS.cpp(885): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(895): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(906): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(914): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(924): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(935): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Solver_ILS.cpp(972): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
+Solver_ILS.cpp(1012): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
   Generating code
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1447): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
   Finished generating code

@@ -1,27 +1,25 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Solver_ILS.cpp
+  Problem.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Solver_ILS.cpp(67): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(131): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(175): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(234): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(248): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(295): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(323): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(371): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(484): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(575): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(614): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(675): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(761): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(821): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(885): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(895): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(906): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(914): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(924): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(935): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(972): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(1012): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
+Problem.cpp(205): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(209): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(243): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(263): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(289): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(516): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(560): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(567): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(409): warning C4101: 'exc' : unreferenced local variable
+Problem.cpp(509): warning C4101: 'exc' : unreferenced local variable
+Problem.cpp(590): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
+Problem.cpp(914): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Problem.cpp(1096): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Problem.cpp(1601): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
+          Problem.cpp(261) : see reference to function template instantiation 'std::unique_ptr<Job,std::default_delete<_Ty>> std::make_unique<Job,size_t,int&,Product*,double&,double&,double&>(size_t &&,int &,Product *&&,double &,double &,double &)' being compiled
+          with
+          [
+              _Ty=Job
+          ]
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

@@ -111,6 +111,10 @@ public:
 	void saveToDat(std::string filename, Schedule* sched = nullptr, ProbParams* params = nullptr);
 	void createAutoSchedModelFiles(std::string topfolder, std::string subfolder, ProbParams& params) const;
 
+	// bottlenack configuration, see Yang, Kreipl, Pinedo (2000)
+	double getAvgWorkloadPerMachine(int stageIdx);
+	void configureBottleneck(std::pair<int, int> bottleneckStageIdx, double bottleneckCriticality, bool integerValues = false);
+
 	void _setG();	// set big integer
 
 	std::pair<int, int> _tokenizeTupel(std::string tupel);
@@ -124,5 +128,6 @@ public:
 	void static genInstancesEURO25_integer();				// as above with integer values (floored)
 	void static genInstancesEURO25_exact();					// small-sized instances for exact references
 	void static genInstancesTCB25_Jun25_exactMILPvsCP();	// small instances to be solved to optimality in one iteration
+	void static genInstancesTCB26_Testing();				// trying to find reasonable instances comparable to SMT2020
 };
 

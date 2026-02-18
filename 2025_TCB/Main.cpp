@@ -30,6 +30,7 @@ mt19937 TCB::rng = mt19937(123456789);
 
 int main(int argc, char* argv[]) {
 
+	Problem::genInstancesTCB26_Testing();
 	//Problem::genInstancesTCB25_Jun25_exactMILPvsCP();
 	//Problem::genInstancesEURO25_exact();
 	//Problem::genInstancesEURO25_integer();
