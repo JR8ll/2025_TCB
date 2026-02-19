@@ -29,7 +29,7 @@ struct ProbParams {
 	double tcFlowFactor;	// time constraint flow factor >= 1.0
 
 	std::pair<int, int> nTcInterval;	// lowest/highest number of time constraints per product
-	int tcScenario;	// see Klemmt & Mönch
+	int tcScenario;						// 1: overlapping n:m, 2: overlapping n:1
 
 	std::pair<double, double> dueDateFF;	// lowest/highest factor multiplied with raw processing time to define due date (r_j + raw_processing_time * factor)
 
@@ -48,8 +48,6 @@ struct ProbParams {
 
 class Problem {
 private:
-	
-
 	std::vector<Product> products;
 	std::vector<pJob> unscheduledJobs;
 
@@ -113,13 +111,15 @@ public:
 
 	// bottlenack configuration, see Yang, Kreipl, Pinedo (2000)
 	double getAvgWorkloadPerMachine(int stageIdx);
-	void configureBottleneck(std::pair<int, int> bottleneckStageIdx, double bottleneckCriticality, bool integerValues = false);
+	void configureBottleneck(std::pair<int, int> bottleneckStageIdx, double bottleneckCriticality, ProbParams& params, bool integerValues = false);
 
 	void _setG();	// set big integer
 
 	std::pair<int, int> _tokenizeTupel(std::string tupel);
 
 	std::unique_ptr<Schedule> getSchedule();	// machine environment + jobs to be scheduled
+
+	bool assertFeasibility();
 
 	// EXPERIMENTATION PLANNING
 	void static genInstancesTCB25_Feb25_exact();			// small instances to be solved by cplex (n <= 10, one iteration)
@@ -129,5 +129,6 @@ public:
 	void static genInstancesEURO25_exact();					// small-sized instances for exact references
 	void static genInstancesTCB25_Jun25_exactMILPvsCP();	// small instances to be solved to optimality in one iteration
 	void static genInstancesTCB26_Testing();				// trying to find reasonable instances comparable to SMT2020
+	void static genInstancesTCB26small_Testing();
 };
 

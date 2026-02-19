@@ -53,7 +53,7 @@ public:
 
 void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& bConsole, Sched_params& schedParams, GA_params& gaParams, DECOMPMILP_params& decompParams, ILS_params& ilsParams);
 void writeSolutions(Schedule* solution, int solverType, std::string solverName, std::string objectiveName, int prescribedTime, int usedTime, Sched_params* schedParams, GA_params* gaParams, DECOMPMILP_params* decompParams, ILS_params* ilsParams);
-
+void writeFailureReport();
 
 void sortJobsById(std::vector<pJob>& jobs);
 void sortJobsRandomly(std::vector<pJob>& jobs);		

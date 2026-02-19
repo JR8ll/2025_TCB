@@ -219,6 +219,24 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 	}
 }
 
+void writeFailureReport() {
+	bool success = CreateDirectory(L".\\results", NULL);
+	string fullPath = ".\\results\\TCB_results.csv";
+	ifstream checkFile(fullPath);
+	bool fileExists = checkFile.good();
+	checkFile.close();
+
+	ofstream file(fullPath, ios::app);
+	if (file.is_open()) {
+		if (!fileExists) {
+			// +++ HEADINGS +++
+			file << "Problem\t" << "Solver\t" << "Seed\t" << "Objective\t" << "ObjectiveValue\t" << "TimeLimit\t" << "TimeUsed\t" << "SchedParams\t" << "GA_params\t" << "MILPCP_params\t" << "ILS_params\t" << "miscReporting\t" << "CreatedOn" << endl;
+		}
+		file << TCB::prob->getFilename() << "\t" << "INFEASIBLE_PROBLEM_INSTANCE" << endl;
+		file.close();
+	}
+}
+
 void sortJobsById(std::vector<pJob>& jobs) {
 	sort(jobs.begin(), jobs.end(), compJobsById);
 }

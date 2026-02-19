@@ -14,8 +14,10 @@ Problem.cpp(409): warning C4101: 'exc' : unreferenced local variable
 Problem.cpp(509): warning C4101: 'exc' : unreferenced local variable
 Problem.cpp(590): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
 Problem.cpp(914): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Problem.cpp(1096): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Problem.cpp(1601): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+Problem.cpp(1099): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Problem.cpp(1133): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+Problem.cpp(1658): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+Problem.cpp(2004): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
           Problem.cpp(261) : see reference to function template instantiation 'std::unique_ptr<Job,std::default_delete<_Ty>> std::make_unique<Job,size_t,int&,Product*,double&,double&,double&>(size_t &&,int &,Product *&&,double &,double &,double &)' being compiled
           with

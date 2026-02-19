@@ -29,8 +29,8 @@ mt19937 TCB::rng = mt19937(123456789);
 // argv[9] filename of ILS parameters
 
 int main(int argc, char* argv[]) {
-
-	Problem::genInstancesTCB26_Testing();
+	//Problem::genInstancesTCB26small_Testing();
+	//Problem::genInstancesTCB26_Testing();
 	//Problem::genInstancesTCB25_Jun25_exactMILPvsCP();
 	//Problem::genInstancesEURO25_exact();
 	//Problem::genInstancesEURO25_integer();
@@ -50,6 +50,11 @@ int main(int argc, char* argv[]) {
 	DECOMPMILP_params decompParams = DECOMPMILP_params();
 	ILS_params ilsParams = ILS_params();
 	processCmd(argc, argv, iSolver, iTilimSeconds, bConsole, schedParams, gaParams, decompParams, ilsParams);
+
+	if (!p.assertFeasibility()) {
+		writeFailureReport();
+		exit(EXIT_FAILURE);
+	}
 
 	// PREPARE 
 	pSched sched = TCB::prob->getSchedule();

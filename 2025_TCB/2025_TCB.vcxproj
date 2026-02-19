@@ -113,6 +113,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>C:\ILOG_1271\concert\lib\x64_windows_vs2013\stat_mda\concert.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\cplex1271.lib;C:\ILOG_1271\cplex\lib\x64_windows_vs2013\stat_mda\ilocplex.lib;C:\ILOG_1271\cpoptimizer\lib\x64_windows_vs2013\stat_mda\cp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <StackReserveSize>
+      </StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
