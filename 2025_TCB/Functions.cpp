@@ -99,6 +99,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 		TCB::logger.Log(Warning, warning);
 	}
 
+	// argv[9] filename of ils parameters
 	if (argc > 9) {
 		if (iSolver == ALG_ILS || iSolver == ALG_ILS_PARALLELIZED || iSolver == ALG_ILS_SEQUENCE || iSolver == ALG_ILS_SEQUENCE_PARALLELIZED || iSolver == ALG_ILS_HYBRID) {
 			try {
