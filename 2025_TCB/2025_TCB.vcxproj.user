@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>exp/Inst_TCB2026_F5m7n200tcSc1tcFF1.50_1_btlNckLast.dat %%i 3 180 0 exp/sched1.par exp/ga.par noDecomp noILS</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>exp/Inst_TCB2026_F1m5n10tcSc2tcFF1.50_2btlNckLast.dat 123456 1 600 0 exp/sched1.par noGA exp/decomp.par noILS</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

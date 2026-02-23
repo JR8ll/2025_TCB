@@ -31,7 +31,7 @@ double GaDecoderJobListSched::applyNonPersitentLocalSearch(Schedule* sched) cons
         bLeftShiftApplied = sched->localSearchJobLeftShifting(&sortJobsByStart, finishBy, gaParams->applyLocalSearchBestFit);     // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!        [JR-2026-Feb-23] added finishBy parameter
         bJobSwapApplied = sched->localSearchJobSwapping(&sortJobsByStart, finishBy, gaParams->applyLocalSearchBestFit);           // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!        [JR-2026-Feb-23] added finishBy parameter
         bBatchConsolidationApplied = sched->localSearchBatchConsolidation(finishBy, gaParams->applyLocalSearchBestFit);                                                                                                                     // [JR-2026-Feb-23] added finishBy parameter
-    } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
+    } while ((bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied) && chrono::high_resolution_clock::now() < finishBy);
 	
     return sched->getTWT();
 }

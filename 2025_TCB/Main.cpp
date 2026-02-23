@@ -69,7 +69,13 @@ int main(int argc, char* argv[]) {
 	case ALG_ITERATEDMILP:
 		solverName = "DecompMILP";
 		{
-			Solver_MILP cplex = Solver_MILP(schedParams, decompParams);
+			// [JR-2026-Feb-23] 
+			double omega = 0.9;
+			if (decompParams.nDash >= p.getN()) {
+				omega = 1.0;
+			}
+
+			Solver_MILP cplex = Solver_MILP(schedParams, decompParams, omega);
 			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim, sortJobsByD, sortJobsByGATC);
 		}
 		break;

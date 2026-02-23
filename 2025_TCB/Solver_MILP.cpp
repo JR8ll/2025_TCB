@@ -15,7 +15,7 @@ using IloBoolVarArray3 = IloArray<IloBoolVarArray2>;
 using IloNumVarArray2 = IloArray<IloNumVarArray>;
 using IloBoolArray2 = IloArray<IloBoolArray>;
 
-Solver_MILP::Solver_MILP(Sched_params& sched_params, DECOMPMILP_params& decompParams) : schedParams(&sched_params), params(&decompParams) {}
+Solver_MILP::Solver_MILP(Sched_params& sched_params, DECOMPMILP_params& decompParams, double omega) : schedParams(&sched_params), params(&decompParams), omega(omega) {}
 Solver_MILP::~Solver_MILP() {}
 
 double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTilim) {
@@ -33,7 +33,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 	IloEnv env;
 
 	// PARAMETERS
-	IloNum omega = 9;	// TODO set omega
+	IloNum omega = this->omega;	// TODO set omega
 
 	IloNum G = schedule->getProblem()->getG();	
 	IloInt m = schedule->size();
@@ -252,7 +252,7 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 		}
 	}
 	IloExpr obj(env);
-	obj = omega * objTwt + objJobStart;
+	obj = omega * objTwt + (1.0 - omega) * objJobStart;		// [JR-2026-Feb-23] added to 2nd summand: "(1.0 - omega) * "
 
 	mod.add(IloMinimize(env, obj));
 
@@ -586,8 +586,8 @@ double Solver_MILP::solveJobBasedMILP(Schedule* schedule, int nDash, int cplexTi
 
 	// set timelimit and solve
 	IloCplex cplex(mod);
-	cplex.setOut(env.getNullStream());				// GO-LIVE: uncomment
-	//cplex.exportModel("milp.lp");					// GO-LIVE: comment
+	//cplex.setOut(env.getNullStream());				// GO-LIVE: uncomment
+	cplex.exportModel("milp.lp");					// GO-LIVE: comment
 	cplex.setParam(IloCplex::EpGap, params->presetMipGap);	// [JR-2026-Jan-23]
 	cplex.setParam(IloCplex::TiLim, cplexTilim);	
 

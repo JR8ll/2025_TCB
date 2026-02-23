@@ -1,8 +1,4 @@
 ﻿cl : Command line warning D9025: overriding '/sdl' with '/GS-'
-  Workcenter.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Workcenter.cpp(34): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Solver_MILP.cpp
 C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(3428): warning C4996: 'IloCplex::PresolveCallbackI::~PresolveCallbackI': was declared deprecated
           C:\ILOG_1271\cplex\include\ilcplex/ilocplexi.h(2013) : compiler has generated 'IloCplex::PresolveCallbackI::~PresolveCallbackI' here
@@ -100,46 +96,14 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): war
   ,            _Alloc=std::allocator<std::pair<const std::pair<int,int>,int>>
   ,            _Valty=std::pair<std::pair<__int64,__int64>,int>
           ]
-  Solver_ILS.cpp
+  Main.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Solver_ILS.cpp(67): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(131): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(175): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(234): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(248): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(295): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(323): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(371): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-Solver_ILS.cpp(484): warning C4244: '=' : conversion from '__int64' to 'int', possible loss of data
-Solver_ILS.cpp(575): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(614): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(675): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(761): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(821): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Solver_ILS.cpp(885): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(895): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(906): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(914): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(924): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(935): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Solver_ILS.cpp(972): warning C4244: 'argument' : conversion from 'uint64_t' to 'unsigned int', possible loss of data
-Solver_ILS.cpp(1012): warning C4244: '=' : conversion from '__int64' to 'double', possible loss of data
-  Solver_GA.cpp
-C:\Users\rocholl\brkgaAPI\src\MTRand.h(257): warning C4800: 'size_t' : forcing value to bool 'true' or 'false' (performance warning)
-c:\users\rocholl\brkgaapi\src\Population.h(70): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
-c:\users\rocholl\brkgaapi\src\Population.h(74): warning C4267: 'return' : conversion from 'size_t' to 'unsigned int', possible loss of data
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\BRKGA_SelectiveLocalSearch.h(34): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-          c:\users\rocholl\source\repos\2025_tcb\2025_tcb\BRKGA_SelectiveLocalSearch.h(33) : while compiling class template member function 'void BRKGA_SelectiveLocalSearch<GaDecoderJobListSched,MTRand>::setLocalSearchFraction(double)'
-          Solver_GA.cpp(40) : see reference to function template instantiation 'void BRKGA_SelectiveLocalSearch<GaDecoderJobListSched,MTRand>::setLocalSearchFraction(double)' being compiled
-          Solver_GA.cpp(39) : see reference to class template instantiation 'BRKGA_SelectiveLocalSearch<GaDecoderJobListSched,MTRand>' being compiled
-  Solver_CP.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Solver_CP.cpp(25): warning C4101: 'ex' : unreferenced local variable
-Solver_CP.cpp(35): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Main.cpp(142): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Main.cpp(150): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Main.cpp(174): warning C4244: 'argument' : conversion from '__int64' to 'int', possible loss of data
+  Generating Code...
+  Compiling...
   Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -162,58 +126,6 @@ Schedule.cpp(1992): warning C4267: 'initializing' : conversion from 'size_t' to 
 Schedule.cpp(1993): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
 Schedule.cpp(2224): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
 Schedule.cpp(2314): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-  Problem.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Problem.cpp(205): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(209): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(243): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(263): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(289): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(516): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(560): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(567): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(409): warning C4101: 'exc' : unreferenced local variable
-Problem.cpp(509): warning C4101: 'exc' : unreferenced local variable
-Problem.cpp(590): warning C4800: 'BOOL' : forcing value to bool 'true' or 'false' (performance warning)
-Problem.cpp(914): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Problem.cpp(1099): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Problem.cpp(1133): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-Problem.cpp(1658): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-Problem.cpp(2363): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): warning C4267: 'argument' : conversion from 'size_t' to 'int', possible loss of data
-          Problem.cpp(261) : see reference to function template instantiation 'std::unique_ptr<Job,std::default_delete<_Ty>> std::make_unique<Job,size_t,int&,Product*,double&,double&,double&>(size_t &&,int &,Product *&&,double &,double &,double &)' being compiled
-          with
-          [
-              _Ty=Job
-          ]
-  Operation.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Operation.cpp(120): warning C4804: '>=' : unsafe use of type 'bool' in operation
-Operation.cpp(233): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(234): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(235): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(259): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(260): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(261): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(286): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(287): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(316): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Operation.cpp(317): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-  Main.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Main.cpp(136): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Main.cpp(144): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Main.cpp(168): warning C4244: 'argument' : conversion from '__int64' to 'int', possible loss of data
-  Machine.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Machine.cpp(30): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
-  GaDecoder.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   Functions.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -240,50 +152,6 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(20): warn
               _Ty=long
   ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<unsigned __int64>>>
           ]
-  Batch.cpp
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Batch.cpp(59): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Generating Code...
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\schedule.cpp(1615): warning C4715: 'Schedule::locSearchSwapJobs' : not all control paths return a value
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\solver_cp.cpp(31): warning C4715: 'Solver_CP::solveCP' : not all control paths return a value
-c:\users\rocholl\source\repos\2025_tcb\2025_tcb\workcenter.cpp(665): warning C4715: 'Workcenter::debugNoTwoBatchesStartingSimultaneously' : not all control paths return a value
-concert.lib(ilosstructi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosstructi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilohash.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilohash.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloalg.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloalg.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloenv.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloenv.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilostimei.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilostimei.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloallocator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloallocator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilosatomi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosatomi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloserror.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloserror.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilosdisplayi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosdisplayi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilorandom.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilorandom.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilothread.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilothread.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilossol.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilossol.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilotypes.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilotypes.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloexpression.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloexpression.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilosbasic.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosbasic.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloset.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloset.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloconstraint.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloconstraint.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloanyexpr.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloanyexpr.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloextractable.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloextractable.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilomap.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilomap.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilotupleset.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilotupleset.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilosmodel.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosmodel.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilosolution.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosolution.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloiterator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloiterator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilossequencei.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilossequencei.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilocollection.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollection.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilocollectionstruct.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollectionstruct.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilosimplecollection.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilosimplecollection.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilocollectionoperator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollectionoperator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilocollectioniterator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilocollectioniterator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloskiplist.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloskiplist.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilonumfunci.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilonumfunci.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(iloparami.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(iloparami.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(ilointervalsi.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(ilointervalsi.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(evalkernel.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(evalkernel.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(evaluator.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(evaluator.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(evalexpand.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(evalexpand.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
-concert.lib(strtod.obj) : warning LNK4099: PDB 'concert.pdb' was not found with 'concert.lib(strtod.obj)' or at 'C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\concert.pdb'; linking object as if no debug info
   2025_TCB.vcxproj -> C:\Users\rocholl\source\repos\2025_TCB\x64\Debug\2025_TCB.exe

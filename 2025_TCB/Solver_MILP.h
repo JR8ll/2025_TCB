@@ -29,9 +29,10 @@ class Solver_MILP {
 private:
 	DECOMPMILP_params* params;
 	Sched_params* schedParams;
+	double omega;	// [0,1] for objective function: omega * TWT + (1-omega) * operations´ start times
 
 public:
-	Solver_MILP(Sched_params& sched_params, DECOMPMILP_params& decompParams);
+	Solver_MILP(Sched_params& sched_params, DECOMPMILP_params& decompParams, double omega = 1.0);
 	~Solver_MILP();
 
 	double solveJobBasedMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60);	// job based MILP by Cailloux & Mönch (MISTA 2019), iteratively considering max. nDash jobs, given sorting (static)
