@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 #include "Common_aliases.h"
-#include<chrono>
+#include <chrono>
 
 #include "GaDecoder.h"
 

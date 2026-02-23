@@ -972,6 +972,174 @@ void Schedule::localSearchOpLeftShifting(prioRule<pJob> rule, double pWait) {
 		}
 	}
 }
+bool Schedule::localSearchJobSwapping(prioRule<pJob> rule, chrono::time_point<chrono::high_resolution_clock> finishBy, bool bestFit) {
+	bool bImprovedOnce = false;
+	bool bImproved = true;
+	int nJobs = scheduledJobs.size();
+	while (bImproved && chrono::high_resolution_clock::now() < finishBy) {
+		bImproved = false;
+		rule(scheduledJobs);
+		bool swapFeasible = true;
+		double bestImprovement = 0;
+		size_t best1 = 0;
+		size_t best2 = 0;
+		for (size_t j = 0; j < nJobs; ++j) {
+			for (int k = nJobs - 1; k >= 0; --k) {
+				if (chrono::high_resolution_clock::now() >= finishBy) {
+					break;
+				}
+
+				if (j != k) {
+					double tempImprovement = locSearchEvaluateJobSwap(j, k, swapFeasible);
+					if (swapFeasible && tempImprovement > bestImprovement) {
+						if (!bestFit) { // FIRST FIT
+							locSearchSwapJobs(j, k);
+							bImprovedOnce = true;
+							bImproved = true;
+							break;
+						}
+						else {			// BEST FIT
+							bestImprovement = tempImprovement;
+							best1 = j;
+							best2 = k;
+						}
+					}
+				}
+			}
+			if (bImproved || chrono::high_resolution_clock::now() >= finishBy) {
+				break; // continue with while loop
+			}
+		}
+		if (bestFit && bestImprovement > 0) {
+			locSearchSwapJobs(best1, best2);
+			bImprovedOnce = true;
+			bImproved = true;
+		}
+	}
+	return bImprovedOnce;
+}
+bool Schedule::localSearchJobLeftShifting(prioRule<pJob> rule, chrono::time_point<chrono::high_resolution_clock> finishBy, bool bestFit) {
+	int maxConsecutiveInnerStageImprovement = scheduledJobs.size();	// to avoid infinite loop (there may be infinite shifts improving completion of inner operations only (w/o effect on TWT)
+	int nConsecutiveInnerStageImprovement = 0;
+	bool bImproved = true;
+	bool bImprovedOnce = false;
+	int nJobs = scheduledJobs.size();
+
+	while (bImproved && chrono::high_resolution_clock::now() < finishBy) {
+		bImproved = false;
+		rule(scheduledJobs);
+		pair<double, double> bestImprovement = make_pair(0, 0);
+		double bestTwtImprovement = 0.0;
+		size_t best = 0;
+		vector<vector<pair<double, double>>> bestPossibleLeftShifts = vector<vector<pair<double, double>>>(size());
+		for (size_t j = 0; j < nJobs; ++j) {
+			if (chrono::high_resolution_clock::now() >= finishBy) {
+				break;
+			}
+			vector<vector<pair<double, double>>> tempPossibleLeftShifts = vector<vector<pair<double, double>>>(size());
+			pair<double, double> tempImprovement = locSearchEvaluateJobLeftShift(j, tempPossibleLeftShifts);
+			double tempTwtImprovement = tempImprovement.first * scheduledJobs[j]->getW();
+			if (tempTwtImprovement > bestTwtImprovement || (tempTwtImprovement == bestTwtImprovement && tempImprovement.second > bestImprovement.second)) {
+				if (tempTwtImprovement <= 0) {
+					++nConsecutiveInnerStageImprovement;
+				}
+				else {
+					nConsecutiveInnerStageImprovement = 0;
+				}
+				if (!bestFit) {
+					locSearchLeftShiftJob(j, tempPossibleLeftShifts);
+					if (nConsecutiveInnerStageImprovement < maxConsecutiveInnerStageImprovement) {
+						bImprovedOnce = true;
+						bImproved = true;
+					}
+					break;
+				}
+				else {
+					bestImprovement = tempImprovement;
+					bestTwtImprovement = tempTwtImprovement;
+					bestPossibleLeftShifts = tempPossibleLeftShifts;
+					best = j;
+				}
+			}
+		}
+		if (bestFit && (bestImprovement.first > 0 || bestImprovement.second > 0)) {
+			locSearchLeftShiftJob(best, bestPossibleLeftShifts);
+			if (nConsecutiveInnerStageImprovement < maxConsecutiveInnerStageImprovement) {
+				bImprovedOnce = true;
+				bImproved = true;
+			}
+		}
+	}
+	return bImprovedOnce;
+}
+bool Schedule::localSearchBatchConsolidation(chrono::time_point<chrono::high_resolution_clock> finishBy, bool bestFit) {
+	bool bImproving = true;
+	bool bImprovedOnce = false;
+	while (bImproving && chrono::high_resolution_clock::now() < finishBy) {
+		bImproving = false;
+		double bestImprovement = 0.0;
+		size_t bestWc = 0;
+		size_t bestM = 0;
+		size_t bestB = 0;
+		size_t bestOp = 0;
+
+		for (size_t o = 0; o < size(); ++o) {
+			Workcenter* workcenter = &(*workcenters[o]);
+			for (size_t m = 0; m < workcenter->size(); ++m) {
+				Machine* machine = &(*workcenter)[m];
+
+				for (int b = 0; (b + 1) < machine->size(); ++b) {
+					Batch* batch = &(*machine)[b];
+					Batch* succB = &(*machine)[b + 1];
+
+					if (batch->getF() == succB->getF()) {
+						for (size_t op = 0; op < succB->size(); ++op) {
+							size_t opIdx = op;	// by value
+
+							double tempImprovement = localSearchEvaluateBatchConsolidation(o, m, b, m, b + 1, opIdx);	// opIdx by reference
+
+							if (tempImprovement > bestImprovement) {
+								if (!bestFit) {
+									// FIRST FIT => execute if improvement > 0
+									localSearchConsolidateBatch(o, m, b, m, b + 1, opIdx);
+									bImprovedOnce = true;
+									bImproving = true;
+									break;
+								}
+								else {
+									// BEST FIT (GREEDY) => keep looking for best move
+									bestWc = o;
+									bestM = m;
+									bestB = b;
+									bestOp = opIdx;
+									bestImprovement = tempImprovement;
+								}
+							}
+						}
+					}
+
+					if (bImproving || chrono::high_resolution_clock::now() >= finishBy) break;
+				}
+				if (bImproving ||chrono::high_resolution_clock::now() >= finishBy) break;
+			}
+			if (bImproving|| chrono::high_resolution_clock::now() >= finishBy) break;
+		}
+
+		if (bestFit && bestImprovement > 0) {
+			// BEST FIT => execute best move if improvement > 0
+			if (!localSearchConsolidateBatch(bestWc, bestM, bestB, bestM, bestB + 1, bestOp)) {
+				throw(ExcSched("INVALID SCHEDULE AFTER CONSOLIDATE BATCH"));	// [JR-2026-Jan-24]
+			}
+
+			bImprovedOnce = true;
+			bImproving = true;
+		}
+	}
+	return bImprovedOnce;
+}
+
+
+
 void Schedule::perturbRandomJobSwap() {
 	uniform_int_distribution<> distrib(0, scheduledJobs.size()-1);
 	int max = 1000;
@@ -1692,7 +1860,7 @@ vector<vector<pair<size_t, double>>> Schedule::getTcSlack(Job* job) {
 	}
 	return tcSlack;
 }
-bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway) {
+bool Schedule::constrainLeftShiftOptionsFromOverlaps(vector<vector<pair<double, double>>>& options, vector<double>& leeway) {
 	bool changeApplied = false;
 	for (int o = options.size() - 1; o >= 1; --o) {
 		for (int opt = options[o].size() - 1; opt >= 0; --opt) {
@@ -1744,7 +1912,7 @@ bool Schedule::constrainLeftShiftOptionsFromOverlaps(std::vector<std::vector<std
 	}
 	return changeApplied;
 }
-bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, vector<vector<pair<size_t, double>>>& tcSlack) {
+bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(vector<vector<pair<double, double>>>& options, vector<vector<pair<size_t, double>>>& tcSlack) {
 	bool changeApplied = false;
 	for (int o = 0; o < options.size() - 1; ++o) {
 		for (int opt = 0; opt < options[o].size(); ++opt) {
@@ -1819,7 +1987,7 @@ bool Schedule::constrainLeftShiftOptionsFromTimeConstraints(std::vector<std::vec
 	return changeApplied;
 }
 
-bool Schedule::constrainRightShiftOptionsFromOverlaps(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<double>& leeway) {
+bool Schedule::constrainRightShiftOptionsFromOverlaps(vector<vector<pair<double, double>>>& options, vector<double>& leeway) {
 	bool changeApplied = false;
 	for (int o = options.size() - 1; o >= 1; --o) {
 		for (int opt = options[o].size() - 1; opt >= 0; --opt) {
@@ -1862,7 +2030,7 @@ bool Schedule::constrainRightShiftOptionsFromOverlaps(std::vector<std::vector<st
 	}
 	return changeApplied;
 }
-bool Schedule::constrainRightShiftOptionsFromTimeConstraints(std::vector<std::vector<std::pair<double, double>>>& options, std::vector<std::vector<std::pair<size_t, double>>>& tcSlack) {
+bool Schedule::constrainRightShiftOptionsFromTimeConstraints(vector<vector<pair<double, double>>>& options, vector<vector<pair<size_t, double>>>& tcSlack) {
 	bool changeApplied = false;
 	for (int o = 0; o < options.size() - 1; ++o) {
 		for (int opt = 0; opt < options[o].size(); ++opt) {
@@ -1923,7 +2091,7 @@ bool Schedule::constrainRightShiftOptionsFromTimeConstraints(std::vector<std::ve
 
 
 
-void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<double, double>& option) {
+void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, pair<double, double>& option) {
 	if (option.first > 0) {
 		Operation* operation = &(*scheduledJobs[jobIdx])[stgIdx];
 		bool bIntoExistingBatch = option.first == option.second;
@@ -1935,7 +2103,7 @@ void Schedule::executeLeftShiftOption(size_t jobIdx, size_t stgIdx, std::pair<do
 		}
 	}
 }
-bool Schedule::executeLeftShiftOption(Operation* operation, std::pair<double, double>& option) {
+bool Schedule::executeLeftShiftOption(Operation* operation, pair<double, double>& option) {
 	bool bIntoExistingBatch = true;
 	if (option.first > 0) {
 		bIntoExistingBatch = option.first == option.second;
@@ -2002,7 +2170,7 @@ double Schedule::getMinMSP(size_t stgIdx) const {
 	return workcenters[stgIdx]->getMinMSP();
 }
 
-void Schedule::saveJson(std::string solver) {
+void Schedule::saveJson(string solver) {
 	pt::ptree treeFile;
 
 	treeFile.put("Problem", TCB::prob->getFilename());
@@ -2057,7 +2225,7 @@ void Schedule::saveJson(std::string solver) {
 	string pathAndFilename = string(".\\results\\").append(schedFileName);
 	pt::write_json(pathAndFilename, treeFile);
 }
-void Schedule::saveJsonFactory(std::string solver) const {
+void Schedule::saveJsonFactory(string solver) const {
 	pt::ptree treeFile;
 
 	treeFile.put("Problem", TCB::prob->getFilename());

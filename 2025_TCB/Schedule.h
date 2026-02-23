@@ -1,7 +1,8 @@
 #pragma once
 
-#include<memory>
-#include<vector>
+#include <chrono>
+#include <memory>
+#include <vector>
 
 #include "Common_aliases.h"
 #include "Job.h"
@@ -109,6 +110,12 @@ public:
 	void localSearchBatchLeftShifting();																					// TODO
 	void localSearchOpLeftShifting(prioRule<pJob> rule = &sortJobsByWaitingTimeDecr, double pWait = 0.0);					// LOCAL SEARCH OPERATION BASED (ALMOST USELESS)	
 	
+	// versions with timelimit [JR-2026-Feb-23]
+	bool localSearchJobSwapping(prioRule<pJob> rule = &sortJobsByD, std::chrono::time_point<std::chrono::high_resolution_clock> finishBy = std::chrono::high_resolution_clock::now(), bool bestFit = true);									// if not bestFit => firstFit
+	bool localSearchJobLeftShifting(prioRule<pJob> rule = &sortJobsByD, std::chrono::time_point<std::chrono::high_resolution_clock> finishBy = std::chrono::high_resolution_clock::now(), bool bestFit = true);								// if not bestFit => firstFit
+	bool localSearchBatchConsolidation(std::chrono::time_point<std::chrono::high_resolution_clock> finishBy, bool bestFit = true);																// if not bestFit => firstFit
+
+
 	void perturbRandomJobSwap();
 	void perturbRandomBatchRightShifting();		
 	void perturbRandomJobRightShifting();		

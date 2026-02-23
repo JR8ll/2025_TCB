@@ -25,7 +25,9 @@ double Solver_GA::solveBRKGA_List_jobBased(Schedule& sched, int iTilimSeconds) {
 	chrono::seconds usedTime;
 	chrono::time_point<chrono::high_resolution_clock> stop;
 
-	GaDecoderJobListSched decoder(&sched, schedParams, params);
+	auto finishBy = start + std::chrono::seconds(iTilimSeconds);
+
+	GaDecoderJobListSched decoder(&sched, schedParams, params, finishBy);	// [JR-2026-Feb-23] added finishBy parameter
 	const long unsigned rngSeed = TCB::seed;
 	MTRand rng(rngSeed);
 

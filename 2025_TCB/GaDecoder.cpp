@@ -5,7 +5,8 @@
 
 using namespace std;
 
-GaDecoderJobListSched::GaDecoderJobListSched(Schedule* schedule, Sched_params* schedParameters, GA_params* gaParameters) : masterSched(schedule), schedParams(schedParameters), gaParams(gaParameters) {}
+GaDecoderJobListSched::GaDecoderJobListSched(Schedule* schedule, Sched_params* schedParameters, GA_params* gaParameters) : masterSched(schedule), schedParams(schedParameters), gaParams(gaParameters), finishBy(chrono::high_resolution_clock::now()) {}
+GaDecoderJobListSched::GaDecoderJobListSched(Schedule* schedule, Sched_params* schedParameters, GA_params* gaParameters, std::chrono::time_point<std::chrono::high_resolution_clock> finishBy) : masterSched(schedule), schedParams(schedParameters), gaParams(gaParameters), finishBy(finishBy) {}
 GaDecoderJobListSched::~GaDecoderJobListSched() {}
 double GaDecoderJobListSched::decode(const vector<double>& chr) const {
 	unique_ptr<Schedule> mySched = masterSched->clone();
@@ -27,9 +28,9 @@ double GaDecoderJobListSched::applyNonPersitentLocalSearch(Schedule* sched) cons
     bool bJobSwapApplied = false;
     bool bBatchConsolidationApplied = false;
     do {
-        bLeftShiftApplied = sched->localSearchJobLeftShifting(&sortJobsByStart, gaParams->applyLocalSearchBestFit);     // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!
-        bJobSwapApplied = sched->localSearchJobSwapping(&sortJobsByStart, gaParams->applyLocalSearchBestFit);           // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!
-        bBatchConsolidationApplied = sched->localSearchBatchConsolidation(gaParams->applyLocalSearchBestFit);           
+        bLeftShiftApplied = sched->localSearchJobLeftShifting(&sortJobsByStart, finishBy, gaParams->applyLocalSearchBestFit);     // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!        [JR-2026-Feb-23] added finishBy parameter
+        bJobSwapApplied = sched->localSearchJobSwapping(&sortJobsByStart, finishBy, gaParams->applyLocalSearchBestFit);           // [JR-2026-Jan-19] deterministic sorting is important for schedule reproduction from best individual!        [JR-2026-Feb-23] added finishBy parameter
+        bBatchConsolidationApplied = sched->localSearchBatchConsolidation(finishBy, gaParams->applyLocalSearchBestFit);                                                                                                                     // [JR-2026-Feb-23] added finishBy parameter
     } while (bLeftShiftApplied || bJobSwapApplied || bBatchConsolidationApplied);
 	
     return sched->getTWT();

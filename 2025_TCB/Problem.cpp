@@ -1831,6 +1831,13 @@ void Problem::genInstancesTCB26_Testing() {
 	params.n = 200;
 	params.tcFlowFactor = 1.5;
 	params.stgs = 7;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
 	// n = 200, 7 stages, tcFF = 1.5, bottlenek 1st stage
 	for (int i = 0; i < nInstances; ++i) {
 		Problem prob = Problem(params, true);
@@ -1908,6 +1915,13 @@ void Problem::genInstancesTCB26_Testing() {
 	// 15 stages
 	params.stgs = 15;
 	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
 	// n = 200, 15 stages, tcFF = 1.5, bottlenek 1st stage
 	for (int i = 0; i < nInstances; ++i) {
 		Problem prob = Problem(params, true);
@@ -1981,30 +1995,13 @@ void Problem::genInstancesTCB26_Testing() {
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
 		prob.saveToDat(fileName);
 	}
-}
 
-void Problem::genInstancesTCB26small_Testing() {
-	ProbParams params;
-	params.omega = 9;
-	params.F = 1;
-	params.stgs = 5;
-	params.n = 10;
-	params.m_oIntervals = make_pair(1, 2);
-	params.m_BIntervals = make_pair(1, 3);
-	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
-	params.pInterval = make_pair(10, 25);
-	params.tcScenario = 2;
+
+
+	params.tcScenario = 1;
+	params.n = 100;
+	params.stgs = 7;
 	params.tcFlowFactor = 1.5;
-	params.rInterval = make_pair(0, 0.75);
-	params.sInterval = make_pair(1, 1);	// uniform job sizes
-	params.wInterval = make_pair(1.0, 3.0);
-	params.dueDateFF = make_pair(1.0, 1.3);
-
-
-	int nmin_tc = params.stgs / 3.0;
-	int nmax_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
-	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
-
 	params.routes = vector<vector<int> >(params.F);
 	for (int i = 0; i < params.F; ++i) {
 		params.routes[i] = vector<int>(params.stgs);
@@ -2013,9 +2010,7 @@ void Problem::genInstancesTCB26small_Testing() {
 		}
 	}
 
-	int nInstances = 10;
-	double bottleneckCriticality = 0.125;
-
+	// tc-Scenario 1
 	// n = 100, 7 stages, tcFF = 1.5, bottlenek 1st stage
 	for (int i = 0; i < nInstances; ++i) {
 		Problem prob = Problem(params, true);
@@ -2051,6 +2046,494 @@ void Problem::genInstancesTCB26small_Testing() {
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
 		prob.saveToDat(fileName);
 	}
+
+
+	params.tcFlowFactor = 3.0;
+	// n = 100, 7 stages, tcFF = 3.0, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	//  n = 100, 7 stages, tcFF = 3.0, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	//  n = 100, 7 stages, tcFF = 3.0, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// 15 stages
+	params.stgs = 15;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	params.tcFlowFactor = 1.5;
+	// n = 100, 15 stages, tcFF = 1.5, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, 15 stages, tcFF = 1.5, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, 15 stages, tcFF = 1.5, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+
+	params.tcFlowFactor = 3.0;
+	// n = 100, 15 stages, tcFF = 3.0, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, 15 stages, tcFF = 3.0, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, 15 stages, tcFF = 3.0, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.n = 200;
+	params.tcFlowFactor = 1.5;
+	params.stgs = 7;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	// n = 200, 7 stages, tcFF = 1.5, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 7 stages, tcFF = 1.5, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 7 stages, tcFF = 1.5, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+
+	params.tcFlowFactor = 3.0;
+	// n = 200, 7 stages, tcFF = 3.0, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 7 stages, tcFF = 3.0, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 7 stages, tcFF = 3.0, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// 15 stages
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	// n = 200, 15 stages, tcFF = 1.5, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 15 stages, tcFF = 1.5, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 15 stages, tcFF = 1.5, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+
+	params.tcFlowFactor = 3.0;
+	// n = 200, 15 stages, tcFF = 3.0, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 15 stages, tcFF = 3.0, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 200, 15 stages, tcFF = 3.0, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+
+
+
+}
+
+void Problem::genInstancesTCB26small_Testing() {
+	ProbParams params;
+	params.omega = 9;
+	params.F = 1;
+	params.stgs = 5;
+	params.n = 10;
+	params.m_oIntervals = make_pair(1, 2);
+	params.m_BIntervals = make_pair(1, 3);
+	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 2;
+	params.tcFlowFactor = 1.5;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.15);		// tighter due dates compared to larger instances
+
+
+	int nmin_tc = params.stgs / 3.0;
+	int nmax_tc = params.stgs - 1; // minimum number of timeconstraints = number of stages (-1)
+	params.nTcInterval = make_pair(nmin_tc, nmax_tc);
+
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	int nInstances = 10;
+	double bottleneckCriticality = 0.125;
+
+	// n = 10, 5 stages, tcSc2, tcFF = 1.5, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc2, tcFF = 1.5, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc2, tcFF = 1.5, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+
+	params.tcScenario = 1;
+	// n = 10, 5 stages, tcSc1, tcFF = 1.5, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc1, tcFF = 1.5, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc1, tcFF = 1.5, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+	params.F = 2;
+	params.tcScenario = 2;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	// F = 2
+	// n = 10, 5 stages, tcSc2, tcFF = 1.5, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc2, tcFF = 1.5, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc2, tcFF = 1.5, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+
+	params.tcScenario = 1;
+	// n = 10, 5 stages, tcSc1, tcFF = 1.5, bottlenek 1st stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(0, 0), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckFirst.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc1, tcFF = 1.5, bottleneck middle stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair(params.stgs - 1, params.stgs - 1), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckLast.dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 10, 5 stages, tcSc1, tcFF = 1.5, bottleneck last stage
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(make_pair((params.stgs - 1) / 2, (params.stgs - 1) / 2), bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "Inst_TCB2026_F" + to_string(params.F) + "m" + to_string(params.stgs) + "n" + to_string(params.n)
+			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
+		prob.saveToDat(fileName);
+	}
+
+
 }
 
 
