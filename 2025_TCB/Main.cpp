@@ -34,7 +34,8 @@ int main(int argc, char* argv[]) {
 	//Problem::genInstancesTCB25_Jun25_exactMILPvsCP();
 	//Problem::genInstancesEURO25_exact();
 	//Problem::genInstancesEURO25_integer();
-
+	Problem::genInstancesTCB26_BottleneckConfigs(100);
+	Problem::genInstancesTCB26_BottleneckConfigs(200);
 
 	// PROCESS COMMAND LINE ARGUMENTS
 	TCB::logger = Logger();

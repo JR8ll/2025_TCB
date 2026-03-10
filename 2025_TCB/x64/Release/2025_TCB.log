@@ -32,6 +32,9 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(20): warn
   GaDecoder.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Job.cpp
+c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Log.cpp
   Machine.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -39,9 +42,9 @@ Machine.cpp(30): warning C4267: 'return' : conversion from 'size_t' to 'int', po
   Main.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-Main.cpp(136): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Main.cpp(144): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
-Main.cpp(168): warning C4244: 'argument' : conversion from '__int64' to 'int', possible loss of data
+Main.cpp(142): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Main.cpp(150): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Main.cpp(174): warning C4244: 'argument' : conversion from '__int64' to 'int', possible loss of data
   Operation.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -81,6 +84,8 @@ C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\memory(1639): war
           [
               _Ty=Job
           ]
+  Product.cpp
+Product.cpp(11): warning C4267: 'return' : conversion from 'size_t' to 'int', possible loss of data
   Schedule.cpp
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Job.h(6): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 c:\users\rocholl\source\repos\2025_tcb\2025_tcb\Workcenter.h(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline

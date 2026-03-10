@@ -1113,14 +1113,104 @@ void Problem::configureBottleneck(pair<int, int> bottleneckStageIndices, double 
 	
 
 	// DEBUGGING: output average workload of all stages
-	//for (int i = 0; i < stgs; ++i) {
-	//	cout << "Stage " << (i + 1) << ": Workload/machine = " << fixed << setprecision(1) << getAvgWorkloadPerMachine(i);
-	//	if (i == basicStageIdx) cout << " (basic stage)";
-	//	if (i == bottleneckStageIdx) cout << " (bottleneck stage)";
-	//	cout << endl;
-	//}
-	/*int debugger = 666;*/
+	/*for (int i = 0; i < stgs; ++i) {
+		cout << "Stage " << (i + 1) << ": Workload/machine = " << fixed << setprecision(1) << getAvgWorkloadPerMachine(i);
+		if (i == basicStageIdx) cout << " (basic stage)";
+		if (i == bottleneckStageIdx) cout << " (bottleneck stage)";
+		cout << endl;
+	}
+	int debugger = 666;*/
 }
+void Problem::configureTwoBottlenecks(std::pair<int, int> bottleneckIdx1, std::pair<int, int> bottleneckIdx2, double bottleneckCriticality, ProbParams& params, bool integerValues) {
+	if (bottleneckIdx1.first < 0 || bottleneckIdx1.first >= stgs || bottleneckIdx1.second < 0 || bottleneckIdx1.second >= stgs) throw out_of_range("Problem::configureTwoBottlenecks(...) out of range.");
+	if (bottleneckIdx2.first < 0 || bottleneckIdx2.first >= stgs || bottleneckIdx2.second < 0 || bottleneckIdx2.second >= stgs) throw out_of_range("Problem::configureTwoBottlenecks(...) out of range.");
+	uniform_int_distribution<int> bnStageDist1 = uniform_int_distribution<int>(bottleneckIdx1.first, bottleneckIdx1.second);
+	uniform_int_distribution<int> bnStageDist2 = uniform_int_distribution<int>(bottleneckIdx2.first, bottleneckIdx2.second);
+	int bottleneckStageIdx1 = bnStageDist1(TCB::rng);
+	int bottleneckStageIdx2 = bnStageDist2(TCB::rng);
+	while (bottleneckStageIdx1 == bottleneckStageIdx2) {
+		bottleneckStageIdx2 = bnStageDist2(TCB::rng);
+	}
+
+	// get basic stage (= stage with lowest workload)
+	int basicStageIdx = 0;
+	int maxDistance = 0;
+	for (int i = 0; i < stgs; ++i) {	// arg max(o in 1...stgs) |o - o_bottleneck|
+		int tempDistance = min<int>(abs(bottleneckStageIdx1 - i), abs(bottleneckStageIdx2 - i));
+		if (tempDistance > maxDistance) {
+			maxDistance = tempDistance;
+			basicStageIdx = i;
+		}
+	}
+
+	double baseWorkload = getAvgWorkloadPerMachine(basicStageIdx);
+	double btlnckWorkloadRatio = (maxDistance * bottleneckCriticality) + 1;
+
+	// adapt workload of all stages (but the basic stage)
+	for (int i = 0; i < stgs; ++i) {
+		if (i != basicStageIdx) {
+			double myWorkload = getAvgWorkloadPerMachine(i);
+			double actualWorkloadRatio = myWorkload / baseWorkload;
+
+			double ratioBtlnck = btlnckWorkloadRatio - (bottleneckCriticality * min<int>(abs(bottleneckStageIdx1 - i), abs(bottleneckStageIdx2 - i)));
+			double ratioBasic = (maxDistance - (min<int>(abs(bottleneckStageIdx1 - i), abs(bottleneckStageIdx2 - i))) * bottleneckCriticality);
+
+			double targetWorkloadRatio = min(ratioBtlnck, ratioBasic);
+			for (int f = 0; f < F; ++f) {
+				pTimes[f][i] *= (targetWorkloadRatio / actualWorkloadRatio);
+				if (integerValues) {
+					pTimes[f][i] = round(pTimes[f][i]);
+				}
+			}
+		}
+	}
+
+	// adapt maximal time lags to adapted processing times
+	for (size_t i = 0; i < tc.size(); ++i) {
+		for (size_t lo = 0; lo < tc[i].size(); ++lo) {
+			for (size_t hi = lo + 1; hi < tc[i][lo].size(); ++hi) {
+				if (tc[i][lo][hi] != 999999) {
+					double pRaw = 0.0;
+					for (size_t k = lo; k < hi; ++k) {
+						pRaw += pTimes[i][k];
+					}
+					tc[i][lo][hi] = pRaw * params.tcFlowFactor;
+				}
+			}
+		}
+	}
+	if (!assertFeasibility()) throw ExcSched("INFEASIBLE MAXIMAL TIME LAGS");
+
+	// adapt due dates to adapted processing times
+	uniform_real_distribution<double> ddFFDist(params.dueDateFF.first, params.dueDateFF.second);
+	for (size_t j = 0; j < n; ++j) {
+		int nSteps = routes[jobs_f[j] - 1].size();
+		double myD = jobs_r[j];
+		double tempP = 0;
+		for (size_t o = 0; o < nSteps; ++o) {
+			tempP += pTimes[jobs_f[j] - 1][o];
+		}
+		double dueDateFF = ddFFDist(TCB::rng);
+		myD += dueDateFF * tempP;				// Klemmt & Mönch: r_j + 2 x raw_processing_time
+		if (integerValues) {
+			myD = floor(myD);
+		}
+		jobs_d[j] = myD;
+		unscheduledJobs[j]->setD(myD);
+	}
+
+	// DEBUGGING: output average workload of all stages
+	/*for (int i = 0; i < stgs; ++i) {
+		cout << "Stage " << (i + 1) << ": Workload/machine = " << fixed << setprecision(1) << getAvgWorkloadPerMachine(i);
+		if (i == basicStageIdx) cout << " (basic stage)";
+		if (i == bottleneckStageIdx1 || i == bottleneckStageIdx2) cout << " (bottleneck stage)";
+		cout << endl;
+	}
+	int debugger = 666;*/
+
+}
+
+
 
 void Problem::_setG() {
 	double bigInteger = 0;
@@ -1637,7 +1727,7 @@ void Problem::genInstancesTCB25_Jun25_exactMILPvsCP() {
 	}
 }
 
-void Problem::genInstancesTCB26_Testing() {
+void Problem::genInstancesTCB26_Testing()	 {
 	ProbParams params;
 	params.omega = 9;
 	params.F = 5;
@@ -2532,6 +2622,2606 @@ void Problem::genInstancesTCB26small_Testing() {
 			+ "tcSc" + to_string(params.tcScenario) + "tcFF" + tcFFstream.str() + "_" + to_string(i + 1) + "_btlNckMdl.dat";
 		prob.saveToDat(fileName);
 	}
+
+
+}
+
+void Problem::genInstancesTCB26_BottleneckConfigs(int n) {
+	ProbParams params;
+	params.omega = 9;
+	params.m_oIntervals = make_pair(4, 10);
+	params.m_BIntervals = make_pair(2, 6);
+	//params.m_BValues = vector<int>({ 3, 3, 3, 3, 3 });
+	params.pInterval = make_pair(10, 25);
+	params.tcScenario = 1;
+	params.rInterval = make_pair(0, 0.75);
+	params.sInterval = make_pair(1, 1);	// uniform job sizes
+	params.wInterval = make_pair(1.0, 3.0);
+	params.dueDateFF = make_pair(1.0, 1.3);	
+	int nInstances = 10;
+	double bottleneckCriticality = 0.25;
+	
+	// n = 100, F = 5, m = 7, tcFF = 1.5, btln1
+	params.n = n;
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	pair<int, int> bottleneck = {0, 0};
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +  
+			+ "_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first+1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 1.5, btln1
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 1.5, btln1
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 1.5, btln1
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 7, tcFF = 3.0, btln1
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 3.0, btln1
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 3.0, btln1
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 3.0, btln1
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+;
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 5, m = 7, tcFF = 1.5, btlnMdl
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 1.5, btlnMdl
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 1.5, btlnMdl
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 1.5, btlnMdl
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 7, tcFF = 3.0, btlnMdl
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 3.0, btlnMdl
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 3.0, btlnMdl
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 10, m = 15, tcFF = 3.0, btlnMdl
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs / 2, params.stgs / 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 5, m = 7, tcFF = 1.5, btlnLst
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs-1, params.stgs-1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 1.5, btlnLst
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs - 1, params.stgs - 1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 1.5, btlnLst
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs - 1, params.stgs - 1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 1.5, btlnLst
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs - 1, params.stgs - 1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 7, tcFF = 3.0, btlnLst
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs - 1, params.stgs - 1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 3.0, btlnLst
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs - 1, params.stgs - 1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 3.0, btlnLst
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs - 1, params.stgs - 1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 3.0, btlnLst
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck = { params.stgs - 1, params.stgs - 1 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first + 1) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 5, m = 7, tcFF = 1.5, 2btln:2nd2ndToLst
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	pair<int, int> bottleneck1 = { 1, 1 };
+	pair<int, int> bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 10, m = 7, tcFF = 1.5, 2btln:2nd2ndToLst
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 1.5, 2btln:2nd2ndToLst
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 1.5, 2btln:2nd2ndToLst
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 7, tcFF = 3.0, 2btln:2nd2ndToLst
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 3.0, 2btln:2nd2ndToLst
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 3.0, 2btln:2nd2ndToLst
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 3.0, 2btln:2nd2ndToLst
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	
+	// n = 100, F = 5, m = 7, tcFF = 1.5, 2btln:2nd3rd
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 10, m = 7, tcFF = 1.5, 2btln:2nd3rd
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 1.5, 2btln:2nd3rd
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 1.5, 2btln:2nd3rd
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 7, tcFF = 3.0, 2btln:2nd3rd
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 3.0, 2btln:2nd3rd
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 3.0, 2btln:2nd3rd
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 3.0, 2btln:2nd3rd
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { 1, 1 };
+	bottleneck2 = { 2, 2 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 5, m = 7, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// n = 100, F = 10, m = 7, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 1.5;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 7, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	params.F = 5;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 7, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	params.F = 10;
+	params.stgs = 7;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 5, m = 15, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	params.F = 5;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+	
+	// n = 100, F = 10, m = 15, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	params.F = 10;
+	params.stgs = 15;
+	params.tcFlowFactor = 3.0;
+	params.routes = vector<vector<int> >(params.F);
+	for (int i = 0; i < params.F; ++i) {
+		params.routes[i] = vector<int>(params.stgs);
+		for (int o = 0; o < params.stgs; ++o) {
+			params.routes[i][o] = o + 1;	// flow-shop
+		}
+	}
+	bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	for (int i = 0; i < nInstances; ++i) {
+		Problem prob = Problem(params, true);
+		prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+		stringstream tcFFstream;
+		string strInst = std::to_string(i);
+		if (strInst.length() < 2) {
+			strInst = "0" + strInst;
+		}
+		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+			+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck1.first + 1) + "bt" + to_string(bottleneck2.first) + "_Inst" + strInst + ".dat";
+		prob.saveToDat(fileName);
+	}
+
+	// ++++++++++++++++++++++++++++++++++++++++++++
+	// +++++++++++++++ n = 200 ++++++++++++++++++++
+	// ++++++++++++++++++++++++++++++++++++++++++++
+
+	// n = 200, F = 5, m = 7, tcFF = 1.5, btln1
+	//params.n = 200;
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { 0, 0 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 1.5, btln1
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 1.5, btln1
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 1.5, btln1
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 3.0, btln1
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 3.0, btln1
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 3.0, btln1
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 3.0, btln1
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//;
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln1" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 1.5, btlnMdl
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs / 2, params.stgs / 2 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 1.5, btlnMdl
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 1.5, btlnMdl
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 1.5, btlnMdl
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 3.0, btlnMdl
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 3.0, btlnMdl
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 3.0, btlnMdl
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 3.0, btlnMdl
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnMdl" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 1.5, btlnLst
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 1.5, btlnLst
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 1.5, btlnLst
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 1.5, btlnLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 3.0, btlnLst
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 3.0, btlnLst
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 3.0, btlnLst
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 3.0, btlnLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck = { params.stgs - 1, params.stgs - 1 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureBottleneck(bottleneck, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btlnLst" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 1.5, 2btln:2nd2ndToLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck1 = { 1, 1 };
+	//bottleneck2 = { params.stgs - 2, params.stgs - 2 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 1.5, 2btln:2nd2ndToLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 1.5, 2btln:2nd2ndToLst
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 1.5, 2btln:2nd2ndToLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 3.0, 2btln:2nd2ndToLst
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 3.0, 2btln:2nd2ndToLst
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 3.0, 2btln:2nd2ndToLst
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 3.0, 2btln:2nd2ndToLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+
+	//// n = 200, F = 5, m = 7, tcFF = 1.5, 2btln:2nd3rd
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck1 = { 1, 1 };
+	//bottleneck2 = { 2, 2 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 1.5, 2btln:2nd3rd
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 1.5, 2btln:2nd3rd
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 1.5, 2btln:2nd3rd
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 3.0, 2btln:2nd3rd
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 3.0, 2btln:2nd3rd
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 3.0, 2btln:2nd3rd
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 3.0, 2btln:2nd3rd
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln2-3" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+	//bottleneck1 = { params.stgs - 2, params.stgs - 2 };
+	//bottleneck2 = { params.stgs - 3, params.stgs - 3 };
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 1.5, 2btln:2ndToLst3rdToLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 1.5;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 7, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	//params.F = 5;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 7, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	//params.F = 10;
+	//params.stgs = 7;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 5, m = 15, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	//params.F = 5;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+	//// n = 200, F = 10, m = 15, tcFF = 3.0, 2btln:2ndToLst3rdToLst
+	//params.F = 10;
+	//params.stgs = 15;
+	//params.tcFlowFactor = 3.0;
+	//for (int i = 0; i < params.F; ++i) {
+	//	params.routes[i] = vector<int>(params.stgs);
+	//	for (int o = 0; o < params.stgs; ++o) {
+	//		params.routes[i][o] = o + 1;	// flow-shop
+	//	}
+	//}
+
+	//for (int i = 0; i < nInstances; ++i) {
+	//	Problem prob = Problem(params, true);
+	//	prob.configureTwoBottlenecks(bottleneck1, bottleneck2, bottleneckCriticality, params, true);
+
+	//	stringstream tcFFstream;
+	//	string strInst = std::to_string(i);
+	//	if (strInst.length() < 2) {
+	//		strInst = "0" + strInst;
+	//	}
+	//	tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
+	//	string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +
+	//		+"_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_btln3l-2l" + "_Inst" + strInst + ".dat";
+	//	prob.saveToDat(fileName);
+	//}
+
+
+
 
 
 }

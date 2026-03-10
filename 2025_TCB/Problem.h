@@ -112,6 +112,7 @@ public:
 	// bottlenack configuration, see Yang, Kreipl, Pinedo (2000)
 	double getAvgWorkloadPerMachine(int stageIdx);
 	void configureBottleneck(std::pair<int, int> bottleneckStageIdx, double bottleneckCriticality, ProbParams& params, bool integerValues = false);
+	void configureTwoBottlenecks(std::pair<int, int> bottleneckIdx1, std::pair<int, int> bottleneckIdx2, double bottleneckCriticality, ProbParams& params, bool integerValues = false);
 
 	void _setG();	// set big integer
 
@@ -130,5 +131,6 @@ public:
 	void static genInstancesTCB25_Jun25_exactMILPvsCP();	// small instances to be solved to optimality in one iteration
 	void static genInstancesTCB26_Testing();				// trying to find reasonable instances comparable to SMT2020
 	void static genInstancesTCB26small_Testing();
+	void static genInstancesTCB26_BottleneckConfigs(int n);
 };
 
