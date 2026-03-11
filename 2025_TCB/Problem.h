@@ -132,5 +132,6 @@ public:
 	void static genInstancesTCB26_Testing();				// trying to find reasonable instances comparable to SMT2020
 	void static genInstancesTCB26small_Testing();
 	void static genInstancesTCB26_BottleneckConfigs(int n);
+	void static genInstancesTCB26_BottleneckConfigs_small();
 };
 
