@@ -615,7 +615,7 @@ void Schedule::lSchedJobs(double pWait) {
 	int iteration = 1;		// DEBUGGING
 	while(!unscheduledJobs.empty()) {
 		lSchedFirstJob(pWait);
-		saveJsonFactory("LIST_it" + to_string(iteration));	// DEBUGGING
+		//saveJsonFactory("LIST_it" + to_string(iteration));	// DEBUGGING
 		iteration++;		// DEBUGGING
 	}
 }

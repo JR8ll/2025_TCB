@@ -826,7 +826,7 @@ double Solver_MILP::solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule
 
 double Solver_MILP::solveGapAwareMILP(Schedule* schedule, int nDash, int cplexTilim)
 {
-	cout << "DEVELOPMENT IN PROGRESS: CONSIDER [JR-2026-Okt-26] TAG" << endl;
+	//cout << "DEVELOPMENT IN PROGRESS: CONSIDER [JR-2026-Okt-26] TAG" << endl;
 
 	if (schedule->getProblem() == nullptr) throw ExcSched("solveDecompositionMILP missing problem reference");
 
@@ -834,7 +834,7 @@ double Solver_MILP::solveGapAwareMILP(Schedule* schedule, int nDash, int cplexTi
 	for (size_t j = 0; j < nDash; ++j) {
 		try {
 			consideredJobs.push_back(move(schedule->get_pJob(0)));
-			cout << consideredJobs[0]->getId();	// DEBUGGING
+			//cout << consideredJobs[0]->getId();	// DEBUGGING
 		}
 		catch (const out_of_range& ex) {
 			break;	// all jobs considered
@@ -881,7 +881,31 @@ double Solver_MILP::solveGapAwareMILP(Schedule* schedule, int nDash, int cplexTi
 	IloNumArray3 batDur(env);	// processing time of a batch
 	IloNumArray3 batFam(env);	// family (product) of a batch
 
-	int latestBatchStart = 9999;	// [JR-2026-Okt-26] latest batch start to be calculated
+
+	// CALCULATE UPPER BOUND ON BATCH COMPLETION
+	int rMax = 0;
+	int pMax = 0;
+	int rawP = 0;
+	for (int j = 0; j < consideredJobs.size(); j++) {
+		if (consideredJobs[j]->getR() > rMax) {
+			rMax = consideredJobs[j]->getR();
+		}
+
+
+		for (int o = 0; o < nStages; ++o) {
+			if (consideredJobs[j]->getP(o) > pMax) {
+				pMax = consideredJobs[j]->getP(o);
+			}
+			rawP += consideredJobs[j]->getP(o);
+		}
+	}
+	int maxMSP = 0;
+	for (int l = 0; l < (*schedule)[nStages - 1].size(); ++l) {
+		if ((*schedule)[nStages - 1][l].getMSP() > maxMSP) {
+			maxMSP = (*schedule)[nStages - 1][l].getMSP();
+		}
+	}
+	int latestBatchStart = max(rMax, maxMSP) + rawP + pMax;	 
 
 	// variables for schedule construction
 	vector<vector<vector<Batch*>>> existingBatches = vector<vector<vector<Batch*>>>(nStages);
@@ -998,7 +1022,7 @@ double Solver_MILP::solveGapAwareMILP(Schedule* schedule, int nDash, int cplexTi
 	for (int k = 0; k < stageMachine.getCardinality(); ++k) {
 		z.add(IloBoolVarArray2(env));
 		for (int b = 0; b < nBatches; ++b) {
-			z[k].add(IloBoolVarArray(env, nBatches));
+			z[k].add(IloBoolVarArray(env, nProducts));
 			for (int i = 0; i < nProducts; ++i) {
 				z[k][b][i] = IloBoolVar(env);
 				string varName = "z_" + to_string(k) + "," + to_string(b) + "," + to_string(i);
@@ -1269,8 +1293,36 @@ double Solver_MILP::solveGapAwareMILP(Schedule* schedule, int nDash, int cplexTi
 		}
 	}
 
-	//R17: Compatibility: batch compatiblity of previously scheduled batches
-	//R17: forall(sm in stageMachine, b in batches, j in jobs) X[sm][j][b] <= e[j][f[j]] + (1 - eB[sm][b][f[j]]);
+//R17: Link job completion with previously scheduled batches
+//R17: forall(o in stages, l in machines, b in batches, j in jobs) X[sm][j][b] * gamma[sm][b] + p[f[j]][o] <= C[j][o];	
+	for (int o = 0; o < nStages; ++o) {
+		for (int l = 0; l < (*schedule)[o].size(); ++l) {
+			for (int b = 0; b < nBatches; ++b) {
+				for (int j = 0; j < nJobs; ++j) {
+					IloExpr cR17(env);
+					cR17 = x[constMapStgMac.at({ o, l })][j][b] * batStart[o][l][b] + p[f[j] - 1][o];
+					mod.add(cR17 <= C[j][o]);
+				}
+			}
+		}
+	}
+
+//R18: Link job completion with previously scheduled batches
+//R18: forall(o in stages, l in machines, b in batches, j in jobs) X[sm][j][b] * gamma[sm][b] + p[f[j]][o] <= C[j][o];	
+	for (int o = 0; o < nStages; ++o) {
+		for (int l = 0; l < (*schedule)[o].size(); ++l) {
+			for (int b = 0; b < nBatches; ++b) {
+				for (int j = 0; j < nJobs; ++j) {
+					IloExpr cR18(env);
+					cR18 = batEnd[o][l][b] + G * (1 - x[constMapStgMac.at({ o, l })][j][b]);
+					mod.add(C[j][o] <= cR18);
+				}
+			}
+		}
+	}
+
+//R19: Compatibility: batch compatiblity of previously scheduled batches
+//R19: forall(sm in stageMachine, b in batches, j in jobs) X[sm][j][b] <= e[j][f[j]] + (1 - eB[sm][b][f[j]]);
 	for (int j = 0; j < nJobs; ++j) {												// forall(j in jobs,
 		for (int i = 0; i < nProducts; ++i) {										//   i in products,
 			for (int o = 0; o < nStages; ++o) {										//   
@@ -1278,21 +1330,21 @@ double Solver_MILP::solveGapAwareMILP(Schedule* schedule, int nDash, int cplexTi
 					for (int b = 0; b < nBatches; ++b) {							//   b in batches
 						int e = i == f[j] - 1;
 						int eB = i == batFam[o][l][b] - 1;
-						IloExpr cR17(env);
-						cR17 = x[constMapStgMac.at({ o, l })][j][b];
-						mod.add(cR17 <= e + (1 - eB));
+						IloExpr cR19(env);
+						cR19 = x[constMapStgMac.at({ o, l })][j][b];
+						mod.add(cR19 <= e + (1 - eB));
 					}
 				}
 			}
 		}
 	}
 
-//R18: Tardiness
-//R18: forall(j in jobs) C[j][O] - d[j] <= T[j];
+//R20: Tardiness
+//R20: forall(j in jobs) C[j][O] - d[j] <= T[j];
 	for (int j = 0; j < nJobs; ++j) {
-		IloExpr cR18(env);
-		cR18 = C[j][nStages - 1] - T[j];
-		mod.add(cR18 <= d[j]);
+		IloExpr cR20(env);
+		cR20 = C[j][nStages - 1] - T[j];
+		mod.add(cR20 <= d[j]);
 	}
 
 
@@ -1500,6 +1552,10 @@ double Solver_MILP::solveDecompGapAwareDynamicSortingGridMILP(Schedule* schedule
 
 	while (schedule->getN() > 0) {
 		// DYNAMIC SORTING AND UPDATE WAITING TIMES 
+		
+		// DEBUGGING
+		schedule->saveJsonFactory("DEBUGGING");
+
 		unique_ptr<Schedule> tempSched = schedule->clone();
 		double bestKappa = tempSched->lSchedJobsWithSorting(dynRule, kappas);	// GRID SEARCH
 		tempSched->updateWaitingTimes();
