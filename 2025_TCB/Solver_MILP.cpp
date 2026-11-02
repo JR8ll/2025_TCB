@@ -1377,13 +1377,14 @@ double Solver_MILP::solveGapAwareMILP(Schedule* schedule, int nDash, int cplexTi
 			TCB::logger.Log(Error, errorMsg.str());
 			cout << errorMsg.str() << endl;
 		}
+		params->relMipGap = cplex.getMIPRelativeGap();	// output rel MIP gap of last iteration (only really interesting for exact solutions with nDash == n
 	}
 	catch (IloException& e) {
 		TCB::logger.Log(Error, e.getMessage());
 		env.end();
 	}
 
-	params->relMipGap = cplex.getMIPRelativeGap();	// output rel MIP gap of last iteration (only really interesting for exact solutions with nDash == n
+	
 
 	cout << ".";
 
@@ -1554,7 +1555,7 @@ double Solver_MILP::solveDecompGapAwareDynamicSortingGridMILP(Schedule* schedule
 		// DYNAMIC SORTING AND UPDATE WAITING TIMES 
 		
 		// DEBUGGING
-		schedule->saveJsonFactory("DEBUGGING");
+		// schedule->saveJsonFactory("DEBUGGING");
 
 		unique_ptr<Schedule> tempSched = schedule->clone();
 		double bestKappa = tempSched->lSchedJobsWithSorting(dynRule, kappas);	// GRID SEARCH

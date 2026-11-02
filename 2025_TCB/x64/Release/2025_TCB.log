@@ -22,8 +22,8 @@ Solver_MILP.cpp(1186): warning C4244: 'initializing' : conversion from 'IloInt' 
 Solver_MILP.cpp(1201): warning C4244: 'initializing' : conversion from 'IloInt' to 'int', possible loss of data
 Solver_MILP.cpp(1217): warning C4244: 'initializing' : conversion from 'IloInt' to 'int', possible loss of data
 Solver_MILP.cpp(1285): warning C4244: 'initializing' : conversion from 'IloInt' to 'int', possible loss of data
-Solver_MILP.cpp(1451): warning C4244: 'initializing' : conversion from 'IloNum' to 'IloBool', possible loss of data
-Solver_MILP.cpp(1470): warning C4244: 'initializing' : conversion from 'IloNum' to 'IloBool', possible loss of data
+Solver_MILP.cpp(1452): warning C4244: 'initializing' : conversion from 'IloNum' to 'IloBool', possible loss of data
+Solver_MILP.cpp(1471): warning C4244: 'initializing' : conversion from 'IloNum' to 'IloBool', possible loss of data
 Solver_MILP.cpp(839): warning C4101: 'ex' : unreferenced local variable
 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157): warning C4244: 'initializing' : conversion from '__int64' to 'int', possible loss of data
           C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\utility(157) : see reference to function template instantiation 'std::pair<int,int>::pair<__int64,__int64,void>(std::pair<__int64,__int64> &&)' being compiled
