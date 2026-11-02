@@ -1087,6 +1087,9 @@ void Problem::configureBottleneck(pair<int, int> bottleneckStageIndices, double 
 					pRaw += pTimes[i][k];
 				}
 					tc[i][lo][hi] = pRaw * params.tcFlowFactor;
+					if (integerValues) {
+						tc[i][lo][hi] = ceil(tc[i][lo][hi]);
+					}
 				}
 			}
 		}
@@ -1175,6 +1178,9 @@ void Problem::configureTwoBottlenecks(std::pair<int, int> bottleneckIdx1, std::p
 						pRaw += pTimes[i][k];
 					}
 					tc[i][lo][hi] = pRaw * params.tcFlowFactor;
+					if (integerValues) {
+						tc[i][lo][hi] = ceil(tc[i][lo][hi]);
+					}
 				}
 			}
 		}
@@ -2674,7 +2680,7 @@ void Problem::genInstancesTCB26_BottleneckConfigs(int n) {
 		tcFFstream << fixed << setprecision(2) << params.tcFlowFactor;
 		string fileName = "TCB2026_n" + to_string(params.n) + "_F" + to_string(params.F) + "_m" + to_string(params.stgs) +  
 			+ "_tcSc" + to_string(params.tcScenario) + "_tcFF" + tcFFstream.str() + "_bt" + to_string(bottleneck.first+1) + "_Inst" + strInst + ".dat";
-		prob.saveToDat(fileName);
+		prob.saveToDat(fileName, nullptr, &params);
 	}
 	
 	// n = 100, F = 10, m = 7, tcFF = 1.5, btln1
@@ -4174,7 +4180,7 @@ void Problem::genInstancesTCB26_BottleneckConfigs_small() {
 	params.tcScenario = 1;
 	params.rInterval = make_pair(0, 0.75);
 	params.sInterval = make_pair(1, 1);	// uniform job sizes
-	params.wInterval = make_pair(1.0, 3.0);
+	params.wInterval = make_pair(1.0, 2.0);
 	params.dueDateFF = make_pair(1.0, 1.05);
 	int nInstances = 10;
 	double bottleneckCriticality = 0.25;

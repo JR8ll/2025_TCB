@@ -140,6 +140,9 @@ void Schedule::addWorkcenter(pWc wc) {
 void Schedule::addJob(pJob job) {
 	unscheduledJobs.push_back(move(job));
 }
+void Schedule::addJobFront(pJob job) {
+	unscheduledJobs.insert(unscheduledJobs.begin(), move(job));
+}
 
 void Schedule::schedOp(Operation* op, double pWait) {
 	int wcIdx = op->getWorkcenterId() - 1;
@@ -179,22 +182,43 @@ void Schedule::reset() {
 	}
 }
 void Schedule::clearJobs() {
-	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
-		for (size_t o = 0; o < (*unscheduledJobs[j]).size(); ++o) {	
-			(*unscheduledJobs[j])[o].setPred(nullptr);
-			(*unscheduledJobs[j])[o].setSucc(nullptr);
-		}
-	}
+	//for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+	//	for (size_t o = 0; o < (*unscheduledJobs[j]).size(); ++o) {	
+	//		(*unscheduledJobs[j])[o].setPred(nullptr);
+	//		(*unscheduledJobs[j])[o].setSucc(nullptr);
+	//	}
+	//}
 
+	//for (size_t j = 0; j < scheduledJobs.size(); ++j) {
+	//	for (size_t o = 0; o < (*scheduledJobs[j]).size(); ++o) {
+	//		(*scheduledJobs[j])[o].setPred(nullptr);
+	//		(*scheduledJobs[j])[o].setSucc(nullptr);
+	//	}
+	//}
+	//unscheduledJobs.clear();
+	//scheduledJobs.clear();
+	clearUnscheduledJobs();
+	clearScheduledJobs();
+}
+void Schedule::clearScheduledJobs() {
 	for (size_t j = 0; j < scheduledJobs.size(); ++j) {
 		for (size_t o = 0; o < (*scheduledJobs[j]).size(); ++o) {
 			(*scheduledJobs[j])[o].setPred(nullptr);
 			(*scheduledJobs[j])[o].setSucc(nullptr);
 		}
 	}
-	unscheduledJobs.clear();
 	scheduledJobs.clear();
 }
+void Schedule::clearUnscheduledJobs() {
+	for (size_t j = 0; j < unscheduledJobs.size(); ++j) {
+		for (size_t o = 0; o < (*unscheduledJobs[j]).size(); ++o) {
+			(*unscheduledJobs[j])[o].setPred(nullptr);
+			(*unscheduledJobs[j])[o].setSucc(nullptr);
+		}
+	}
+	unscheduledJobs.clear();
+}
+
 
 void Schedule::sortUnscheduled(prioRule<pJob> rule) {
 	rule(unscheduledJobs);
@@ -212,6 +236,10 @@ void Schedule::sortUnscheduled(prioRuleKeySet<pJob> rule, std::vector<double>& c
 void Schedule::sortScheduled(prioRule<pJob> rule) {
 	updateWaitingTimes();
 	rule(scheduledJobs);
+}
+
+void Schedule::sortUnscheduled(const std::unordered_map<int, int>& priorities) {
+	sortJobsByPrio(unscheduledJobs, priorities);
 }
 
 void Schedule::updateWaitingTimes() {
@@ -584,8 +612,11 @@ void Schedule::lSchedJobsStageWiseBackwardWithSorting(prioRule<pJob> rule, doubl
 	lSchedJobsStageWiseBackward(pWait);	
 }
 void Schedule::lSchedJobs(double pWait) {
+	int iteration = 1;		// DEBUGGING
 	while(!unscheduledJobs.empty()) {
 		lSchedFirstJob(pWait);
+		saveJsonFactory("LIST_it" + to_string(iteration));	// DEBUGGING
+		iteration++;		// DEBUGGING
 	}
 }
 void Schedule::lSchedJobs(vector<double> pWaitVec) {
@@ -639,6 +670,7 @@ void Schedule::lSchedJobsWithSorting(prioRuleKappa<pJob> rule, double kappa, dou
 	while (!unscheduledJobs.empty()) {
 		t = getMinMSP(0);
 		rule(unscheduledJobs, t, kappa);
+		//cout << unscheduledJobs[0]->getId() << "."; // DEBUGGING
 		lSchedFirstJob(pWait);
 	}
 }
@@ -2365,3 +2397,161 @@ bool Schedule::debugNoTwoBatchesStartingSimultaneously() {
 	return false;
 }
 
+
+// RK code
+int getJobIndex(int jobId, const vector<pJob>& jobs) {
+	for (size_t i = 0; i < jobs.size(); ++i) {
+		if (jobs[i]->getId() == jobId) {
+			return static_cast<int>(i);
+		}
+	}
+	return -1; // i gefunden (TODO Exception Handling)
+}
+
+void printStatus(double kappa, int iteration, double tempTWT, double bestTWT, double maxWaitingTime) {
+	cout << endl
+		<< "Kappa " << setw(6) << kappa
+		<< " Iterationstep " << setw(4) << iteration
+		<< " tempTWT: " << setw(10) << tempTWT
+		<< " bestTWT: " << setw(10) << bestTWT
+		<< " Max Waiting: " << setw(10) << maxWaitingTime;
+}
+struct PatienceConvergence {
+	int patienceN = 6;
+	double requiredImprovement = 0.05;
+	int sinceLastSignificant = 0;
+
+	bool hasBest = false;
+	double best = 0.0;
+
+	bool update(double twt) {
+		if (!hasBest) {
+			best = twt;
+			hasBest = true;
+			sinceLastSignificant = 0;
+			return false;
+		}
+
+		double target = best * (1.0 - requiredImprovement);
+		if (twt < target) {
+			best = twt;
+			sinceLastSignificant = 0;
+			return false;
+		}
+
+		++sinceLastSignificant;
+		return sinceLastSignificant >= patienceN;
+	}
+};
+enum class AbortBy {
+	MaxWaitDiff,			// LTI
+	TWT,					// TWT Vergleich
+	RunCount,				// Fixe Anzahl
+	PatienceConvergence,	// Anzahl an Iterationen mit % an Verbesserung
+};
+void Schedule::initialWaitingTimeByFF(double flowFactor) {
+	// Initiale Wartezeit by FlowFactor
+	int jobSizeUnsch = this->unscheduledJobs.size();
+	for (size_t job = 0; job < jobSizeUnsch; ++job) {
+		for (size_t stage = 0; stage < this->unscheduledJobs[job]->size(); ++stage) {
+			double initialWaitingTime = (flowFactor - 1) * (*this->unscheduledJobs[job])[stage].getP();
+			(*this->unscheduledJobs[job])[stage].setWait(initialWaitingTime);
+		}
+	}
+
+	int jobSizeSched = this->scheduledJobs.size();
+	for (size_t job = 0; job < jobSizeSched; ++job) {
+		for (size_t stage = 0; stage < this->scheduledJobs[job]->size(); ++stage) {
+			double initialWaitingTime = (flowFactor - 1) * (*this->scheduledJobs[job])[stage].getP();
+			(*this->scheduledJobs[job])[stage].setWait(initialWaitingTime);
+		}
+	}
+}
+unique_ptr<Schedule> Schedule::lSchedJobsWithGATC(double flowFactor, double smoothingFactor, const std::vector<double>& kappaGrid, double pWait) {
+	// Settings
+	AbortBy reason = AbortBy::PatienceConvergence;
+	double epsilon = 0.01;
+	int runCount = 20;
+	int jobSize = this->unscheduledJobs.size();
+
+	//unique_ptr<Schedule> test = this->clone();
+	//test->lSchedJobsWithSorting(sortJobsByGATC, 2.0);
+	//cout << "Pre LTI: " << test->getTWT();
+
+	unique_ptr<Schedule> bestSched = this->clone();
+	bestSched->lSchedJobs(0.0);
+
+	for (double kappa : kappaGrid) {
+		PatienceConvergence pcc;
+
+		double bestTWT = DBL_MAX;
+
+		unique_ptr<Schedule> tempSched = this->clone();
+		unique_ptr<Schedule> waitSched = this->clone();
+		waitSched->lSchedJobs(0.0);
+		waitSched->initialWaitingTimeByFF(flowFactor);
+
+		int index = 0;
+		double lastMaxWait = DBL_MAX;
+		bool runningCondition = true;
+		while (runningCondition) {
+			tempSched->mimicWaitingTimes(waitSched.get());
+			tempSched->lSchedJobsWithSorting(sortJobsByGATC, kappa);
+			tempSched->updateWaitingTimes();
+
+#pragma region Breaking Conditions
+			double tempTWT = tempSched->getTWT();
+			double bestTWT = bestSched->getTWT();
+			double tempMaxWait = 0;
+
+			if (reason == AbortBy::RunCount && index == runCount) runningCondition = false;
+			if (reason == AbortBy::TWT && tempTWT >= bestTWT) runningCondition = false;
+			if (tempTWT < bestTWT) bestTWT = tempTWT;
+#pragma endregion
+
+			for (size_t job = 0; job < jobSize; ++job) {
+				int jobId = (*tempSched->scheduledJobs[job]).getId();		 // Job ID für die Indexsuche
+				int jobIdx = getJobIndex(jobId, waitSched->scheduledJobs);   // Index von Job ID in waitSched
+
+				for (size_t stage = 0; stage < unscheduledJobs[job]->size(); ++stage) {
+					double oldWait = (*waitSched->scheduledJobs[jobIdx])[stage].getWait();
+					double newWait = (*tempSched->scheduledJobs[job])[stage].getWait();
+					double waitingTime = (1 - smoothingFactor) * oldWait + smoothingFactor * newWait;
+
+					(*waitSched->scheduledJobs[jobIdx])[stage].setWait(waitingTime);
+
+					if (tempMaxWait < waitingTime) tempMaxWait = waitingTime;
+				}
+			}
+
+#pragma region Breaking Conditions
+			if (reason == AbortBy::MaxWaitDiff && ((fabs(lastMaxWait - tempMaxWait) <= epsilon) || index == 15)) runningCondition = false;
+			lastMaxWait = tempMaxWait;
+
+			if (reason == AbortBy::PatienceConvergence) {
+				runningCondition = !pcc.update(tempTWT);
+			}
+#pragma endregion
+
+			if (bestTWT >= tempTWT) bestSched = tempSched->clone();
+			tempSched->reset();
+
+			++index;
+		}
+	}
+	//TODO(RK): Delete Log
+	//cout << "Post LTI: " << bestSched->getTWT();
+
+	return bestSched;
+}
+unordered_map<int, int> Schedule::getPriorities() {
+	int jobSize = scheduledJobs.size();
+	unordered_map<int, int> priorities;
+	priorities.reserve(jobSize);
+
+	for (int i = 0; i < jobSize; ++i) {
+		int jobId = scheduledJobs[i]->getId();
+		priorities[jobId] = i;
+	}
+	return priorities;
+}

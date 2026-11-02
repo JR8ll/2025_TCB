@@ -41,6 +41,11 @@ public:
 	double solveDecompJobBasedDynamicSortingMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60, prioRule<pJob> initRule = sortJobsByD, prioRuleKappa<pJob> dynRule = sortJobsByGATC, double kappa = 1.0);
 	double solveDecompJobBasedDynamicSortingGridMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60, prioRule<pJob> initRule = sortJobsByD, prioRuleKappa<pJob> dynRule = sortJobsByGATC);	// kappa grid from internal class member params
 
+	double solveGapAwareMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60);	// Jens Rocholl: MILP September, explicit modeling of previously scheduled batches allows inserting new batches in gaps
+	double solveDecompGapAwareMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60);
+	double solveDecompGapAwareDynamicSortingGridMILP(Schedule* schedule, int nDash = 5, int cplexTilim = 60, prioRule<pJob> initRule = sortJobsByD, prioRuleKappa<pJob> dynRule = sortJobsByGATC);
+
+
 	static DECOMPMILP_params getDefaultParams();
 };
 

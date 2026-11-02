@@ -83,7 +83,7 @@ void processCmd(int argc, char* argv[], int& iSolver, int& iTilimSeconds, bool& 
 
 	// argv[8] filename of decomp MILP parameters
 	if (argc > 8) {
-		if (iSolver == ALG_ITERATEDMILP || iSolver == ALG_BRKGALS2MILP || iSolver == ALG_ITMILPLSHIFT) {
+		if (iSolver == ALG_ITERATEDMILP || iSolver == ALG_ITERATEDMILP_GAPAWARE || iSolver == ALG_BRKGALS2MILP || iSolver == ALG_ITMILPLSHIFT || iSolver == ALG_ITERATEDCP) {
 			try {
 				loadDecompParams(decompParams, argv[8]);
 			}
@@ -206,7 +206,7 @@ void writeSolutions(Schedule* solution, int solverType, string solverName, strin
 		else if (solverType == ALG_ILS_HYBRID) {
 			file << "bestTWTAfterPhase1=" << fixed << setprecision(1) << ilsParams->bestTWTAfterPhase1 << "\t";
 		}
-		else if (solverType == ALG_ITERATEDMILP) {
+		else if (solverType == ALG_ITERATEDMILP || solverType == ALG_ITERATEDMILP_GAPAWARE) {
 			file << "relMipGap=" << std::fixed << std::setprecision(3) << decompParams->relMipGap << "\t";
 		}
 		else {
@@ -291,6 +291,13 @@ void sortJobsDebugging(std::vector<pJob>& jobs) {
 	sort(jobs.begin(), jobs.end(), compJobsDebugging);
 }
 
+void sortJobsByPrio(std::vector<pJob>& jobs, const std::unordered_map<int, int>& priorities) {
+	std::sort(jobs.begin(), jobs.end(),
+		[&](const pJob& a, const pJob& b) {
+			return compJobsPrio(a, b, priorities);
+		});
+}
+
 bool compJobsById(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
 	return a->getId() < b->getId();
 }
@@ -333,16 +340,117 @@ bool compJobsByR(const unique_ptr<Job>& a, const unique_ptr<Job>& b) {
 
 bool compJobsDebugging(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b) {
 	static std::unordered_map<int, int> jobOrder = {
-		{1, 0},
-		{5, 1},
-		{4, 2},
-		{7, 3},
-		{9, 4},
+		{2, 0},
+		{4, 1},
+		{5, 2},
+		{6, 3},
+		{1, 4},
 		{3, 5},
-		{8, 6},
-		{6, 7},
-		{10, 8},
-		{2, 9}
+		{7, 6},
+		{8, 7},
+		{74, 8},
+		{84, 9},
+		{10, 10},
+		{49, 11},
+		{29, 12},
+		{39, 13},
+		{61, 14},
+		{72, 15},
+		{92, 16},
+		{20, 17},
+		{27, 18},
+		{8, 19},
+		{82, 20},
+		{40, 21},
+		{78, 22},
+		{42, 23},
+		{9, 24},
+		{11, 25},
+		{12, 26},
+		{13, 27},
+		{80, 28},
+		{14, 29},
+		{15, 30},
+		{16, 31},
+		{77, 32},
+		{41, 33},
+		{47, 34},
+		{18, 35},
+		{19, 36},
+		{21, 37},
+		{22, 38},
+		{23, 39},
+		{24, 40},
+		{25, 41},
+		{26, 42},
+		{28, 43},
+		{30, 44},
+		{31, 45},
+		{32, 46},
+		{33, 47},
+		{34, 48},
+		{35, 49},
+		{36, 50},
+		{37, 51},
+		{38, 52},
+		{43, 53},
+		{44, 54},
+		{45, 55},
+		{73, 56},
+		{46, 57},
+		{48, 58},
+		{50, 59},
+		{51, 60},
+		{52, 61},
+		{53, 62},
+		{54, 63},
+		{55, 64},
+		{56, 65},
+		{57, 66},
+		{58, 67},
+		{59, 68},
+		{60, 69},
+		{65, 70},
+		{62, 71},
+		{63, 72},
+		{64, 73},
+		{66, 74},
+		{67, 75},
+		{68, 76},
+		{69, 77},
+		{70, 78},
+		{71, 79},
+		{75, 80},
+		{76, 81},
+		{79, 82},
+		{81, 83},
+		{83, 84},
+		{85, 85},
+		{86, 86},
+		{91, 87},
+		{87, 88},
+		{88, 89},
+		{89, 90},
+		{90, 91},
+		{93, 92},
+		{94, 93},
+		{95, 94},
+		{96, 95},
+		{97, 96},
+		{98, 97},
+		{99, 98},
+		{100, 99}
+
+		//{1, 0},
+		//{5, 1},
+		//{4, 2},
+		//{7, 3},
+		//{9, 4},
+		//{3, 5},
+		//{8, 6},
+		//{6, 7},
+		//{10, 8},
+		//{2, 9}
 	};
 
 	int aId = a->getId();
@@ -351,6 +459,10 @@ bool compJobsDebugging(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>
 	int aPriority = jobOrder[aId];
 	int bPriority = jobOrder[bId];
 	return aPriority < bPriority;
+}
+
+bool compJobsPrio(const unique_ptr<Job>& a, const unique_ptr<Job>& b, const unordered_map<int, int>& priorities) {
+	return priorities.at(a->getId()) < priorities.at(b->getId());
 }
 
 void shiftJobFromVecToVec(vector<pJob>& source, vector<pJob>& target, size_t sourceIdx) {

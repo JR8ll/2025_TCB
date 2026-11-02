@@ -2,7 +2,9 @@
 
 #include <chrono>
 #include <memory>
+#include <set>
 #include <vector>
+#include <unordered_map>	// RK code
 
 #include "Common_aliases.h"
 #include "Job.h"
@@ -54,6 +56,7 @@ public:
 	const std::vector<pWc>& getWorkcenters() const;
 	void addWorkcenter(pWc wc);
 	void addJob(pJob job);
+	void addJobFront(pJob job);		// RK code
 
 	void schedOp(Operation* op, double pWait = 0.0);
 	void schedOp(Operation* op, double pWait, double inflation, bool batchinStageInflationOnly = true, bool opsWithoutTcInflationOnly = true);
@@ -64,11 +67,15 @@ public:
 
 	void reset();																										// clear all batches/machines and shift all jobs back to unscheduled
 	void clearJobs();																									// clears unscheduled + scheduled jobs, operations and their references to products
+	void clearScheduledJobs();
+	void clearUnscheduledJobs();
+	
 
 	void sortUnscheduled(prioRule<pJob> rule);
 	void sortUnscheduled(prioRuleKappa<pJob> rule, double kappa);
 	void sortUnscheduled(prioRuleKeySet<pJob> rule, std::vector<double>& chr);
 	void sortScheduled(prioRule<pJob> rule);
+	void sortUnscheduled(const std::unordered_map<int, int>& priorities); // RK code
 	void updateWaitingTimes();
 	void mimicWaitingTimes(const Schedule* wtSchedule);		// set waiting times of operations in this schedule according to the waiting times in the wtSchedule
 	
@@ -161,6 +168,10 @@ public:
 	void saveJson(std::string solver = "N/A");
 	void saveJsonFactory(std::string solver = "N/A") const;				// format complying zui5_gantt viewer application
 
+
+	void initialWaitingTimeByFF(double flowFactor); // RK code
+	std::unique_ptr<Schedule> lSchedJobsWithGATC(double flowFactor, double smoothingFactor, const std::vector<double>& kappaGrid, double pWait = 0.0);	// RK code
+	std::unordered_map<int, int> getPriorities();	// RK code
 
 	// DEBUGGING TOOLS (MAY LEAD TO INFEASIBLE SOLUTIONS)
 	void debugSetR(size_t scheduledJobIdx, double newR);			// change r of a scheduled job

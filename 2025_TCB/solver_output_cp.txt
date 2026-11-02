@@ -1,0 +1,26 @@
+ ! ----------------------------------------------------------------------------
+ ! Minimization problem - 214182 variables, 1025 constraints
+ ! Using starting point solution
+ ! RandomSeed           = 1867215825
+ ! Workers              = 1
+ ! TimeLimit            = 60
+ ! Initial process time : 0.63s (0.09s extraction + 0.53s propagation)
+ !  . Log search space  : 7559759.2 (before), 7559759.2 (after)
+ !  . Memory usage      : 932.0 MB (before), 994.0 MB (after)
+ ! Using sequential search.
+ ! ----------------------------------------------------------------------------
+ !          Best Branches  Non-fixed            Branch decision
+                     1000     213073            on opOnMac_p6_j63_s12_m2
+                     2000     212573            on opOnMac_p1_j74_s7_m3
+                     3000     212073            on opOnMac_p5_j168_s9_m4
+                     4000     211573            on opOnMac_p1_j38_s5_m5
+                     5000     211073            on opOnMac_p3_j168_s3_m5
+                     6000     210573            on opOnMac_p1_j129_s12_m6
+ ! ----------------------------------------------------------------------------
+ ! Search terminated by limit, no solution found.
+ ! Number of branches     : 6006
+ ! Number of fails        : 1
+ ! Total memory usage     : 1.1 GB (1.0 GB CP Optimizer + 0.1 GB Concert)
+ ! Time spent in solve    : 60.01s (59.91s engine + 0.09s extraction)
+ ! Search speed (br. / s) : 100.2
+ ! ----------------------------------------------------------------------------

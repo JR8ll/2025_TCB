@@ -6,6 +6,7 @@
 #include "Solver_ILS.h"
 #include "Solver_GA.h"
 #include "Solver_MILP.h"
+#include "Solver_CP.h"
 
 using namespace std;
 using pSched = unique_ptr<Schedule>;
@@ -78,18 +79,76 @@ int main(int argc, char* argv[]) {
 			}
 
 			Solver_MILP cplex = Solver_MILP(schedParams, decompParams, omega);
+			
+			// DEBUGGING START
+			// cout << "Solving with fixed sequence and nDash = 1 " << endl;
+			// sched->sortUnscheduled(sortJobsDebugging);
+			// cplex.solveDecompJobBasedMILP(sched.get(), decompParams.nDash, 60);
+			// DEBUGGING END
+
 			cplex.solveDecompJobBasedDynamicSortingGridMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim, sortJobsByD, sortJobsByGATC);
+		}
+		break;
+	case ALG_ITERATEDMILP_GAPAWARE:
+		solverName = "DecompMILPnew";
+		{
+			// [JR-2026-Okt-28] 
+			double omega = 0.9;
+			if (decompParams.nDash >= p.getN()) {
+				omega = 1.0;
+			}
+
+			Solver_MILP cplex = Solver_MILP(schedParams, decompParams, omega);
+
+			// DEBUGGING START
+			// cout << "Solving with fixed sequence" << endl;
+			// sched->sortUnscheduled(sortJobsDebugging);
+			// cplex.solveDecompGapAwareMILP(sched.get(), decompParams.nDash, 60);
+			// DEBUGGING END
+
+			cplex.solveDecompGapAwareDynamicSortingGridMILP(sched.get(), decompParams.nDash, decompParams.cplexTilim, sortJobsByD, sortJobsByGATC);
+		}
+		break;
+	case ALG_ITERATEDCP:
+		solverName = "DecompCP";
+		{
+			// [JR-2026-Feb-23] 
+			double omega = 0.9;
+			if (decompParams.nDash >= p.getN()) {
+				omega = 1.0;
+			}
+
+			Solver_CP cp = Solver_CP(schedParams);
+
+			// DEBUGGING START
+			cout << "Solving with fixed sequence and nDash = 1 " << endl;
+			cout << "Method (4th param in solveDecompCP) set to debugging" << endl;
+			decompParams.method = 0;	// DEBUGGING
+			//sched->sortUnscheduled(sortJobsDebugging);
+			cp.solveDecompCP(sched.get(), &schedParams, 5, decompParams.cplexTilim, decompParams.method);
+			// DEBUGGING END
+
+			// cp.solveDecompCP(sched.get(), &schedParams, decompParams.nDash, decompParams.cplexTilim, decompParams.method);
 		}
 		break;
 	case ALG_LISTSCHEDATC: 
 		solverName = "ListSchedGATC";
 		{
-			sched->lSchedJobsWithSorting(sortJobsByGATC, schedParams);	
+			// DEBUGGING START
+			sched->sortUnscheduled(sortJobsDebugging);
+			sched->lSchedJobs(0);
+			// DEBUGGING END
+
+			//sched->lSchedJobsWithSorting(sortJobsByGATC, schedParams);	
+
+			if (!sched->isValid()) {
+				cout << "INVALID SCHEDULE" << endl;
+			}
 			// MISC REPORTING
-			double twtBefore = sched->getTWT();
-			sched->localSearchOpLeftShifting();	// try parameters sortJobsByC, sortJobsByStart, ...pWait
-			double twtAfter = sched->getTWT();
-			schedParams.leftShiftImprovement = (twtBefore - twtAfter) / twtBefore;
+			//double twtBefore = sched->getTWT();
+			//sched->localSearchOpLeftShifting();	// try parameters sortJobsByC, sortJobsByStart, ...pWait
+			//double twtAfter = sched->getTWT();
+			//schedParams.leftShiftImprovement = (twtBefore - twtAfter) / twtBefore;
 		}
 		break;
 	case ALG_BRKGALISTSCH:

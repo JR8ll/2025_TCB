@@ -1,6 +1,6 @@
 pWaitLow: 0.0
 pWaitHigh: 0.0
 pWaitStep: 0.1
-kappaLow: 0.1
-kappaHigh: 5.0
+kappaLow: 1.5
+kappaHigh: 1.5
 kappaStep: 0.1

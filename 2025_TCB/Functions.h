@@ -1,6 +1,7 @@
 #pragma once
 
 #include<random>
+#include<unordered_map>
 
 #include "Job.h"
 #include "Common_aliases.h"
@@ -16,6 +17,8 @@ static const int ALG_ILS_SEQUENCE = 7;						// LS working on a sequence/permutat
 static const int ALG_ILS_SEQUENCE_PARALLELIZED = 8;			// LS working on a sequence/permutation/chromosome parallelized
 static const int ALG_ILS_HYBRID = 9;						// Starts with ILS on sequence, eventually switches to ILS on schedule-object
 static const int ALG_ITMILPLSHIFT = 10;						// iterated MILP solving with final left-shifting local search improvement
+static const int ALG_ITERATEDCP = 11;						// iterated CP solving
+static const int ALG_ITERATEDMILP_GAPAWARE = 12;			// iterated MILP solving new formulation (precedence variables, considering gaps between previously scheduled batches)
 
 struct GA_params;
 struct ILS_params;
@@ -65,6 +68,7 @@ void sortJobsByR(std::vector<pJob>& jobs);									// by release time
 void sortJobsByGATC(std::vector<pJob>& jobs, double t, double kappa);		// by global ATC
 void sortJobsByRK(std::vector<pJob>& jobs, const std::vector<double>& chr);	// by random keys 
 void sortJobsDebugging(std::vector<pJob>& jobs);
+void sortJobsByPrio(std::vector<pJob>& unscheduledJobs, const std::unordered_map<int, int>& priorities); // RK code
 
 bool compJobsById(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByC(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
@@ -73,6 +77,7 @@ bool compJobsByWaitingTimeDecr(const std::unique_ptr<Job>& a, const std::unique_
 bool compJobsByD(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsByR(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
 bool compJobsDebugging(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b);
+bool compJobsPrio(const std::unique_ptr<Job>& a, const std::unique_ptr<Job>& b, const std::unordered_map<int, int>& priorities); // RK code
 
 void shiftJobFromVecToVec(std::vector<pJob>& source, std::vector<pJob>& target, size_t sourceIdx);
 
